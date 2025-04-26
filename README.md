@@ -5,19 +5,19 @@ This project is technically called **Project Nexus** during development.
 
 ## 🚀 Project Overview
 
-Leaflet is designed to be a minimalist, intuitive app where users can anonymously:
+Leaflet is designed to be a minimalist, intuitive app where users can:
 - Request books they want
 - Share lists of books they own
 - Set up mutual transfer times
 - Chat after a request match
 
-All while feeling comfortable, safe, and inspired.
+All while feeling comfortable, safe, and inspired. Can even go anonymous 👤
 
 ---
 
 ## 📈 Project Stats
 
-![Website Visitors](https://visitor-badge.laobi.icu/badge?page_id=divyamojas.project-nexus)
+// ![Website Visitors](https://visitor-badge.laobi.icu/badge?page_id=divyamojas/project-nexus)
 ![GitHub Stars](https://img.shields.io/github/stars/divyamojas/project-nexus)
 ![GitHub Forks](https://img.shields.io/github/forks/divyamojas/project-nexus)
 ![GitHub Issues](https://img.shields.io/github/issues/divyamojas/project-nexus)
