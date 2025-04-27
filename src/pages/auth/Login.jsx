@@ -1,9 +1,19 @@
 // src/pages/auth/Login.jsx
 
 import React, { useState } from 'react';
-import { Container, Typography, TextField, Button, Alert, CircularProgress } from '@mui/material';
+import {
+  Container,
+  Typography,
+  TextField,
+  Button,
+  Alert,
+  Card,
+  CardContent,
+  CircularProgress,
+  Link,
+} from '@mui/material';
 import { useAuth } from '@contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
 
 export default function Login() {
   const { login } = useAuth();
@@ -29,52 +39,90 @@ export default function Login() {
         setError('Something went wrong. Please try again.');
       }
     } else {
-      navigate('/dashboard'); // Redirect after successful login
+      navigate('/dashboard');
     }
   };
 
   return (
     <Container maxWidth="xs" style={{ marginTop: '4rem' }}>
-      <Typography variant="h4" gutterBottom align="center" color="primary">
-        Welcome Back
-      </Typography>
-
-      <form
-        onSubmit={handleSubmit}
-        style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
+      <Card
+        style={{
+          backgroundColor: '#f0fdf4',
+          padding: '2rem',
+          borderRadius: '16px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+        }}
       >
-        <TextField
-          label="Work Email"
-          type="email"
-          variant="outlined"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          fullWidth
-        />
-        <TextField
-          label="Password"
-          type="password"
-          variant="outlined"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          fullWidth
-        />
+        <CardContent>
+          <Typography variant="h4" gutterBottom align="center" color="primary" fontWeight="bold">
+            Welcome Back 🌿
+          </Typography>
+          <Typography
+            variant="subtitle2"
+            align="center"
+            style={{ marginBottom: '1rem', color: '#66bb6a' }}
+          >
+            Sign in to your Leaflet account
+          </Typography>
 
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          disabled={loading}
-          fullWidth
-          style={{ fontWeight: 'bold', backgroundColor: '#388e3c' }}
-        >
-          {loading ? <CircularProgress size={24} color="inherit" /> : 'Log In'}
-        </Button>
+          <form
+            onSubmit={handleSubmit}
+            style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
+          >
+            <TextField
+              label="Work Email"
+              type="email"
+              variant="outlined"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              fullWidth
+            />
+            <TextField
+              label="Password"
+              type="password"
+              variant="outlined"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              fullWidth
+            />
 
-        {error && <Alert severity="error">{error}</Alert>}
-      </form>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={loading}
+              fullWidth
+              style={{ backgroundColor: '#388e3c', fontWeight: 'bold', borderRadius: '8px' }}
+            >
+              {loading ? <CircularProgress size={24} color="inherit" /> : 'Log In'}
+            </Button>
+
+            {error && <Alert severity="error">{error}</Alert>}
+
+            <Typography variant="body2" align="center" style={{ marginTop: '1rem' }}>
+              Don&apos;t have an account?{' '}
+              <Link
+                component={RouterLink}
+                to="/signup"
+                style={{ color: '#2e7d32', fontWeight: 'bold' }}
+              >
+                Sign up
+              </Link>
+            </Typography>
+
+            <Typography variant="body2" align="center" style={{ marginTop: '0.5rem' }}>
+              <Link
+                component={RouterLink}
+                to="/forgot-password"
+                style={{ color: '#4caf50', fontWeight: 'bold' }}
+              >
+                Forgot your password?
+              </Link>
+            </Typography>
+          </form>
+        </CardContent>
+      </Card>
     </Container>
   );
 }
