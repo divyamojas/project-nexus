@@ -11,7 +11,10 @@ import {
   CardContent,
   CircularProgress,
   Link,
+  InputAdornment,
+  IconButton,
 } from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useAuth } from '@contexts/AuthContext';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 
@@ -21,12 +24,31 @@ export default function Login() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const allowedDomains = ['sprinklr.com', 'gmail.com'];
+
+  const isValidDomain = (email) => {
+    return allowedDomains.some((domain) => email.endsWith(`@${domain}`));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    // Validate Email and Password Non-Empty
+    if (!email || !password) {
+      setError('Please fill in both email and password.');
+      return;
+    }
+
+    // Validate Allowed Email Domain
+    if (!isValidDomain(email)) {
+      setError('Only work or Gmail emails are allowed.');
+      return;
+    }
 
     setLoading(true);
     const { error: loginError } = await login(email, password);
@@ -35,6 +57,10 @@ export default function Login() {
     if (loginError) {
       if (loginError.message.includes('Invalid login credentials')) {
         setError('Incorrect email or password.');
+      } else if (loginError.message.includes('User not found')) {
+        setError('Account does not exist.');
+      } else if (loginError.message.includes('Email not confirmed')) {
+        setError('Please verify your email before logging in.');
       } else {
         setError('Something went wrong. Please try again.');
       }
@@ -80,12 +106,21 @@ export default function Login() {
             />
             <TextField
               label="Password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               variant="outlined"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               fullWidth
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={() => setShowPassword((prev) => !prev)} edge="end">
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
 
             <Button
@@ -98,7 +133,11 @@ export default function Login() {
               {loading ? <CircularProgress size={24} color="inherit" /> : 'Log In'}
             </Button>
 
-            {error && <Alert severity="error">{error}</Alert>}
+            {error && (
+              <Alert severity="error" style={{ marginTop: '1rem' }}>
+                {error}
+              </Alert>
+            )}
 
             <Typography variant="body2" align="center" style={{ marginTop: '1rem' }}>
               Don&apos;t have an account?{' '}

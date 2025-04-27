@@ -11,7 +11,10 @@ import {
   CardContent,
   CircularProgress,
   Link,
+  InputAdornment,
+  IconButton,
 } from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useAuth } from '@contexts/AuthContext';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 
@@ -22,12 +25,24 @@ export default function Signup() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const allowedDomains = ['sprinklr.com', 'gmail.com'];
+
+  const isValidDomain = (email) => {
+    return allowedDomains.some((domain) => email.endsWith(`@${domain}`));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (!isValidDomain(email)) {
+      setError('Only work or Gmail emails are allowed.');
+      return;
+    }
 
     if (password !== confirmPassword) {
       setError('Passwords do not match.');
@@ -44,7 +59,11 @@ export default function Signup() {
     setLoading(false);
 
     if (signupError) {
-      setError(signupError.message);
+      if (signupError.message.includes('User already registered')) {
+        setError("You're already signed up. Try logging in!");
+      } else {
+        setError('Something went wrong. Please try again.');
+      }
     } else {
       navigate('/dashboard');
     }
@@ -87,21 +106,39 @@ export default function Signup() {
             />
             <TextField
               label="Password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               variant="outlined"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               fullWidth
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={() => setShowPassword((prev) => !prev)} edge="end">
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
             <TextField
               label="Confirm Password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               variant="outlined"
               required
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               fullWidth
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={() => setShowPassword((prev) => !prev)} edge="end">
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
 
             <Button
