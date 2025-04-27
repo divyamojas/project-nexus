@@ -1,11 +1,12 @@
 # Project Nexus (Internal) / Leaflet (Public Name)
 
-Welcome to **Leaflet** — a cozy, positive platform for book sharing and discovery. 
+Welcome to **Leaflet** — a cozy, positive platform for book sharing and discovery.
 This project is technically called **Project Nexus** during development.
 
 ## 🚀 Project Overview
 
 Leaflet is designed to be a minimalist, intuitive app where users can:
+
 - Request books they want
 - Share lists of books they own
 - Set up mutual transfer times
@@ -22,21 +23,19 @@ All while feeling comfortable, safe, and inspired. Can even go anonymous 👤
 ![GitHub Forks](https://img.shields.io/github/forks/divyamojas/project-nexus)
 ![GitHub Issues](https://img.shields.io/github/issues/divyamojas/project-nexus)
 
-
-
 ---
 
 ## 🛠 Tech Stack
 
-| Technology | Purpose |
-|------------|---------|
-| **Vite** | Lightning-fast frontend build tool (better than CRA) |
-| **React.js** | Frontend framework for building the UI |
-| **Material UI (MUI)** | Component library for clean, accessible design |
-| **React Router** | Client-side routing (future scalability) |
-| **Node.js (Planned)** | Backend server to handle authentication, APIs |
-| **Database: Supabase or Firebase (Planned)** | Auth + data storage solution |
-| **Deployment: Vercel/Netlify (Planned)** | Hosting the web app |
+| Technology                                   | Purpose                                              |
+| -------------------------------------------- | ---------------------------------------------------- |
+| **Vite**                                     | Lightning-fast frontend build tool (better than CRA) |
+| **React.js**                                 | Frontend framework for building the UI               |
+| **Material UI (MUI)**                        | Component library for clean, accessible design       |
+| **React Router**                             | Client-side routing (future scalability)             |
+| **Node.js (Planned)**                        | Backend server to handle authentication, APIs        |
+| **Database: Supabase or Firebase (Planned)** | Auth + data storage solution                         |
+| **Deployment: Vercel/Netlify (Planned)**     | Hosting the web app                                  |
 
 ---
 
@@ -47,7 +46,6 @@ All while feeling comfortable, safe, and inspired. Can even go anonymous 👤
 - [x] Email capture form with Material UI components
 - [x] Modular, scalable folder organization
 - [x] Fully responsive and mobile-friendly design
-
 
 ## 📋 Folder Structure
 
@@ -71,22 +69,21 @@ src/
 
 ## 🌱 Way Forward
 
-| Phase | Features |
-|------|----------|
+| Phase       | Features                                                    |
+| ----------- | ----------------------------------------------------------- |
 | **Phase 1** | Build authentication via work emails (Supabase or Firebase) |
-| **Phase 2** | Implement anonymous book request and sharing flows |
-| **Phase 3** | Integrate a simple chat feature post-request |
-| **Phase 4** | Book transfer scheduling between matched users |
-| **Phase 5** | Launch public beta and collect feedback |
-| **Phase 6** | Launch mobile apps (React Native or Flutter) |
-
+| **Phase 2** | Implement anonymous book request and sharing flows          |
+| **Phase 3** | Integrate a simple chat feature post-request                |
+| **Phase 4** | Book transfer scheduling between matched users              |
+| **Phase 5** | Launch public beta and collect feedback                     |
+| **Phase 6** | Launch mobile apps (React Native or Flutter)                |
 
 ## 🎯 Goals
+
 - Keep UI minimal, positive, and engaging
 - Launch a fast MVP with strong core functionality
 - Gather user feedback early and iterate fast
 - Scale gradually with a focus on community and trust
-
 
 ## 🤝 Contribution
 

@@ -1,5 +1,16 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, TextField, Button, Card, CardContent, Chip, Snackbar, Alert } from '@mui/material';
+import {
+  Container,
+  Typography,
+  TextField,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Snackbar,
+  Alert,
+} from '@mui/material';
 import { motion } from 'framer-motion';
 import LeafletLogo from '@assets/images/leaflet-logo-full.png';
 import { supabase } from '@services/supabaseClient';
@@ -10,7 +21,6 @@ export default function ComingSoon() {
   const [error, setError] = useState('');
   const [emailCount, setEmailCount] = useState(0);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
-
 
   useEffect(() => {
     const fetchEmailCount = async () => {
@@ -31,21 +41,24 @@ export default function ComingSoon() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-  
+
     const { data, error: insertError } = await supabase
       .from('early_access_emails')
       .insert([{ email }]);
-  
+
     if (insertError) {
       console.error('Error saving email:', insertError.message);
-  
-      if (insertError.message.toLowerCase().includes('duplicate') || insertError.message.toLowerCase().includes('unique')) {
+
+      if (
+        insertError.message.toLowerCase().includes('duplicate') ||
+        insertError.message.toLowerCase().includes('unique')
+      ) {
         setSubmitted(true);
         setError('');
         setEmail('');
         setShowSuccessToast(true); // ✅ Show toast even for duplicate
       } else {
-        setError("Something went wrong. Please try again.");
+        setError('Something went wrong. Please try again.');
       }
     } else {
       setSubmitted(true);
@@ -53,8 +66,6 @@ export default function ComingSoon() {
       setShowSuccessToast(true); // ✅ Show toast on normal success too
     }
   };
-  
-  
 
   return (
     <Container
@@ -106,24 +117,31 @@ export default function ComingSoon() {
       </Typography>
 
       {/* Form Section */}
-      <Card style={{ marginTop: '2rem', width: '100%', backgroundColor: '#ffffffcc', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>
+      <Card
+        style={{
+          marginTop: '2rem',
+          width: '100%',
+          backgroundColor: '#ffffffcc',
+          boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+        }}
+      >
         <CardContent>
-
           {submitted ? (
             <>
               <Typography
                 variant="h5"
                 component="div"
-                style={{ color: '#2e7d32', fontWeight: 'bold', textAlign: 'center', marginBottom: '1rem' }}
+                style={{
+                  color: '#2e7d32',
+                  fontWeight: 'bold',
+                  textAlign: 'center',
+                  marginBottom: '1rem',
+                }}
               >
-                You're on the list! 🌱
+                You&apos;re on the list! 🌱
               </Typography>
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                style={{ textAlign: 'center' }}
-              >
-                We can't wait to welcome you into the Leaflet community soon.
+              <Typography variant="body2" color="text.secondary" style={{ textAlign: 'center' }}>
+                We can&apos;t wait to welcome you into the Leaflet community soon.
               </Typography>
             </>
           ) : (
@@ -145,12 +163,12 @@ export default function ComingSoon() {
                 variant="contained"
                 fullWidth
                 sx={{
-                    backgroundColor: '#388e3c',
-                    fontWeight: 'bold',
-                    '&:hover': {
-                      backgroundColor: '#2e7d32', // darker on hover
-                    },
-                  }}
+                  backgroundColor: '#388e3c',
+                  fontWeight: 'bold',
+                  '&:hover': {
+                    backgroundColor: '#2e7d32', // darker on hover
+                  },
+                }}
               >
                 Join the Waitlist
               </Button>
@@ -165,7 +183,6 @@ export default function ComingSoon() {
               {error}
             </Typography>
           )}
-
         </CardContent>
       </Card>
 
@@ -198,37 +215,34 @@ export default function ComingSoon() {
         © 2025 Leaflet. Made with ❤️ for book lovers.
       </Typography>
       <Snackbar
-  open={showSuccessToast}
-  autoHideDuration={4000}
-  onClose={() => setShowSuccessToast(false)}
-  anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
->
-  <Alert
-    onClose={() => setShowSuccessToast(false)}
-    sx={{
-      width: '100%',
-      backgroundColor: '#f0fff4', // ✅ Light greenish-white background
-      color: '#2e7d32',           // ✅ Dark green text for brand feel
-      fontWeight: 'bold',
-      fontSize: '1rem',
-      border: '2px solid #2e7d32', // ✅ Green border
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)', // ✅ Soft 3D shadow
-      borderRadius: '12px',        // ✅ Slightly rounded corners
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: '0.5rem',
-      padding: '1rem',
-    }}
-    elevation={6}
-    variant="filled"
-  >
-    🌱 Thanks for joining Leaflet!
-  </Alert>
-</Snackbar>
-
-
-
+        open={showSuccessToast}
+        autoHideDuration={4000}
+        onClose={() => setShowSuccessToast(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={() => setShowSuccessToast(false)}
+          sx={{
+            width: '100%',
+            backgroundColor: '#f0fff4', // ✅ Light greenish-white background
+            color: '#2e7d32', // ✅ Dark green text for brand feel
+            fontWeight: 'bold',
+            fontSize: '1rem',
+            border: '2px solid #2e7d32', // ✅ Green border
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)', // ✅ Soft 3D shadow
+            borderRadius: '12px', // ✅ Slightly rounded corners
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem',
+            padding: '1rem',
+          }}
+          elevation={6}
+          variant="filled"
+        >
+          🌱 Thanks for joining Leaflet!
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }
