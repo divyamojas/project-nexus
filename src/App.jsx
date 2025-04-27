@@ -8,6 +8,7 @@ import PrivateRoute from '@components/Common/PrivateRoute';
 const ComingSoon = lazy(() => import('@components/ComingSoon'));
 const Signup = lazy(() => import('@pages/auth/Signup'));
 const Login = lazy(() => import('@pages/auth/Login'));
+const ForgotPassword = lazy(() => import('@pages/auth/ForgotPassword'));
 const Dashboard = lazy(() => import('@pages/Dashboard'));
 
 export default function App() {
@@ -19,6 +20,7 @@ export default function App() {
           <Route path="/" element={<ComingSoon />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
 
           {/* Protected Route */}
           <Route
