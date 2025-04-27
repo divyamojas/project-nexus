@@ -5,7 +5,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import PrivateRoute from '@components/Common/PrivateRoute';
 
 // Lazy loading pages
-const ComingSoon = lazy(() => import('@pages/ComingSoon'));
+const ComingSoon = lazy(() => import('@components/ComingSoon'));
 const Signup = lazy(() => import('@pages/auth/Signup'));
 const Login = lazy(() => import('@pages/auth/Login'));
 const Dashboard = lazy(() => import('@pages/Dashboard'));
