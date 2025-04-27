@@ -1,100 +1,163 @@
-# Project Nexus (Internal) / Leaflet (Public Name)
 
-Welcome to **Leaflet** — a cozy, positive platform for book sharing and discovery.
-This project is technically called **Project Nexus** during development.
+# 📚 Leaflet — Share the Books You Love 🌿
 
-## 🚀 Project Overview
-
-Leaflet is designed to be a minimalist, intuitive app where users can:
-
-- Request books they want
-- Share lists of books they own
-- Set up mutual transfer times
-- Chat after a request match
-
-All while feeling comfortable, safe, and inspired. Can even go anonymous 👤
+Welcome to **Leaflet** —
+A cozy new way to share, discover, and celebrate the books that move you.
 
 ---
 
-## 📈 Project Stats
+## 🌐 Live Websites
 
-// ![Website Visitors](https://visitor-badge.laobi.icu/badge?page_id=divyamojas/project-nexus)
-![GitHub Stars](https://img.shields.io/github/stars/divyamojas/project-nexus)
-![GitHub Forks](https://img.shields.io/github/forks/divyamojas/project-nexus)
-![GitHub Issues](https://img.shields.io/github/issues/divyamojas/project-nexus)
+- **Production**: [leafletbooks.vercel.app](https://leafletbooks.vercel.app/)
+- **Development (UAT)**: [uatleafletbooks.vercel.app](https://uatleafletbooks.vercel.app/)
+
+---
+
+## 🪴 About Leaflet
+
+**Leaflet** is a friendly community platform where users can:
+
+- Share the books they own
+- Request books anonymously
+- Set mutual days and times for pickup
+- Engage through cozy private chats (coming soon!)
+
+We believe in **slowing down**, **discovering stories**, and **building real communities through books**. 🌿✨
+
+---
+
+## 🚀 Features
+
+### ✅ Implemented:
+
+- Early access landing page with email capture
+- Authentication system (Signup, Login, Forgot Password)
+- Domain restriction for work and Gmail accounts
+- Protected Dashboard with lazy-loaded routes
+- SPA routing enabled on Vercel with RLS-secured Supabase backend
+
+---
+
+### 📋 Upcoming:
+
+- Book sharing system (Add/Request Books)
+- Mutual Day & Time coordination for book transfers
+- Anonymous private chat after book request acceptance
+- Notifications system (Email & In-app)
+- Profile management
+- Book discovery with filters and search
+- Mobile app (React Native)
 
 ---
 
 ## 🛠 Tech Stack
 
-| Technology                                   | Purpose                                              |
-| -------------------------------------------- | ---------------------------------------------------- |
-| **Vite**                                     | Lightning-fast frontend build tool (better than CRA) |
-| **React.js**                                 | Frontend framework for building the UI               |
-| **Material UI (MUI)**                        | Component library for clean, accessible design       |
-| **React Router**                             | Client-side routing (future scalability)             |
-| **Node.js (Planned)**                        | Backend server to handle authentication, APIs        |
-| **Database: Supabase or Firebase (Planned)** | Auth + data storage solution                         |
-| **Deployment: Vercel/Netlify (Planned)**     | Hosting the web app                                  |
+| Layer | Technologies |
+|:------|:-------------|
+| Frontend | React.js (Vite, Material-UI, Framer Motion) |
+| Routing | React Router v7 |
+| State Management | React Context API |
+| Backend as a Service | Supabase |
+| Hosting | Vercel |
+| Code Formatting | Prettier, ESLint |
+| Version Control | Git + GitHub |
+| Auth Security | Supabase Email Auth + RLS |
+| Build Optimization | Lazy loading, modular design |
 
 ---
 
-## ✨ Current Features (MVP)
-
-- [x] Professional project structure
-- [x] Coming Soon Landing Page
-- [x] Email capture form with Material UI components
-- [x] Modular, scalable folder organization
-- [x] Fully responsive and mobile-friendly design
-
-## 📋 Folder Structure
+## 🧩 Project Structure
 
 ```
 src/
-├── assets/         # Static files (images, logos)
-├── components/     # Reusable components (ComingSoon)
-├── pages/          # Full screen pages (LandingPage)
-├── layouts/        # App layouts (Navbar, Footer - future)
-├── services/       # API calls (email, auth, etc.)
-├── hooks/          # Custom React hooks
-├── contexts/       # Global states (UserContext - future)
-├── utils/          # Utility functions (validators, formatters)
-├── theme/          # Material UI custom theme
-├── routes/         # Route definitions (future expansion)
-├── App.jsx         # Main App component
-├── main.jsx        # Entry point
+  ├── assets/          # Images, logos
+  ├── components/      # Common reusable components
+  ├── contexts/        # AuthContext for global user auth
+  ├── hooks/           # (Reserved for custom hooks)
+  ├── layouts/         # (Reserved for future layouts)
+  ├── pages/           # Page components (Login, Signup, Dashboard)
+  ├── routes/          # (Reserved for route configs)
+  ├── services/        # Supabase client setup
+  ├── theme/           # (Reserved for MUI theme customization)
+  └── utils/           # (Reserved for helpers)
+public/
+  ├── vercel.json      # SPA routing config for Vercel
+.env                   # Environment variables
+vite.config.js         # Vite project config
 ```
 
----
-
-## 🌱 Way Forward
-
-| Phase       | Features                                                    |
-| ----------- | ----------------------------------------------------------- |
-| **Phase 1** | Build authentication via work emails (Supabase or Firebase) |
-| **Phase 2** | Implement anonymous book request and sharing flows          |
-| **Phase 3** | Integrate a simple chat feature post-request                |
-| **Phase 4** | Book transfer scheduling between matched users              |
-| **Phase 5** | Launch public beta and collect feedback                     |
-| **Phase 6** | Launch mobile apps (React Native or Flutter)                |
-
-## 🎯 Goals
-
-- Keep UI minimal, positive, and engaging
-- Launch a fast MVP with strong core functionality
-- Gather user feedback early and iterate fast
-- Scale gradually with a focus on community and trust
-
-## 🤝 Contribution
-
-> Currently, this is a private development project. Collaboration invites will open after the MVP is tested internally.
-
-If you’re reading this and excited, feel free to star the repo or reach out for future collaboration opportunities! 🌟
+✅ Modular, scalable, startup-grade structure.
 
 ---
 
-**Let's make sharing stories as easy as sharing smiles.** 🌿
+## ⚙️ Environment Variables
+
+Create a `.env` file at the project root with:
+
+```plaintext
+VITE_SUPABASE_URL=https://your-project-id.supabase.co
+VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+```
+
+✅ Never hardcode sensitive keys inside code.
 
 ---
 
-> Made with ❤️ under Project Nexus, for the world as **Leaflet**.
+## 🏃‍♂️ Local Setup Instructions
+
+1. **Clone the repo**:
+
+```bash
+git clone https://github.com/divyamojas/project-nexus.git
+cd project-nexus
+```
+
+2. **Install dependencies**:
+
+```bash
+npm install
+# or
+yarn install
+```
+
+3. **Setup environment**:
+
+Create `.env` file as shown above.
+
+4. **Start development server**:
+
+```bash
+npm run dev
+# or
+yarn dev
+```
+
+✅ Project will run at [localhost:5173](http://localhost:5173).
+
+---
+
+## 📈 Roadmap (Next Phases)
+
+- [ ] Book Sharing: Add / Request Books
+- [ ] Mutual Day & Time Setting
+- [ ] Anonymous Private Chat after Request
+- [ ] Book Discovery (search and filters)
+- [ ] Profile pages
+- [ ] Notifications (email & in-app)
+- [ ] Mobile app (React Native)
+
+---
+
+## 🤝 Contributions
+
+Currently internal for MVP.  
+Open-source contributions will be considered post public beta launch! 🌿
+
+---
+
+## 📜 License
+
+© 2025 Leaflet Books  
+Made with ❤️ for book lovers.
+
+---
