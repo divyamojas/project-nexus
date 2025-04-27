@@ -28,25 +28,12 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const allowedDomains = ['sprinklr.com', 'gmail.com'];
-
-  const isValidDomain = (email) => {
-    return allowedDomains.some((domain) => email.endsWith(`@${domain}`));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    // Validate Email and Password Non-Empty
     if (!email || !password) {
       setError('Please fill in both email and password.');
-      return;
-    }
-
-    // Validate Allowed Email Domain
-    if (!isValidDomain(email)) {
-      setError('Only work or Gmail emails are allowed.');
       return;
     }
 
@@ -59,10 +46,8 @@ export default function Login() {
         setError('Incorrect email or password.');
       } else if (loginError.message.includes('User not found')) {
         setError('Account does not exist.');
-      } else if (loginError.message.includes('Email not confirmed')) {
-        setError('Please verify your email before logging in.');
       } else {
-        setError('Something went wrong. Please try again.');
+        setError(loginError.message || 'Something went wrong. Please try again.');
       }
     } else {
       navigate('/dashboard');
@@ -133,11 +118,7 @@ export default function Login() {
               {loading ? <CircularProgress size={24} color="inherit" /> : 'Log In'}
             </Button>
 
-            {error && (
-              <Alert severity="error" style={{ marginTop: '1rem' }}>
-                {error}
-              </Alert>
-            )}
+            {error && <Alert severity="error">{error}</Alert>}
 
             <Typography variant="body2" align="center" style={{ marginTop: '1rem' }}>
               Don&apos;t have an account?{' '}

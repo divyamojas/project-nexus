@@ -29,18 +29,12 @@ export default function Signup() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const allowedDomains = ['sprinklr.com', 'gmail.com'];
-
-  const isValidDomain = (email) => {
-    return allowedDomains.some((domain) => email.endsWith(`@${domain}`));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    if (!isValidDomain(email)) {
-      setError('Only work or Gmail emails are allowed.');
+    if (!email || !password || !confirmPassword) {
+      setError('Please fill all fields.');
       return;
     }
 
@@ -59,11 +53,7 @@ export default function Signup() {
     setLoading(false);
 
     if (signupError) {
-      if (signupError.message.includes('User already registered')) {
-        setError("You're already signed up. Try logging in!");
-      } else {
-        setError('Something went wrong. Please try again.');
-      }
+      setError(signupError.message);
     } else {
       navigate('/dashboard');
     }

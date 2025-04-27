@@ -9,6 +9,12 @@ export function useAuth() {
   return useContext(AuthContext);
 }
 
+const allowedDomains = ['sprinklr.com', 'gmail.com'];
+
+const isValidDomain = (email) => {
+  return allowedDomains.some((domain) => email.endsWith(`@${domain}`));
+};
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -32,11 +38,19 @@ export function AuthProvider({ children }) {
   }, []);
 
   const signup = async (email, password) => {
-    return supabase.auth.signUp({ email, password });
+    if (!isValidDomain(email)) {
+      return {
+        error: { message: 'Hey there! 🌿 Only work or Gmail emails are allowed to join Leaflet.' },
+      };
+    }
+    return await supabase.auth.signUp({ email, password });
   };
 
   const login = async (email, password) => {
-    return supabase.auth.signInWithPassword({ email, password });
+    if (!isValidDomain(email)) {
+      return { error: { message: 'Oops! 🌱 Only work or Gmail emails are accepted on Leaflet.' } };
+    }
+    return await supabase.auth.signInWithPassword({ email, password });
   };
 
   const logout = async () => {
@@ -45,7 +59,7 @@ export function AuthProvider({ children }) {
   };
 
   const resetPassword = async (email) => {
-    return supabase.auth.resetPasswordForEmail(email, {
+    return await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: window.location.origin + '/login',
     });
   };
