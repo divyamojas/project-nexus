@@ -11,6 +11,12 @@ import {
   MenuItem,
   Autocomplete,
 } from '@mui/material';
+import {
+  fetchCatalogBooks,
+  uploadCoverImage,
+  addBookToCatalog,
+  addBookInstance,
+} from '@/services/bookService';
 import { supabase } from '@/services/supabaseClient';
 
 export default function AddBookModal({ onClose }) {
@@ -18,47 +24,71 @@ export default function AddBookModal({ onClose }) {
   const [selectedCatalog, setSelectedCatalog] = useState(null);
   const [condition, setCondition] = useState('good');
   const [notes, setNotes] = useState('');
-  const [customBook, setCustomBook] = useState({ title: '', author: '' });
+  const [customBook, setCustomBook] = useState({
+    title: '',
+    author: '',
+    isbn: '',
+    description: '',
+    cover_image_url: '',
+  });
+  const [coverFile, setCoverFile] = useState(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchCatalog = async () => {
-      const { data } = await supabase.from('books_catalog').select('*').order('title');
-      setCatalogBooks(data || []);
+    const fetchData = async () => {
+      const books = await fetchCatalogBooks();
+      setCatalogBooks(books);
     };
-    fetchCatalog();
+    fetchData();
   }, []);
 
   const handleSubmit = async () => {
+    if (!selectedCatalog && !customBook.title.trim()) {
+      alert('Please select an existing book or enter a new title.');
+      return;
+    }
+    if (!selectedCatalog && !customBook.author.trim()) {
+      alert('Author is required for new titles.');
+      return;
+    }
+
     setLoading(true);
+    const user = await supabase.auth.getUser();
     let catalog_id = selectedCatalog?.id;
 
+    // Upload cover image if file exists
+    let uploadedImageUrl = customBook.cover_image_url;
+    if (coverFile) {
+      const result = await uploadCoverImage(coverFile);
+      if (result) uploadedImageUrl = result;
+    }
+
     if (!catalog_id) {
-      const { data, error } = await supabase
-        .from('books_catalog')
-        .insert([customBook])
-        .select()
-        .single();
-      if (error) {
-        console.error('Catalog insert error:', error);
+      const newCatalog = await addBookToCatalog({
+        ...customBook,
+        cover_image_url: uploadedImageUrl,
+        added_by: user.data.user.id,
+      });
+      if (!newCatalog) {
         setLoading(false);
         return;
       }
-      catalog_id = data.id;
+      catalog_id = newCatalog.id;
     }
 
-    const user = await supabase.auth.getUser();
-    await supabase.from('books').insert([
-      {
-        catalog_id,
-        owner_id: user.data.user.id,
-        condition,
-        notes,
-      },
-    ]);
+    const success = await addBookInstance({
+      catalog_id,
+      owner_id: user.data.user.id,
+      condition,
+      notes,
+    });
 
-    setLoading(false);
-    onClose();
+    if (success) {
+      setLoading(false);
+      onClose();
+    } else {
+      setLoading(false);
+    }
   };
 
   return (
@@ -75,19 +105,62 @@ export default function AddBookModal({ onClose }) {
         />
 
         <TextField
-          label="Or enter a new title"
+          required
+          error={!selectedCatalog && !customBook.title.trim()}
+          helperText={!selectedCatalog && !customBook.title.trim() ? 'Title is required' : ''}
+          label="Or enter a new title *"
           fullWidth
           margin="normal"
           value={customBook.title}
           onChange={(e) => setCustomBook({ ...customBook, title: e.target.value })}
         />
+
         <TextField
-          label="Author"
+          required
+          error={!selectedCatalog && !customBook.author.trim()}
+          helperText={!selectedCatalog && !customBook.author.trim() ? 'Author is required' : ''}
+          label="Author *"
           fullWidth
           margin="normal"
           value={customBook.author}
           onChange={(e) => setCustomBook({ ...customBook, author: e.target.value })}
         />
+
+        <TextField
+          label="ISBN"
+          fullWidth
+          margin="normal"
+          value={customBook.isbn}
+          onChange={(e) => setCustomBook({ ...customBook, isbn: e.target.value })}
+        />
+
+        <TextField
+          label="Description"
+          fullWidth
+          margin="normal"
+          multiline
+          minRows={2}
+          value={customBook.description}
+          onChange={(e) => setCustomBook({ ...customBook, description: e.target.value })}
+        />
+
+        <TextField
+          label="Cover Image URL"
+          fullWidth
+          margin="normal"
+          value={customBook.cover_image_url}
+          onChange={(e) => setCustomBook({ ...customBook, cover_image_url: e.target.value })}
+        />
+
+        <Button variant="outlined" component="label" sx={{ my: 1 }}>
+          Upload Cover Image
+          <input
+            type="file"
+            hidden
+            accept="image/*"
+            onChange={(e) => setCoverFile(e.target.files[0])}
+          />
+        </Button>
 
         <TextField
           select

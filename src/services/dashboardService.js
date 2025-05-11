@@ -6,7 +6,9 @@ export const getMyBooks = async () => {
   const user = await supabase.auth.getUser();
   const { data, error } = await supabase
     .from('books')
-    .select('*, books_catalog(title, author)')
+    .select(
+      'id, condition, archived, owner_id, books_catalog(title, author, description, cover_image_url)',
+    )
     .eq('owner_id', user.data.user.id);
   if (error) console.error('getMyBooks error:', error);
   return data || [];
@@ -65,4 +67,24 @@ export const getUserReviews = async () => {
   if (rErr) console.error('getUserReviews (received) error:', rErr);
 
   return { given: given || [], received: received || [] };
+};
+
+export const archiveBook = async (bookId, value = true) => {
+  const { error } = await supabase.from('books').update({ archived: value }).eq('id', bookId);
+  if (error) console.error('archiveBook error:', error);
+};
+
+export const deleteBook = async (bookId) => {
+  const { error } = await supabase.from('books').delete().eq('id', bookId);
+  if (error) console.error('deleteBook error:', error);
+};
+
+export const subscribeToBooksChanges = (onChange) => {
+  return supabase
+    .channel('books-changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'books' }, () => {
+      console.log('[Realtime] Book change detected');
+      onChange();
+    })
+    .subscribe();
 };
