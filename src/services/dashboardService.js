@@ -88,3 +88,23 @@ export const subscribeToBooksChanges = (onChange) => {
     })
     .subscribe();
 };
+
+export const getCurrentUserFirstName = async () => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('first_name')
+    .eq('id', user.id)
+    .single();
+
+  if (error) {
+    console.error('Error fetching user first_name:', error);
+    return null;
+  }
+
+  return data.first_name;
+};
