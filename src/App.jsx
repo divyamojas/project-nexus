@@ -12,6 +12,7 @@ const Login = lazy(() => import('@pages/auth/Login'));
 const ForgotPassword = lazy(() => import('@pages/auth/ForgotPassword'));
 const Dashboard = lazy(() => import('@pages/Dashboard'));
 const BrowseBooks = lazy(() => import('@pages/BrowseBooks'));
+const Feedback = lazy(() => import('@pages/Feedback'));
 
 export default function App() {
   return (
@@ -41,6 +42,16 @@ export default function App() {
               <PrivateRoute>
                 <Layout>
                   <BrowseBooks />
+                </Layout>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/feedback"
+            element={
+              <PrivateRoute>
+                <Layout>
+                  <Feedback />
                 </Layout>
               </PrivateRoute>
             }

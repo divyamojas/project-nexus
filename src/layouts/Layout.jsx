@@ -13,12 +13,14 @@ import {
   MenuItem,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/services/supabaseClient';
 
 export default function Layout({ children }) {
   const [showNavbar, setShowNavbar] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -30,9 +32,8 @@ export default function Layout({ children }) {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [lastScrollY]);
 
-  const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
 
   const handleMenuOpen = (event) => {
@@ -108,12 +109,32 @@ export default function Layout({ children }) {
         </Toolbar>
       </AppBar>
 
+      {location.pathname !== '/feedback' && (
+        <Box
+          sx={{
+            position: 'fixed',
+            bottom: 24,
+            right: 24,
+            zIndex: 1300,
+          }}
+        >
+          <Button variant="contained" color="secondary" onClick={() => navigate('/feedback')}>
+            Give Feedback
+          </Button>
+        </Box>
+      )}
+
       <Container sx={{ flexGrow: 1, py: 4, mt: 8 }}>{children}</Container>
 
       <Box component="footer" py={2} textAlign="center" bgcolor="grey.100" mt="auto">
-        <Typography variant="body2" color="text.secondary">
-          © {new Date().getFullYear()} Leaflet. All rights reserved.
-        </Typography>
+        {location.pathname !== '/feedback' && (
+          <Typography variant="body2" color="text.secondary">
+            <Link to="/feedback" style={{ color: 'inherit', textDecoration: 'underline' }}>
+              Feedback
+            </Link>{' '}
+            | © {new Date().getFullYear()} Leaflet. All rights reserved.
+          </Typography>
+        )}
       </Box>
     </Box>
   );
