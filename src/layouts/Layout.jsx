@@ -16,6 +16,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/services/supabaseClient';
 
+// eslint-disable-next-line react/prop-types
 export default function Layout({ children }) {
   const [showNavbar, setShowNavbar] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
