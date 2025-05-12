@@ -1,6 +1,6 @@
 // src/pages/auth/Login.jsx
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Container,
   Typography,
@@ -19,7 +19,7 @@ import { useAuth } from '@contexts/AuthContext';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
@@ -27,6 +27,12 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,19 +44,18 @@ export default function Login() {
     }
 
     setLoading(true);
-    const { error: loginError } = await login(email, password);
+    const result = await login(email, password);
     setLoading(false);
 
-    if (loginError) {
-      if (loginError.message.includes('Invalid login credentials')) {
+    if (result?.error) {
+      const msg = result.error.message;
+      if (msg.includes('Invalid login credentials')) {
         setError('Incorrect email or password.');
-      } else if (loginError.message.includes('User not found')) {
+      } else if (msg.includes('User not found')) {
         setError('Account does not exist.');
       } else {
-        setError(loginError.message || 'Something went wrong. Please try again.');
+        setError(msg || 'Something went wrong. Please try again.');
       }
-    } else {
-      navigate('/dashboard');
     }
   };
 

@@ -1,6 +1,6 @@
 // src/pages/auth/ForgotPassword.jsx
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Typography,
@@ -13,15 +13,22 @@ import {
   Link,
 } from '@mui/material';
 import { useAuth } from '@contexts/AuthContext';
-import { Link as RouterLink } from 'react-router-dom';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
 
 export default function ForgotPassword() {
-  const { resetPassword } = useAuth();
+  const { resetPassword, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleResetPassword = async (e) => {
     e.preventDefault();

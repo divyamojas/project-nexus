@@ -65,7 +65,15 @@ export function AuthProvider({ children }) {
     });
   };
 
-  const value = { user, signup, login, logout, resetPassword };
+  const value = {
+    user,
+    signup,
+    login,
+    logout,
+    resetPassword,
+    loading,
+    isAuthenticated: !!user,
+  };
 
   return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
 }
