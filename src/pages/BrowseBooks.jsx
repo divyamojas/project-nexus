@@ -1,68 +1,138 @@
 // src/pages/BrowseBooks.jsx
 
 import React, { useEffect, useState } from 'react';
-import { Container, Typography, TextField, Grid, Card, CardContent } from '@mui/material';
-import { supabase } from '@/services/supabaseClient';
+import {
+  Container,
+  Typography,
+  TextField,
+  Grid,
+  Box,
+  Fade,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+  Stack,
+  FormControlLabel,
+  Switch,
+} from '@mui/material';
+import BookCard from '@/components/books/BookCard';
+import { useDebounce } from '@/hooks/useDebounce';
+import { getAvailableBooks, filterAndSortBooks } from '@/services/books';
+import BookModal from '@/components/books/BookModal';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function BrowseBooks() {
   const [books, setBooks] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-
-  const fetchBooks = async () => {
-    const { data, error } = await supabase
-      .from('books')
-      .select('*, books_catalog(title, author)')
-      .eq('available', true);
-
-    if (error) console.error('Error fetching books:', error);
-    else setBooks(data || []);
-  };
+  const debouncedSearch = useDebounce(searchTerm, 300);
+  const [loading, setLoading] = useState(true);
+  const [sortBy, setSortBy] = useState('date_added');
+  const [filter, setFilter] = useState('all');
+  const [showOwnBooks, setShowOwnBooks] = useState(false);
+  const [selectedBook, setSelectedBook] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
-    fetchBooks();
+    (async () => {
+      setLoading(true);
+      try {
+        const data = await getAvailableBooks();
+        setBooks(data);
+      } catch (e) {
+        console.error('Error fetching books:', e);
+      }
+      setLoading(false);
+    })();
   }, []);
 
-  const filtered = books.filter((b) => {
-    const search = searchTerm.toLowerCase();
-    return (
-      b.books_catalog?.title?.toLowerCase().includes(search) ||
-      b.books_catalog?.author?.toLowerCase().includes(search)
-    );
+  const filteredBooks = filterAndSortBooks(books, {
+    searchTerm: debouncedSearch,
+    statusFilter: filter,
+    sortBy,
+    userId: user?.id,
+    includeOwn: showOwnBooks,
   });
+
+  const handleCardClick = (book) => {
+    setSelectedBook(book);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setSelectedBook(null);
+    setIsModalOpen(false);
+  };
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        Browse Books
+      <Typography variant="h4" fontWeight={600} mb={3}>
+        📚 Discover Books Shared by the Community
       </Typography>
 
-      <TextField
-        fullWidth
-        label="Search by title or author"
-        margin="normal"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} mb={3} alignItems="flex-start">
+        <TextField
+          fullWidth
+          label="Search by title or author"
+          variant="outlined"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
 
-      <Grid container spacing={2} mt={1}>
-        {filtered.map((book) => (
-          <Grid item xs={12} sm={6} md={4} key={book.id}>
-            <Card>
-              <CardContent>
-                <Typography variant="subtitle1" fontWeight="bold">
-                  {book.books_catalog.title}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  by {book.books_catalog.author}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Condition: {book.condition}
-                </Typography>
-              </CardContent>
-            </Card>
+        <FormControl sx={{ minWidth: 160 }}>
+          <InputLabel>Sort By</InputLabel>
+          <Select value={sortBy} onChange={(e) => setSortBy(e.target.value)} label="Sort By">
+            <MenuItem value="date_added">Date Added</MenuItem>
+            <MenuItem value="name">Title (A-Z)</MenuItem>
+          </Select>
+        </FormControl>
+
+        <FormControl sx={{ minWidth: 160 }}>
+          <InputLabel>Status</InputLabel>
+          <Select value={filter} onChange={(e) => setFilter(e.target.value)} label="Status">
+            <MenuItem value="all">All</MenuItem>
+            <MenuItem value="available">Available</MenuItem>
+            <MenuItem value="lent_out">Lent Out</MenuItem>
+            <MenuItem value="unavailable">Not Available</MenuItem>
+          </Select>
+        </FormControl>
+
+        <FormControlLabel
+          control={
+            <Switch
+              checked={showOwnBooks}
+              onChange={(e) => setShowOwnBooks(e.target.checked)}
+              color="primary"
+            />
+          }
+          label="Show my books"
+        />
+      </Stack>
+
+      <Box>
+        {loading ? (
+          <Typography>Loading books...</Typography>
+        ) : filteredBooks.length === 0 ? (
+          <Typography>No books match your search or filter.</Typography>
+        ) : (
+          <Grid container spacing={2}>
+            {filteredBooks.map((book) => (
+              <Grid item xs={12} sm={6} md={4} key={book.id}>
+                <Fade in timeout={400}>
+                  <Box>
+                    <BookCard book={book} editable={false} onClick={() => handleCardClick(book)} />
+                  </Box>
+                </Fade>
+              </Grid>
+            ))}
           </Grid>
-        ))}
-      </Grid>
+        )}
+      </Box>
+
+      {selectedBook && (
+        <BookModal open={isModalOpen} onClose={closeModal} book={selectedBook} context="browse" />
+      )}
     </Container>
   );
 }

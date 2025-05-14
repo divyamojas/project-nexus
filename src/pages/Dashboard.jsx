@@ -75,7 +75,7 @@ export default function Dashboard() {
     <Container maxWidth="lg" sx={{ py: 5 }}>
       <Paper elevation={2} sx={{ p: 4, borderRadius: 4, bgcolor: '#fdfaf6' }}>
         <Typography variant="h4" fontWeight="medium" gutterBottom sx={{ color: '#5d4037' }}>
-          Hi {userFirstName}, welcome to your dashboard 📘
+          Hi {userFirstName || 'friend'}, welcome to your dashboard 📘
         </Typography>
         <Typography variant="body1" sx={{ color: '#6d4c41', mb: 3 }}>
           You can view and manage your books here, check recent activity, and share something new
@@ -110,7 +110,12 @@ export default function Dashboard() {
 
       <AddBookModal open={showAddModal} onClose={() => setShowAddModal(false)} />
       {selectedBook && (
-        <BookModal open={!!selectedBook} onClose={handleCloseModal} book={selectedBook} />
+        <BookModal
+          open={!!selectedBook}
+          onClose={handleCloseModal}
+          book={selectedBook}
+          onActionComplete={fetchData}
+        />
       )}
     </Container>
   );

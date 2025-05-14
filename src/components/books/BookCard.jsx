@@ -34,7 +34,13 @@ const fallbackGradients = [
   'linear-gradient(135deg, #cfd9df 0%, #e2ebf0 100%)',
 ];
 
-export default function BookCard({ book, onClick, onDelete = () => {}, onArchive = () => {} }) {
+export default function BookCard({
+  book,
+  onClick,
+  onDelete = () => {},
+  onArchive = () => {},
+  editable = true,
+}) {
   const [hovered, setHovered] = useState(false);
   const catalog = book.books_catalog || book.catalog || {};
   const { title, author, cover_image_url } = catalog;
@@ -83,47 +89,53 @@ export default function BookCard({ book, onClick, onDelete = () => {}, onArchive
           }}
           elevation={0}
         >
-          <Fade in={hovered}>
-            <Box
-              sx={{
-                position: 'absolute',
-                top: 8,
-                right: 8,
-                zIndex: 2,
-                display: 'flex',
-                gap: 1,
-              }}
-            >
-              <Tooltip title={archived ? 'Unarchive' : 'Archive'}>
-                <IconButton
-                  size="small"
-                  onClick={handleArchiveToggle}
-                  sx={{
-                    bgcolor: '#fff',
-                    boxShadow: 2,
-                    transition: 'all 0.2s ease-in-out',
-                    '&:hover': { bgcolor: '#f0e6ff', color: '#6a1b9a' },
-                  }}
-                >
-                  {archived ? <UnarchiveIcon fontSize="small" /> : <ArchiveIcon fontSize="small" />}
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Delete">
-                <IconButton
-                  size="small"
-                  onClick={handleDelete}
-                  sx={{
-                    bgcolor: '#fff',
-                    boxShadow: 2,
-                    transition: 'all 0.2s ease-in-out',
-                    '&:hover': { bgcolor: '#ffebee', color: '#c62828' },
-                  }}
-                >
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            </Box>
-          </Fade>
+          {editable && (
+            <Fade in={hovered}>
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: 8,
+                  right: 8,
+                  zIndex: 2,
+                  display: 'flex',
+                  gap: 1,
+                }}
+              >
+                <Tooltip title={archived ? 'Unarchive' : 'Archive'}>
+                  <IconButton
+                    size="small"
+                    onClick={handleArchiveToggle}
+                    sx={{
+                      bgcolor: '#fff',
+                      boxShadow: 2,
+                      transition: 'all 0.2s ease-in-out',
+                      '&:hover': { bgcolor: '#f0e6ff', color: '#6a1b9a' },
+                    }}
+                  >
+                    {archived ? (
+                      <UnarchiveIcon fontSize="small" />
+                    ) : (
+                      <ArchiveIcon fontSize="small" />
+                    )}
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Delete">
+                  <IconButton
+                    size="small"
+                    onClick={handleDelete}
+                    sx={{
+                      bgcolor: '#fff',
+                      boxShadow: 2,
+                      transition: 'all 0.2s ease-in-out',
+                      '&:hover': { bgcolor: '#ffebee', color: '#c62828' },
+                    }}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            </Fade>
+          )}
 
           <Box
             sx={{
@@ -198,4 +210,5 @@ BookCard.propTypes = {
   onClick: PropTypes.func,
   onDelete: PropTypes.func,
   onArchive: PropTypes.func,
+  editable: PropTypes.bool,
 };
