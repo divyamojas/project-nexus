@@ -18,7 +18,7 @@ import {
 } from '@mui/material';
 import BookCard from '@/components/books/BookCard';
 import { useDebounce } from '@/hooks/useDebounce';
-import { getAvailableBooks, filterAndSortBooks } from '@/services/books';
+import { getAvailableBooks, filterAndSortBooks } from '@/services/bookService';
 import BookModal from '@/components/books/BookModal';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -40,6 +40,7 @@ export default function BrowseBooks() {
       try {
         const data = await getAvailableBooks();
         setBooks(data);
+        console.log('books data', data);
       } catch (e) {
         console.error('Error fetching books:', e);
       }
@@ -54,6 +55,8 @@ export default function BrowseBooks() {
     userId: user?.id,
     includeOwn: showOwnBooks,
   });
+
+  console.log(filteredBooks);
 
   const handleCardClick = (book) => {
     setSelectedBook(book);

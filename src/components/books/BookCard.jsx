@@ -64,7 +64,7 @@ export default function BookCard({
     <Box
       sx={{
         transition: 'transform 0.2s ease',
-        transform: hovered ? 'scale(1.05)' : 'scale(0.98)',
+        transform: hovered ? 'scale(1.02)' : 'scale(1)',
         zIndex: hovered ? 10 : 1,
       }}
     >

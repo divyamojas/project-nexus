@@ -23,12 +23,14 @@ import ArchiveIcon from '@mui/icons-material/Archive';
 import UnarchiveIcon from '@mui/icons-material/Unarchive';
 import { motion, AnimatePresence } from 'framer-motion';
 import PropTypes from 'prop-types';
-import { deleteBook, archiveBook } from '@/services/bookService';
 import {
+  deleteBook,
+  archiveBook,
   requestBorrowBook,
   getRequestsForBook,
   updateRequestStatus,
-} from '@/services/bookRequests';
+} from '@/services/bookService';
+
 import { useAuth } from '@/contexts/AuthContext';
 
 const statusColor = {

@@ -22,9 +22,10 @@ const conditionOptions = ['new', 'good', 'worn', 'damaged'];
 export default function AddBookModal({ open, onClose }) {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
-  const [description, setDescription] = useState('');
-  const [coverImageUrl, setCoverImageUrl] = useState('');
+  const [isbn, setIsbn] = useState('');
+  const [coverUrl, setCoverUrl] = useState('');
   const [condition, setCondition] = useState('');
+  const [notes, setNotes] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -41,6 +42,8 @@ export default function AddBookModal({ open, onClose }) {
   const handleSelectMatch = (option) => {
     setTitle(option.title);
     setAuthor(option.author);
+    setIsbn(option.isbn || '');
+    setCoverUrl(option.cover_url || '');
   };
 
   const handleSubmit = async () => {
@@ -51,9 +54,10 @@ export default function AddBookModal({ open, onClose }) {
     const success = await addBookToCatalogAndStock({
       title,
       author,
-      description,
-      cover_image_url: coverImageUrl,
+      isbn,
+      cover_url: coverUrl,
       condition,
+      notes,
     });
     if (success) onClose();
     else alert('Something went wrong while adding your book.');
@@ -62,9 +66,10 @@ export default function AddBookModal({ open, onClose }) {
   const resetForm = () => {
     setTitle('');
     setAuthor('');
-    setDescription('');
-    setCoverImageUrl('');
+    setIsbn('');
+    setCoverUrl('');
     setCondition('');
+    setNotes('');
     setSearchResults([]);
   };
 
@@ -106,6 +111,20 @@ export default function AddBookModal({ open, onClose }) {
             onChange={(e) => setAuthor(e.target.value)}
           />
           <TextField
+            label="ISBN"
+            fullWidth
+            variant="outlined"
+            value={isbn}
+            onChange={(e) => setIsbn(e.target.value)}
+          />
+          <TextField
+            label="Cover Image URL"
+            fullWidth
+            variant="outlined"
+            value={coverUrl}
+            onChange={(e) => setCoverUrl(e.target.value)}
+          />
+          <TextField
             label="Condition*"
             select
             fullWidth
@@ -120,20 +139,13 @@ export default function AddBookModal({ open, onClose }) {
             ))}
           </TextField>
           <TextField
-            label="Description"
+            label="Notes"
             fullWidth
             multiline
-            rows={3}
+            rows={2}
             variant="outlined"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-          <TextField
-            label="Cover Image URL"
-            fullWidth
-            variant="outlined"
-            value={coverImageUrl}
-            onChange={(e) => setCoverImageUrl(e.target.value)}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
           />
         </Box>
       </DialogContent>
