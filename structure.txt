@@ -14,22 +14,43 @@
 │   │   └── images
 │   │       └── leaflet-logo-full.png
 │   ├── components
-│   │   ├── AddBookModal.jsx
-│   │   ├── books
-│   │   │   ├── BookCard.jsx
-│   │   │   ├── BookCarouselSection.jsx
-│   │   │   └── BookModal.jsx
-│   │   ├── Common
-│   │   │   ├── PageLoader.jsx
-│   │   │   └── PrivateRoute.jsx
-│   │   └── dashboard
-│   │       ├── FeedbackSection.jsx
-│   │       └── MyBooksSection.jsx
+│   │   └── Common
+│   │       ├── PageLoader.jsx
+│   │       └── PrivateRoute.jsx
 │   ├── constants
 │   │   ├── authConstants.js
 │   │   └── dashboardBookSections.js
 │   ├── contexts
 │   │   └── AuthContext.jsx
+│   ├── features
+│   │   ├── auth
+│   │   │   ├── components
+│   │   │   │   ├── ForgotPassword.jsx
+│   │   │   │   ├── Login.jsx
+│   │   │   │   └── Signup.jsx
+│   │   │   └── services
+│   │   │       └── authService.js
+│   │   ├── books
+│   │   │   ├── components
+│   │   │   │   ├── AddBookModal.jsx
+│   │   │   │   ├── BookCard.jsx
+│   │   │   │   ├── BookCarouselSection.jsx
+│   │   │   │   └── BookModal.jsx
+│   │   │   ├── pages
+│   │   │   │   └── BrowseBooks.jsx
+│   │   │   └── services
+│   │   │       └── bookService.js
+│   │   ├── dashboard
+│   │   │   ├── components
+│   │   │   │   ├── FeedbackSection.jsx
+│   │   │   │   └── MyBooksSection.jsx
+│   │   │   └── pages
+│   │   │       └── Dashboard.jsx
+│   │   └── feedback
+│   │       ├── pages
+│   │       │   └── Feedback.jsx
+│   │       └── services
+│   │           └── feedbackService.js
 │   ├── hooks
 │   │   ├── useDebounce.js
 │   │   ├── useSession.js
@@ -40,17 +61,8 @@
 │   ├── main.jsx
 │   ├── pages
 │   │   ├── auth
-│   │   │   ├── ForgotPassword.jsx
-│   │   │   ├── Login.jsx
-│   │   │   └── Signup.jsx
-│   │   ├── BrowseBooks.jsx
-│   │   ├── Dashboard.jsx
-│   │   ├── Feedback.jsx
 │   │   └── NotFound.jsx
 │   ├── services
-│   │   ├── authService.js
-│   │   ├── bookService.js
-│   │   ├── feedbackService.js
 │   │   ├── supabaseClient.js
 │   │   └── userService.js
 │   └── theme
@@ -59,4 +71,4 @@
 ├── vercel.json
 └── vite.config.js
 
-18 directories, 42 files
+30 directories, 42 files
