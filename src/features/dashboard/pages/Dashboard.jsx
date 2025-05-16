@@ -114,6 +114,9 @@ export default function Dashboard() {
           open={!!selectedBook}
           onClose={handleCloseModal}
           book={selectedBook}
+          status={selectedBook.status} // ✅ Passing status explicitly
+          onArchive={() => handleArchiveBook(selectedBook)} // ✅ Pass service handler
+          onDelete={() => handleDeleteBook(selectedBook)} // ✅ Pass service handler
           onActionComplete={fetchData}
         />
       )}
