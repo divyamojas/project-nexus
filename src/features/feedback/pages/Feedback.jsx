@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Container, Typography, TextField, Button, Box } from '@mui/material';
-import { insertFeedback, fetchUserEmail } from '@/services/feedbackService';
+import { insertFeedback, fetchUserEmail } from '@features/feedback/services/feedbackService';
 
 export default function Feedback() {
   const [message, setMessage] = useState('');
