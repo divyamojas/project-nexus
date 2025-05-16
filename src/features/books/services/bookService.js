@@ -129,8 +129,8 @@ export async function getAvailableBooks() {
   const { data, error } = await supabase
     .from('books')
     .select(`id, status, condition, created_at, user_id, catalog:catalog_id (title, author)`) // join
-    .eq('archived', false)
-    .eq('status', true);
+    .eq('archived', false);
+  // .eq('status', 'available');
 
   if (error) throw error;
   return data || [];
