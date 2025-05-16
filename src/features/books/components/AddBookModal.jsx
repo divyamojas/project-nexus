@@ -14,7 +14,10 @@ import {
   MenuItem,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { searchBooksCatalogByTitle, addBookToCatalogAndStock } from '@/services/bookService';
+import {
+  searchBooksCatalogByTitle,
+  addBookToCatalogAndStock,
+} from '@features/books/services/bookService';
 import PropTypes from 'prop-types';
 
 const conditionOptions = ['new', 'good', 'worn', 'damaged'];

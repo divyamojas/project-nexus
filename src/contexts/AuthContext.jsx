@@ -1,7 +1,7 @@
 // src/contexts/AuthContext.jsx
 
 import React, { createContext, useContext, useState } from 'react';
-import * as authService from '@/services/authService';
+import * as authService from '@/features/auth/services/authService';
 import { ALLOWED_EMAIL_DOMAINS, DOMAIN_ERRORS } from '@/constants/authConstants';
 import { useSessionTracker } from '@/hooks/useSessionTracker';
 

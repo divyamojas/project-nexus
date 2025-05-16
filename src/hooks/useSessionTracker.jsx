@@ -1,7 +1,7 @@
 // src/hooks/useSessionTracker.js
 
 import { useEffect } from 'react';
-import { getSession, onAuthStateChange } from '@/services/authService';
+import { getSession, onAuthStateChange } from '@features/auth/services/authService';
 
 export function useSessionTracker(setUser, setLoading) {
   useEffect(() => {

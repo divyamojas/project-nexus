@@ -16,10 +16,10 @@ import {
   FormControlLabel,
   Switch,
 } from '@mui/material';
-import BookCard from '@/components/books/BookCard';
+import BookCard from '@features/books/components/BookCard';
 import { useDebounce } from '@/hooks/useDebounce';
-import { getAvailableBooks, filterAndSortBooks } from '@/services/bookService';
-import BookModal from '@/components/books/BookModal';
+import { getAvailableBooks, filterAndSortBooks } from '@features/books/services/bookService';
+import BookModal from '@features/books/components/BookModal';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function BrowseBooks() {

@@ -1,6 +1,6 @@
 // /src/services/authService.js
 
-import { supabase } from './supabaseClient';
+import { supabase } from '../../../services/supabaseClient';
 
 export const signup = (email, password) => supabase.auth.signUp({ email, password });
 

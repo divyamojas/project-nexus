@@ -8,12 +8,12 @@ import PageLoader from '@components/Common/PageLoader';
 import { useSession } from '@/hooks/useSession';
 
 // Lazy loading pages
-const Signup = lazy(() => import('@pages/auth/Signup'));
-const Login = lazy(() => import('@pages/auth/Login'));
-const ForgotPassword = lazy(() => import('@pages/auth/ForgotPassword'));
-const Dashboard = lazy(() => import('@pages/Dashboard'));
-const BrowseBooks = lazy(() => import('@pages/BrowseBooks'));
-const Feedback = lazy(() => import('@pages/Feedback'));
+const Signup = lazy(() => import('@features/auth/components/Signup'));
+const Login = lazy(() => import('@features/auth/components/Login'));
+const ForgotPassword = lazy(() => import('@features/auth/components/ForgotPassword'));
+const Dashboard = lazy(() => import('@features/dashboard/pages/Dashboard'));
+const BrowseBooks = lazy(() => import('@features/books/pages/BrowseBooks'));
+const Feedback = lazy(() => import('@features/feedback/pages/Feedback'));
 const NotFound = lazy(() => import('@pages/NotFound'));
 
 function RouteWrapper() {

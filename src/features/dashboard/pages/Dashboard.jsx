@@ -3,11 +3,11 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Typography, Paper } from '@mui/material';
 
-import AddBookModal from '@/components/AddBookModal';
-import BookModal from '@/components/books/BookModal';
-import BookCarouselSection from '@/components/books/BookCarouselSection';
-import MyBooksSection from '@/components/dashboard/MyBooksSection';
-import FeedbackSection from '@/components/dashboard/FeedbackSection';
+import AddBookModal from '@features/books/components/AddBookModal';
+import BookModal from '@features/books/components/BookModal';
+import BookCarouselSection from '@features/books/components/BookCarouselSection';
+import MyBooksSection from '@features/dashboard/components/MyBooksSection';
+import FeedbackSection from '@features/dashboard/components/FeedbackSection';
 
 import { getDashboardSections } from '@/constants/dashboardBookSections';
 import {
@@ -23,7 +23,7 @@ import {
   handleArchiveBookWithRefresh,
   handleDeleteBookWithRefresh,
   categorizeBooks,
-} from '@/services/bookService';
+} from '@features/books/services/bookService';
 
 export default function Dashboard() {
   const [myBooks, setMyBooks] = useState([]);

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Box, Typography, Button, Collapse, Chip } from '@mui/material';
-import BookCarouselSection from '@/components/books/BookCarouselSection';
+import BookCarouselSection from '@features/books/components/BookCarouselSection';
 import PropTypes from 'prop-types';
 
 export default function MyBooksSection({

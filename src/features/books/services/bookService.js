@@ -130,7 +130,7 @@ export async function getAvailableBooks() {
     .from('books')
     .select(`id, status, condition, created_at, user_id, catalog:catalog_id (title, author)`) // join
     .eq('archived', false)
-    .eq('available', true);
+    .eq('status', true);
 
   if (error) throw error;
   return data || [];

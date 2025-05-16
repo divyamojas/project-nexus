@@ -1,0 +1,62 @@
+.
+├── eslint.config.js
+├── index.html
+├── package-lock.json
+├── package.json
+├── public
+│   ├── favicon.png
+│   └── leaflet-preview.png
+├── README.md
+├── src
+│   ├── api
+│   ├── App.jsx
+│   ├── assets
+│   │   └── images
+│   │       └── leaflet-logo-full.png
+│   ├── components
+│   │   ├── AddBookModal.jsx
+│   │   ├── books
+│   │   │   ├── BookCard.jsx
+│   │   │   ├── BookCarouselSection.jsx
+│   │   │   └── BookModal.jsx
+│   │   ├── Common
+│   │   │   ├── PageLoader.jsx
+│   │   │   └── PrivateRoute.jsx
+│   │   └── dashboard
+│   │       ├── FeedbackSection.jsx
+│   │       └── MyBooksSection.jsx
+│   ├── constants
+│   │   ├── authConstants.js
+│   │   └── dashboardBookSections.js
+│   ├── contexts
+│   │   └── AuthContext.jsx
+│   ├── hooks
+│   │   ├── useDebounce.js
+│   │   ├── useSession.js
+│   │   └── useSessionTracker.jsx
+│   ├── index.css
+│   ├── layouts
+│   │   └── Layout.jsx
+│   ├── main.jsx
+│   ├── pages
+│   │   ├── auth
+│   │   │   ├── ForgotPassword.jsx
+│   │   │   ├── Login.jsx
+│   │   │   └── Signup.jsx
+│   │   ├── BrowseBooks.jsx
+│   │   ├── Dashboard.jsx
+│   │   ├── Feedback.jsx
+│   │   └── NotFound.jsx
+│   ├── services
+│   │   ├── authService.js
+│   │   ├── bookService.js
+│   │   ├── feedbackService.js
+│   │   ├── supabaseClient.js
+│   │   └── userService.js
+│   └── theme
+│       └── theme.js
+├── structure.txt
+├── vercel.json
+└── vite.config.js
+
+18 directories, 42 files

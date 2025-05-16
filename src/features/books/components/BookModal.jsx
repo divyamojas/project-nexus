@@ -29,7 +29,7 @@ import {
   requestBorrowBook,
   getRequestsForBook,
   updateRequestStatus,
-} from '@/services/bookService';
+} from '@features/books/services/bookService';
 
 import { useAuth } from '@/contexts/AuthContext';
 
