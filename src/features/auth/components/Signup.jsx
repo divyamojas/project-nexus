@@ -17,6 +17,7 @@ import {
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useAuth } from '@contexts/AuthContext';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { processSignup } from '@features/auth/services/authService';
 
 export default function Signup() {
   const { signup, isAuthenticated } = useAuth();
@@ -37,32 +38,15 @@ export default function Signup() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-
-    if (!email || !password || !confirmPassword) {
-      setError('Please fill all fields.');
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError('Passwords do not match.');
-      return;
-    }
-
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters.');
-      return;
-    }
-
-    setLoading(true);
-    const { error: signupError } = await signup(email, password);
-    setLoading(false);
-
-    if (signupError) {
-      setError(signupError.message);
-    } else {
-      navigate('/dashboard');
-    }
+    processSignup({
+      email,
+      password,
+      confirmPassword,
+      setError,
+      setLoading,
+      navigate,
+      signup,
+    });
   };
 
   return (

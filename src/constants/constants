@@ -1,0 +1,22 @@
+// src/constants/constants.js
+
+
+// Dashboard Sections
+
+export const DASHBOARD_SECTIONS = ({ lentBooks, savedBooks, requests, transfers }) => [
+  { title: 'Lent Books', emoji: '📦', books: lentBooks, context: 'lent' },
+  { title: 'Saved Books', emoji: '🔖', books: savedBooks, context: 'saved' },
+  { title: 'Incoming Requests', emoji: '📥', books: requests?.incoming || [], context: 'incoming' },
+  { title: 'Outgoing Requests', emoji: '📤', books: requests?.outgoing || [], context: 'outgoing' },
+  { title: 'Transfers', emoji: '🚚', books: transfers, context: 'transfers' },
+];
+
+
+// Auth constants
+
+export const ALLOWED_EMAIL_DOMAINS = ['sprinklr.com', 'gmail.com'];
+
+export const DOMAIN_ERRORS = {
+  signup: 'Hey there! 🌿 Only work or Gmail emails are allowed to join Leaflet.',
+  login: 'Oops! 🌱 Only work or Gmail emails are accepted on Leaflet.',
+};

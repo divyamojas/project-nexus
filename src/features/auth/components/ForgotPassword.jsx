@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import { useAuth } from '@contexts/AuthContext';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { processResetPassword } from '@features/auth/services/authService';
 
 export default function ForgotPassword() {
   const { resetPassword, isAuthenticated } = useAuth();
@@ -32,19 +33,7 @@ export default function ForgotPassword() {
 
   const handleResetPassword = async (e) => {
     e.preventDefault();
-    setError('');
-    setMessage('');
-
-    setLoading(true);
-    const { error: resetError } = await resetPassword(email);
-    setLoading(false);
-
-    if (resetError) {
-      setError('Something went wrong. Please try again.');
-    } else {
-      setMessage('Reset link sent! Please check your email.');
-      setEmail('');
-    }
+    processResetPassword({ email, setError, setMessage, setLoading, resetPassword });
   };
 
   return (
