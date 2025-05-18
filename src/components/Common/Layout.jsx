@@ -45,7 +45,7 @@ export default function Layout({ children }) {
   };
 
   const handleLogout = async () => {
-    await logout;
+    await logout();
     navigate('/');
   };
 
