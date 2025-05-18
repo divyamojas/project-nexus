@@ -39,6 +39,7 @@ export default function Dashboard() {
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedBook, setSelectedBook] = useState(null);
+  const [modalContext, setModalContext] = useState('');
   const [showArchived, setShowArchived] = useState(false);
 
   const { categorizedBooks, handleDeleteBook, handleArchiveBook, refreshBooks } = useBookContext();
@@ -67,7 +68,10 @@ export default function Dashboard() {
     setUserFirstName(user.first_name);
   }, [user]);
 
-  const handleBookClick = (book) => setSelectedBook(book);
+  const handleBookClick = (book, context = 'myBooks') => {
+    setSelectedBook(book);
+    setModalContext(context);
+  };
   const handleCloseModal = () => setSelectedBook(null);
   const handleToggleSave = async (book) => {
     await toggleSaveBook(book.id, false, null);
@@ -111,7 +115,7 @@ export default function Dashboard() {
           showArchived={showArchived}
           setShowArchived={setShowArchived}
           onAdd={() => setShowAddModal(true)}
-          onBookClick={handleBookClick}
+          onBookClick={(book) => handleBookClick(book, 'myBooks')}
           onDelete={handleDeleteBook}
           onArchive={handleArchiveBook}
         />
@@ -124,7 +128,7 @@ export default function Dashboard() {
             books={books}
             context={context}
             editable={true}
-            onBookClick={handleBookClick}
+            onBookClick={(book) => handleBookClick(book, context)}
             onDelete={handleDeleteBook}
             onArchive={handleArchiveBook}
             onToggleSave={handleToggleSave}
@@ -145,6 +149,7 @@ export default function Dashboard() {
           open={!!selectedBook}
           onClose={handleCloseModal}
           book={selectedBook}
+          context={modalContext}
           status={selectedBook.status}
           onArchive={() => handleArchiveBook(selectedBook)}
           onDelete={() => handleDeleteBook(selectedBook)}

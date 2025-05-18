@@ -59,30 +59,47 @@ export default function BookModal({
     setIsSavedState(shouldSave);
     await toggleSaveBook(book.id, shouldSave, catalog.id);
     onActionComplete();
+    onClose();
   };
 
   const handleRequestReturn = async () => {
     await requestBookReturn(book.id);
     onActionComplete();
+    onClose();
   };
 
   const handleAcceptRequest = async () => {
     await updateRequestStatus(book.request_id, 'accepted');
     onActionComplete();
+    onClose();
   };
 
   const handleRejectRequest = async () => {
     await updateRequestStatus(book.request_id, 'rejected');
     onActionComplete();
+    onClose();
   };
 
   const handleCancelRequest = async () => {
     await updateRequestStatus(book.request_id, 'cancelled');
     onActionComplete();
+    onClose();
   };
 
-  const handleDelete = () => handleDeleteBook(book);
-  const handleArchive = () => handleArchiveBook(book);
+  const handleDelete = () => {
+    handleDeleteBook(book);
+    onActionComplete();
+    onClose();
+  };
+  const handleArchive = () => {
+    handleArchiveBook(book);
+    onActionComplete();
+    if (book.archived) {
+      // unarchiving case
+      onActionComplete();
+    }
+    onClose();
+  };
 
   const renderActions = () => {
     if (!book) return null;

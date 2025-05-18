@@ -34,7 +34,7 @@ export default function MyBooksSection({
         onDelete={onDelete}
         onArchive={onArchive}
         context="myBooks"
-        editable={true}
+        editable={false}
       />
 
       <Box mt={2} mb={2}>
