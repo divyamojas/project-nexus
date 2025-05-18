@@ -1,118 +1,118 @@
-
 # 📚 Leaflet — Share the Books You Love 🌿
 
-Welcome to **Leaflet** —
-A cozy new way to share, discover, and celebrate the books that move you.
+Welcome to **Leaflet**, a thoughtfully crafted platform for sharing and discovering books with your local and digital communities.
+
+Whether it's lending a treasured novel or browsing what others are reading nearby, Leaflet makes the experience personal, meaningful, and beautifully simple.
 
 ---
 
-## 🌐 Live Websites
+## 🌐 Live Instances
 
 - **Production**: [leafletbooks.vercel.app](https://leafletbooks.vercel.app/)
 - **Development (UAT)**: [uatleafletbooks.vercel.app](https://uatleafletbooks.vercel.app/)
 
 ---
 
-## 🪴 About Leaflet
+## 🌱 What is Leaflet?
 
-**Leaflet** is a friendly community platform where users can:
+Leaflet is a secure and thoughtfully designed book-sharing platform designed to:
 
-- Share the books they own
-- Request books anonymously
-- Set mutual days and times for pickup
-- Engage through cozy private chats (coming soon!)
+- Let users share books they own
+- Receive anonymous requests from nearby readers
+- Coordinate mutual day and time for book exchange
+- (Soon) Chat privately after mutual agreement
 
-We believe in **slowing down**, **discovering stories**, and **building real communities through books**. 🌿✨
-
----
-
-## 🚀 Features
-
-### ✅ Implemented:
-
-- Early access landing page with email capture
-- Authentication system (Signup, Login, Forgot Password)
-- Domain restriction for work and Gmail accounts
-- Protected Dashboard with lazy-loaded routes
-- SPA routing enabled on Vercel with RLS-secured Supabase backend
+At its heart, Leaflet celebrates slower living and story-driven connection.
 
 ---
 
-### 📋 Upcoming:
+## 🚀 Core Features
 
-- Book sharing system (Add/Request Books)
-- Mutual Day & Time coordination for book transfers
-- Anonymous private chat after book request acceptance
-- Notifications system (Email & In-app)
-- Profile management
-- Book discovery with filters and search
-- Mobile app (React Native)
+### ✅ Already Live:
 
----
+- Email-based authentication (Signup, Login, Forgot Password)
+- Access control using domain restrictions (Gmail & work accounts)
+- Secure routing with protected dashboard & layouts
+- Pre-built lazy-loaded routing system
+- Supabase backend with RLS policies
 
-## 🛠 Tech Stack
+### 🛠 Coming Soon:
 
-| Layer | Technologies |
-|:------|:-------------|
-| Frontend | React.js (Vite, Material-UI, Framer Motion) |
-| Routing | React Router v7 |
-| State Management | React Context API |
-| Backend as a Service | Supabase |
-| Hosting | Vercel |
-| Code Formatting | Prettier, ESLint |
-| Version Control | Git + GitHub |
-| Auth Security | Supabase Email Auth + RLS |
-| Build Optimization | Lazy loading, modular design |
+- Fully working book lending system
+- Real-time request and lending flow
+- Private anonymous messaging
+- Notification system
+- Searchable catalog and discovery filters
+- Responsive mobile experience
 
 ---
 
-## 🧩 Project Structure
+## 🧰 Tech Stack Overview
+
+| Area      | Stack                                  |
+| --------- | -------------------------------------- |
+| Frontend  | React + Vite + MUI + Framer Motion     |
+| Routing   | React Router v7                        |
+| State     | React Context API                      |
+| Backend   | Supabase (PostgreSQL + Auth + Storage) |
+| Hosting   | Vercel                                 |
+| Dev Tools | ESLint + Prettier                      |
+
+---
+
+## 📁 Project Structure
 
 ```
-src/
-  ├── assets/          # Images, logos
-  ├── components/      # Common reusable components
-  ├── contexts/        # AuthContext for global user auth
-  ├── hooks/           # (Reserved for custom hooks)
-  ├── layouts/         # (Reserved for future layouts)
-  ├── pages/           # Page components (Login, Signup, Dashboard)
-  ├── routes/          # (Reserved for route configs)
-  ├── services/        # Supabase client setup
-  ├── theme/           # (Reserved for MUI theme customization)
-  └── utils/           # (Reserved for helpers)
-public/
-  ├── vercel.json      # SPA routing config for Vercel
-.env                   # Environment variables
-vite.config.js         # Vite project config
+.
+├── public/                  # Static assets
+├── src/                    # Source code
+│   ├── api/                # Server APIs (optional)
+│   ├── assets/             # Images, logos, etc.
+│   ├── components/         # Reusable UI components
+│   ├── constants/          # App-wide constants
+│   ├── contexts/           # Auth, User, Book contexts
+│   ├── features/           # Domain-specific modules (auth, books, feedback)
+│   ├── hooks/              # Custom React hooks
+│   ├── layouts/            # App-wide layouts (Header, Footer)
+│   ├── pages/              # Top-level route pages
+│   ├── services/           # Supabase clients, external services
+│   ├── theme/              # Global theme and styling
+│   ├── App.jsx             # Main App component
+│   ├── main.jsx            # App bootstrap entry point
+│   └── index.css           # Global CSS
+├── .env                    # Environment variables
+├── eslint.config.js        # Linting rules
+├── vite.config.js          # Vite config
+└── README.md               # Project guide
 ```
 
-✅ Modular, scalable, startup-grade structure.
+✅ Well-modularized and scalable for team collaboration.
 
 ---
 
-## ⚙️ Environment Variables
+## 🔐 Environment Setup
 
-Create a `.env` file at the project root with:
+Create a `.env` file at the root:
 
-```plaintext
+```bash
 VITE_SUPABASE_URL=https://your-project-id.supabase.co
-VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+VITE_SUPABASE_ANON_KEY=your-anon-key
 ```
 
-✅ Never hardcode sensitive keys inside code.
+🚫 Do not expose secrets in the codebase.
 
 ---
 
-## 🏃‍♂️ Local Setup Instructions
+## 🧪 Getting Started Locally
 
-1. **Clone the repo**:
+1. **Clone the repo**
 
 ```bash
 git clone https://github.com/divyamojas/project-nexus.git
 cd project-nexus
 ```
 
-2. **Install dependencies**:
+2. **Install dependencies**
 
 ```bash
 npm install
@@ -120,11 +120,7 @@ npm install
 yarn install
 ```
 
-3. **Setup environment**:
-
-Create `.env` file as shown above.
-
-4. **Start development server**:
+3. **Run the app**
 
 ```bash
 npm run dev
@@ -132,32 +128,31 @@ npm run dev
 yarn dev
 ```
 
-✅ Project will run at [localhost:5173](http://localhost:5173).
+📍 Open [http://localhost:5173](http://localhost:5173) to get started.
 
 ---
 
-## 📈 Roadmap (Next Phases)
+## 🛣️ Roadmap
 
-- [ ] Book Sharing: Add / Request Books
-- [ ] Mutual Day & Time Setting
-- [ ] Anonymous Private Chat after Request
-- [ ] Book Discovery (search and filters)
-- [ ] Profile pages
-- [ ] Notifications (email & in-app)
-- [ ] Mobile app (React Native)
+- [ ] Book Sharing: Add, Save, Request
+- [ ] Request Fulfillment UI
+- [ ] Messaging Interface (Anonymous)
+- [ ] Book Discovery + Recommendations
+- [ ] Push Notifications
+- [ ] Profile & Social Features
+- [ ] React Native App
 
 ---
 
 ## 🤝 Contributions
 
-Currently internal for MVP.  
-Open-source contributions will be considered post public beta launch! 🌿
+We're currently in our MVP development phase. Contributions are welcome post-beta launch.
+If you’re passionate about books, design systems, or thoughtful community tools — we'd love to hear from you.
 
 ---
 
-## 📜 License
+## 📄 License
 
-© 2025 Leaflet Books  
-Made with ❤️ for book lovers.
+© 2025 Leaflet Books. Built with love for communities that read. 🌿
 
 ---

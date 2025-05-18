@@ -18,10 +18,11 @@
 │   │       ├── PageLoader.jsx
 │   │       └── PrivateRoute.jsx
 │   ├── constants
-│   │   ├── authConstants.js
-│   │   └── dashboardBookSections.js
+│   │   └── constants.jsx
 │   ├── contexts
-│   │   └── AuthContext.jsx
+│   │   ├── AuthContext.jsx
+│   │   ├── BookContext.jsx
+│   │   └── UserContext.jsx
 │   ├── features
 │   │   ├── auth
 │   │   │   ├── components
@@ -60,7 +61,6 @@
 │   │   └── Layout.jsx
 │   ├── main.jsx
 │   ├── pages
-│   │   ├── auth
 │   │   └── NotFound.jsx
 │   ├── services
 │   │   ├── supabaseClient.js
@@ -71,4 +71,4 @@
 ├── vercel.json
 └── vite.config.js
 
-30 directories, 42 files
+29 directories, 43 files
