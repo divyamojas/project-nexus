@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { Box, Typography, Grid, Paper } from '@mui/material';
-import PropTypes from 'prop-types';
 
 export default function FeedbackSection({ feedbacks = [] }) {
   return (
@@ -17,7 +16,7 @@ export default function FeedbackSection({ feedbacks = [] }) {
       ) : (
         <Grid container spacing={2}>
           {feedbacks.map((fb, idx) => (
-            <Grid item xs={12} sm={6} md={4} key={idx}>
+            <Grid key={idx}>
               <Paper
                 sx={{
                   px: 3,
@@ -35,11 +34,3 @@ export default function FeedbackSection({ feedbacks = [] }) {
     </Box>
   );
 }
-
-FeedbackSection.propTypes = {
-  feedbacks: PropTypes.arrayOf(
-    PropTypes.shape({
-      content: PropTypes.string,
-    }),
-  ),
-};

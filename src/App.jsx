@@ -6,6 +6,9 @@ import PrivateRoute from '@components/Common/PrivateRoute';
 import Layout from '@/layouts/Layout';
 import PageLoader from '@components/Common/PageLoader';
 import { useSession } from '@/hooks/useSession';
+import { UserProvider } from '@/contexts/UserContext';
+import { BookProvider } from '@/contexts/BookContext';
+import { AuthProvider } from '@/contexts/AuthContext';
 
 // Lazy loading pages
 const Signup = lazy(() => import('@features/auth/components/Signup'));
@@ -15,6 +18,12 @@ const Dashboard = lazy(() => import('@features/dashboard/pages/Dashboard'));
 const BrowseBooks = lazy(() => import('@features/books/pages/BrowseBooks'));
 const Feedback = lazy(() => import('@features/feedback/pages/Feedback'));
 const NotFound = lazy(() => import('@pages/NotFound'));
+
+const protectedRoutes = [
+  { path: '/dashboard', element: <Dashboard /> },
+  { path: '/browse', element: <BrowseBooks /> },
+  { path: '/feedback', element: <Feedback /> },
+];
 
 function RouteWrapper() {
   const location = useLocation();
@@ -45,37 +54,18 @@ function RouteWrapper() {
       <Route path="/login" element={!session ? <Login /> : <Navigate to="/dashboard" replace />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
 
-      {/* Protected Routes */}
-      <Route
-        path="/dashboard"
-        element={
-          <PrivateRoute>
-            <Layout>
-              <Dashboard />
-            </Layout>
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/browse"
-        element={
-          <PrivateRoute>
-            <Layout>
-              <BrowseBooks />
-            </Layout>
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/feedback"
-        element={
-          <PrivateRoute>
-            <Layout>
-              <Feedback />
-            </Layout>
-          </PrivateRoute>
-        }
-      />
+      {/* Protected Routes (mapped) */}
+      {protectedRoutes.map(({ path, element }) => (
+        <Route
+          key={path}
+          path={path}
+          element={
+            <PrivateRoute>
+              <Layout>{element}</Layout>
+            </PrivateRoute>
+          }
+        />
+      ))}
 
       {/* 404 fallback */}
       <Route path="*" element={<NotFound />} />
@@ -87,7 +77,13 @@ export default function App() {
   return (
     <Router>
       <Suspense fallback={<PageLoader />}>
-        <RouteWrapper />
+        <AuthProvider>
+          <UserProvider>
+            <BookProvider>
+              <RouteWrapper />
+            </BookProvider>
+          </UserProvider>
+        </AuthProvider>
       </Suspense>
     </Router>
   );

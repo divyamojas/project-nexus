@@ -1,6 +1,6 @@
 // src/pages/BrowseBooks.jsx
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Container,
   Typography,
@@ -19,20 +19,14 @@ import {
 } from '@mui/material';
 import BookCard from '@features/books/components/BookCard';
 import { useDebounce } from '@/hooks/useDebounce';
-import {
-  getAvailableBooks,
-  filterAndSortBooks,
-  toggleSaveBook,
-  requestBook,
-} from '@features/books/services/bookService';
+import { toggleSaveBook, requestBook } from '@features/books/services/bookService';
 import BookModal from '@features/books/components/BookModal';
 import { useAuth } from '@/contexts/AuthContext';
+import { useBookContext } from '@/contexts/BookContext';
 
 export default function BrowseBooks() {
-  const [books, setBooks] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearch = useDebounce(searchTerm, 300);
-  const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState('date_added');
   const [filter, setFilter] = useState('all');
   const [showOwnBooks, setShowOwnBooks] = useState(false);
@@ -40,32 +34,18 @@ export default function BrowseBooks() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { user } = useAuth();
 
-  const fetchBooks = async () => {
-    setLoading(true);
-    try {
-      const data = await getAvailableBooks();
-      const updated = data.map((book) => ({
-        ...book,
-        is_saved: book?.saved_books?.length > 0 || false,
-      }));
-      setBooks(updated);
-    } catch (e) {
-      console.error('Error fetching books:', e);
-    }
-    setLoading(false);
-  };
+  const { filteredBooks, setFilters, loading, refreshBooks } = useBookContext();
 
-  useEffect(() => {
-    fetchBooks();
-  }, []);
-
-  const filteredBooks = filterAndSortBooks(books, {
-    searchTerm: debouncedSearch,
-    statusFilter: filter,
-    sortBy,
-    userId: user?.id,
-    includeOwn: true, // always include own books in data
-  });
+  // sync filters to context
+  React.useEffect(() => {
+    setFilters({
+      searchTerm: debouncedSearch,
+      statusFilter: filter,
+      sortBy,
+      userId: user?.id,
+      includeOwn: true,
+    });
+  }, [debouncedSearch, sortBy, filter, user?.id, setFilters]);
 
   const myBooks = filteredBooks.filter((book) => book.user_id === user?.id);
   const otherBooks = filteredBooks.filter((book) => book.user_id !== user?.id);
@@ -84,7 +64,7 @@ export default function BrowseBooks() {
     try {
       const shouldSave = !book.is_saved;
       await toggleSaveBook(book.id, shouldSave, book.catalog.id);
-      fetchBooks();
+      refreshBooks();
     } catch (err) {
       console.error('Failed to toggle save:', err);
     }
@@ -157,13 +137,13 @@ export default function BrowseBooks() {
               </Typography>
               <Grid container spacing={2} mb={4}>
                 {myBooks.map((book) => (
-                  <Grid item xs={12} sm={6} md={4} key={book.id}>
+                  <Grid item xs={12} sm={6} key={book.id}>
                     <Fade in timeout={400}>
                       <Box>
                         <BookCard
                           book={book}
                           editable={true}
-                          isSaved={false} // hide bookmark
+                          isSaved={false}
                           onClick={() => handleCardClick(book)}
                           context="myBooks"
                         />
@@ -181,7 +161,7 @@ export default function BrowseBooks() {
           </Typography>
           <Grid container spacing={2}>
             {otherBooks.map((book) => (
-              <Grid item xs={12} sm={6} md={4} key={book.id}>
+              <Grid item xs={12} sm={6} key={book.id}>
                 <Fade in timeout={400}>
                   <Box>
                     <BookCard

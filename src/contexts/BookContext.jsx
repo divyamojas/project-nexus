@@ -1,0 +1,134 @@
+// /src/contexts/BookContext.jsx
+
+import React, { createContext, useState, useEffect, useMemo, useContext } from 'react';
+import {
+  getBooks,
+  getSavedBooks,
+  deleteBook,
+  archiveBook,
+  subscribeToBookChanges,
+} from '@features/books/services/bookService';
+import { useUser } from '@/contexts/UserContext';
+
+const BookContext = createContext();
+
+export const BookProvider = ({ children }) => {
+  const { user } = useUser();
+  const userId = user?.id;
+  const [books, setBooks] = useState([]);
+  const [savedBooks, setSavedBooks] = useState([]);
+  const [filters, setFilters] = useState({
+    searchTerm: '',
+    statusFilter: 'all',
+    sortBy: 'date_added',
+    includeOwn: false,
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const categorizedBooks = useMemo(
+    () => ({
+      availableBooks: books.filter((b) => !b.archived && !b.borrowed_by),
+      lentBooks: books.filter((b) => !b.archived && b.borrowed_by),
+      archivedBooks: books.filter((b) => b.archived),
+      myActiveBooks: books.filter((b) => !b.archived && b.user_id === userId),
+    }),
+    [books, userId],
+  );
+
+  const filteredBooks = useMemo(() => {
+    const search = filters.searchTerm.toLowerCase();
+    return books
+      .filter((book) => {
+        return (
+          book.catalog?.title?.toLowerCase().includes(search) ||
+          book.catalog?.author?.toLowerCase().includes(search)
+        );
+      })
+      .filter((book) => {
+        const isOwnBook = userId && book.user_id?.toLowerCase() === userId.toLowerCase();
+        if (!filters.includeOwn && isOwnBook) return false;
+        if (filters.statusFilter === 'all') return true;
+        return book.status === filters.statusFilter;
+      })
+      .sort((a, b) => {
+        if (filters.sortBy === 'name') {
+          return a.catalog?.title?.localeCompare(b.catalog?.title);
+        }
+        if (filters.sortBy === 'date_added') {
+          return new Date(b.created_at) - new Date(a.created_at);
+        }
+        return 0;
+      });
+  }, [books, filters, userId]);
+
+  const refreshBooks = async () => {
+    setLoading(true);
+    try {
+      const data = await getBooks({ includeArchived: true });
+      setBooks(data);
+      setError(null);
+    } catch (err) {
+      console.error('refreshBooks error:', err);
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const refreshSavedBooks = async () => {
+    try {
+      const data = await getSavedBooks();
+      setSavedBooks(data);
+    } catch (err) {
+      console.error('refreshSavedBooks error:', err);
+    }
+  };
+
+  const handleDeleteBook = async (book) => {
+    await deleteBook(book.id);
+    await refreshBooks();
+  };
+
+  const handleArchiveBook = async (book) => {
+    await archiveBook(book.id, !book.archived);
+    await refreshBooks();
+  };
+
+  useEffect(() => {
+    if (userId) {
+      refreshBooks();
+      refreshSavedBooks();
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    const sub = subscribeToBookChanges(refreshBooks);
+    return () => {
+      sub.unsubscribe();
+    };
+  }, []);
+
+  return (
+    <BookContext.Provider
+      value={{
+        books,
+        savedBooks,
+        categorizedBooks,
+        filteredBooks,
+        filters,
+        setFilters,
+        refreshBooks,
+        refreshSavedBooks,
+        handleDeleteBook,
+        handleArchiveBook,
+        loading,
+        error,
+      }}
+    >
+      {children}
+    </BookContext.Provider>
+  );
+};
+
+export const useBookContext = () => useContext(BookContext);

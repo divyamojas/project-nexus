@@ -6,7 +6,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Button,
   Typography,
   IconButton,
   Stack,
@@ -15,24 +14,25 @@ import {
   Divider,
   Chip,
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import ArchiveIcon from '@mui/icons-material/Inventory2Outlined';
-import UnarchiveIcon from '@mui/icons-material/Unarchive';
-import DeleteIcon from '@mui/icons-material/CloseOutlined';
-import BookmarkIcon from '@mui/icons-material/Bookmark';
-import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
-import ReplayIcon from '@mui/icons-material/Replay';
-import CancelIcon from '@mui/icons-material/CancelOutlined';
-import CheckIcon from '@mui/icons-material/CheckCircleOutline';
-import ClearIcon from '@mui/icons-material/HighlightOff';
+import {
+  Close as CloseIcon,
+  Inventory2Outlined as ArchiveIcon,
+  Unarchive as UnarchiveIcon,
+  CloseOutlined as DeleteIcon,
+  Bookmark as BookmarkIcon,
+  BookmarkBorder as BookmarkBorderIcon,
+  Replay as ReplayIcon,
+  CancelOutlined as CancelIcon,
+  CheckCircleOutline as CheckIcon,
+  HighlightOff as ClearIcon,
+} from '@mui/icons-material';
 
 import {
   toggleSaveBook,
   requestBookReturn,
   updateRequestStatus,
-  handleArchiveBookWithRefresh,
-  handleDeleteBookWithRefresh,
 } from '@features/books/services/bookService';
+import { useBookContext } from '@/contexts/BookContext';
 
 export default function BookModal({
   open,
@@ -42,6 +42,7 @@ export default function BookModal({
   onActionComplete = () => {},
 }) {
   const [isSavedState, setIsSavedState] = useState(false);
+  const { handleDeleteBook, handleArchiveBook } = useBookContext();
 
   useEffect(() => {
     if (book) {
@@ -80,8 +81,8 @@ export default function BookModal({
     onActionComplete();
   };
 
-  const handleDelete = () => handleDeleteBookWithRefresh(book, onActionComplete);
-  const handleArchive = () => handleArchiveBookWithRefresh(book, onActionComplete);
+  const handleDelete = () => handleDeleteBook(book);
+  const handleArchive = () => handleArchiveBook(book);
 
   const renderActions = () => {
     if (!book) return null;

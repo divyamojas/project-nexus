@@ -18,30 +18,31 @@ import {
   getUserReviews,
 } from '@/services/userService';
 import {
-  subscribeToBooksChanges,
-  handleArchiveBookWithRefresh,
-  handleDeleteBookWithRefresh,
-  categorizeBooks,
   getSavedBooks,
   toggleSaveBook,
   requestBookReturn,
   updateRequestStatus,
 } from '@features/books/services/bookService';
+import { useBookContext } from '@/contexts/BookContext';
 
 import ArchiveOutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
+import { useUser } from '@/contexts/UserContext';
 
 export default function Dashboard() {
-  const [myBooks, setMyBooks] = useState([]);
+  const { user } = useUser();
+
+  const [userFirstName, setUserFirstName] = useState('Friend');
   const [requests, setRequests] = useState({ incoming: [], outgoing: [] });
   const [transfers, setTransfers] = useState([]);
   const [savedBooks, setSavedBooks] = useState([]);
   const [reviews, setReviews] = useState({ given: [], received: [] });
-  const [userFirstName, setUserFirstName] = useState('');
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedBook, setSelectedBook] = useState(null);
   const [showArchived, setShowArchived] = useState(false);
+
+  const { categorizedBooks, handleDeleteBook, handleArchiveBook, refreshBooks } = useBookContext();
 
   const fetchData = async () => {
     const [books, req, trf, saved, rev, name] = await Promise.all([
@@ -52,28 +53,24 @@ export default function Dashboard() {
       getUserReviews(),
       getCurrentUserFirstName(),
     ]);
-
-    setMyBooks(books);
     setRequests(req);
     setTransfers(trf);
     setSavedBooks(saved);
     setReviews(rev);
     setUserFirstName(name);
+    refreshBooks();
   };
 
   useEffect(() => {
     fetchData();
-
-    const channel = subscribeToBooksChanges(() => fetchData());
-    return () => channel.unsubscribe();
   }, []);
+  useEffect(() => {
+    setUserFirstName(user.first_name);
+  }, [user]);
 
   const handleBookClick = (book) => setSelectedBook(book);
   const handleCloseModal = () => setSelectedBook(null);
-  const handleDeleteBook = (book) => handleDeleteBookWithRefresh(book, fetchData);
-  const handleArchiveBook = (book) => handleArchiveBookWithRefresh(book, fetchData);
   const handleToggleSave = async (book) => {
-    console.log(book, book.id, !book.is_saved);
     await toggleSaveBook(book.id, false, null);
     fetchData();
   };
@@ -94,7 +91,7 @@ export default function Dashboard() {
     fetchData();
   };
 
-  const { availableBooks, lentBooks, archivedBooks } = categorizeBooks(myBooks);
+  const { lentBooks, archivedBooks, myActiveBooks } = categorizedBooks;
   const bookSections = DASHBOARD_SECTIONS({ lentBooks, savedBooks, requests, transfers });
 
   return (
@@ -110,7 +107,7 @@ export default function Dashboard() {
         </Typography>
 
         <MyBooksSection
-          availableBooks={availableBooks}
+          availableBooks={myActiveBooks}
           archivedBooks={archivedBooks}
           showArchived={showArchived}
           setShowArchived={setShowArchived}

@@ -43,8 +43,6 @@ export default function BookCard({
   const gradientIndex = (title || author || '').length % fallbackGradients.length;
 
   useEffect(() => {
-    // console.log(catalog);
-
     setIsSavedState(context === 'saved' ? true : (isSavedProp ?? book?.is_saved ?? false));
   }, [context, isSavedProp, book?.is_saved]);
 

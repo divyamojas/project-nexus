@@ -18,7 +18,6 @@ import {
   searchBooksCatalogByTitle,
   addBookToCatalogAndStock,
 } from '@features/books/services/bookService';
-import PropTypes from 'prop-types';
 
 const conditionOptions = ['new', 'good', 'worn', 'damaged'];
 
@@ -164,8 +163,3 @@ export default function AddBookModal({ open, onClose }) {
     </Dialog>
   );
 }
-
-AddBookModal.propTypes = {
-  open: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
-};
