@@ -1,6 +1,6 @@
 // /src/contexts/BookContext.jsx
 
-import React, { createContext, useState, useEffect, useMemo, useContext } from 'react';
+import React, { createContext, useState, useEffect, useMemo, useContext, useCallback } from 'react';
 import {
   getBooks,
   getSavedBooks,
@@ -9,8 +9,10 @@ import {
   subscribeToBookChanges,
 } from '@features/books/services/bookService';
 import { useUser } from '@/contexts/UserContext';
+import { INITIAL_BOOK_FORM_DATA } from '@/constants/constants';
 
 const BookContext = createContext();
+const BookFormContext = createContext();
 
 export const BookProvider = ({ children }) => {
   const { user } = useUser();
@@ -25,6 +27,20 @@ export const BookProvider = ({ children }) => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Book form state
+  const [formData, setFormData] = useState(INITIAL_BOOK_FORM_DATA);
+  const [errors, setErrors] = useState({});
+  const [imageStatus, setImageStatus] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [formLoading, setFormLoading] = useState(false);
+
+  const resetForm = useCallback(() => {
+    setFormData(INITIAL_BOOK_FORM_DATA);
+    setErrors({});
+    setImageStatus('');
+    setSearchResults([]);
+  }, []);
 
   const categorizedBooks = useMemo(
     () => ({
@@ -126,9 +142,26 @@ export const BookProvider = ({ children }) => {
         error,
       }}
     >
-      {children}
+      <BookFormContext.Provider
+        value={{
+          formData,
+          setFormData,
+          errors,
+          setErrors,
+          imageStatus,
+          setImageStatus,
+          searchResults,
+          setSearchResults,
+          formLoading,
+          setFormLoading,
+          resetForm,
+        }}
+      >
+        {children}
+      </BookFormContext.Provider>
     </BookContext.Provider>
   );
 };
 
 export const useBookContext = () => useContext(BookContext);
+export const useBookForm = () => useContext(BookFormContext);
