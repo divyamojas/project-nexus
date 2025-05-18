@@ -101,6 +101,32 @@ export const BookProvider = ({ children }) => {
     }
   };
 
+  const updateBookSaveStatus = (bookId, isSaved) => {
+    setBooks((prevBooks) =>
+      prevBooks.map((book) => (book.id === bookId ? { ...book, is_saved: isSaved } : book)),
+    );
+  };
+
+  const toggleBookSaveStatus = async (book) => {
+    try {
+      const shouldSave = !book.is_saved;
+      await toggleSaveBook(book.id, shouldSave, book.catalog.id);
+      updateBookSaveStatus(book.id, shouldSave);
+    } catch (err) {
+      console.error('Failed to toggle save:', err);
+    }
+  };
+
+  const sendBookRequest = async (book, message = 'Hi! I would like to borrow this book.') => {
+    try {
+      await requestBook(book.id, message);
+      return true;
+    } catch (err) {
+      console.error('Failed to request book:', err);
+      return false;
+    }
+  };
+
   const handleDeleteBook = async (book) => {
     await deleteBook(book.id);
     await refreshBooks();
@@ -136,6 +162,9 @@ export const BookProvider = ({ children }) => {
         setFilters,
         refreshBooks,
         refreshSavedBooks,
+        updateBookSaveStatus,
+        toggleBookSaveStatus,
+        sendBookRequest,
         handleDeleteBook,
         handleArchiveBook,
         loading,

@@ -1,6 +1,6 @@
 // src/pages/BrowseBooks.jsx
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Container,
   Typography,
@@ -26,6 +26,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useBookContext } from '../../contexts/BookContext';
 
 export default function BrowseBooks() {
+  const { toggleBookSaveStatus, sendBookRequest } = useBookContext();
+
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearch = useDebounce(searchTerm, 300);
   const [sortBy, setSortBy] = useState('date_added');
@@ -38,7 +40,7 @@ export default function BrowseBooks() {
   const { filteredBooks, setFilters, loading, refreshBooks } = useBookContext();
 
   // sync filters to context
-  React.useEffect(() => {
+  useEffect(() => {
     setFilters({
       searchTerm: debouncedSearch,
       statusFilter: filter,
@@ -61,23 +63,11 @@ export default function BrowseBooks() {
     setIsModalOpen(false);
   };
 
-  const handleToggleSave = async (book) => {
-    try {
-      const shouldSave = !book.is_saved;
-      await toggleSaveBook(book.id, shouldSave, book.catalog.id);
-      refreshBooks();
-    } catch (err) {
-      console.error('Failed to toggle save:', err);
-    }
-  };
+  const handleToggleSave = (book) => toggleBookSaveStatus(book);
 
   const handleRequestBook = async (book) => {
-    try {
-      await requestBook(book.id, 'Hi! I would like to borrow this book.');
-      alert('Borrow request sent!');
-    } catch (err) {
-      console.error('Failed to request book:', err);
-    }
+    const success = await sendBookRequest(book);
+    if (success) alert('Borrow request sent!');
   };
 
   return (
