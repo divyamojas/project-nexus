@@ -99,7 +99,6 @@ export const deleteBook = async (bookId) => {
 };
 
 export const archiveBook = async (bookId, archive = true) => {
-  console.log('hel', bookId, archive);
   const { error } = await supabase.from('books').update({ archived: archive }).eq('id', bookId);
   if (error) {
     console.error('archiveBook error:', error);
