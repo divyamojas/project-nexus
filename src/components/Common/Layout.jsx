@@ -14,9 +14,8 @@ import {
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { supabase } from '@/services/supabaseClient';
+import { logout } from '../../services/authService';
 
-// eslint-disable-next-line react/prop-types
 export default function Layout({ children }) {
   const [showNavbar, setShowNavbar] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -46,7 +45,7 @@ export default function Layout({ children }) {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await logout;
     navigate('/');
   };
 

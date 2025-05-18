@@ -1,8 +1,7 @@
 // src/components/dashboard/MyBooksSection.jsx
 
-import React from 'react';
 import { Box, Typography, Button, Collapse, Chip } from '@mui/material';
-import BookCarouselSection from '@features/books/components/BookCarouselSection';
+import BookCarouselSection from './BookCarouselSection';
 
 export default function MyBooksSection({
   availableBooks = [],

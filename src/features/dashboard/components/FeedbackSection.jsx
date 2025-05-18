@@ -1,6 +1,5 @@
 // src/components/dashboard/FeedbackSection.jsx
 
-import React from 'react';
 import { Box, Typography, Grid, Paper } from '@mui/material';
 
 export default function FeedbackSection({ feedbacks = [] }) {

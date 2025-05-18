@@ -1,6 +1,6 @@
 // /src/services/bookService.js
 
-import { supabase } from '@/services/supabaseClient';
+import { supabase } from './supabaseClient';
 
 // =========================
 // Catalog Operations

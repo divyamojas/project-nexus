@@ -23,12 +23,13 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { motion } from 'framer-motion';
+
 import {
   searchBooksCatalogByTitle,
   validateAndSubmitBookForm,
-} from '@features/books/services/bookService';
-import { useBookForm } from '@/contexts/BookContext';
-import { BOOK_FORM_FIELDS } from '@/constants/constants';
+} from '../../../services/bookService';
+import { useBookForm } from '../../../contexts/BookContext';
+import { BOOK_FORM_FIELDS } from '../../../constants/constants';
 
 export default function AddBookModal({ open, onClose }) {
   const {

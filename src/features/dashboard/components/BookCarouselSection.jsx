@@ -1,8 +1,7 @@
 // src/components/books/BookCarouselSection.jsx
 
-import React from 'react';
 import { Box, Typography, Divider, Stack } from '@mui/material';
-import BookCard from './BookCard';
+import BookCard from '../../books/components/BookCard';
 
 export default function BookCarouselSection({
   title,

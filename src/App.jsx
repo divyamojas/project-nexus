@@ -2,22 +2,22 @@
 
 import React, { Suspense, lazy, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import PrivateRoute from '@components/Common/PrivateRoute';
-import Layout from '@/layouts/Layout';
-import PageLoader from '@components/Common/PageLoader';
-import { useSession } from '@/hooks/useSession';
-import { UserProvider } from '@/contexts/UserContext';
-import { BookProvider } from '@/contexts/BookContext';
-import { AuthProvider } from '@/contexts/AuthContext';
+
+import PageLoader from './components/Common/PageLoader';
+import PrivateRoute from './components/Common/PrivateRoute';
+import Layout from './components/Common/Layout';
+import { UserProvider } from './contexts/UserContext';
+import { BookProvider } from './contexts/BookContext';
+import { useSession } from './hooks/useSession';
 
 // Lazy loading pages
-const Signup = lazy(() => import('@features/auth/components/Signup'));
-const Login = lazy(() => import('@features/auth/components/Login'));
-const ForgotPassword = lazy(() => import('@features/auth/components/ForgotPassword'));
-const Dashboard = lazy(() => import('@features/dashboard/pages/Dashboard'));
-const BrowseBooks = lazy(() => import('@features/books/pages/BrowseBooks'));
-const Feedback = lazy(() => import('@features/feedback/pages/Feedback'));
-const NotFound = lazy(() => import('@pages/NotFound'));
+const Signup = lazy(() => import('./features/auth/Signup'));
+const Login = lazy(() => import('./features/auth/Login'));
+const ForgotPassword = lazy(() => import('./features/auth/ForgotPassword'));
+const Dashboard = lazy(() => import('./features/dashboard/Dashboard'));
+const BrowseBooks = lazy(() => import('./features/books/BrowseBooks'));
+const Feedback = lazy(() => import('./features/feedback/Feedback'));
+const NotFound = lazy(() => import('./features/pageNotFound/NotFound'));
 
 const protectedRoutes = [
   { path: '/dashboard', element: <Dashboard /> },
@@ -77,13 +77,11 @@ export default function App() {
   return (
     <Router>
       <Suspense fallback={<PageLoader />}>
-        <AuthProvider>
-          <UserProvider>
-            <BookProvider>
-              <RouteWrapper />
-            </BookProvider>
-          </UserProvider>
-        </AuthProvider>
+        <UserProvider>
+          <BookProvider>
+            <RouteWrapper />
+          </BookProvider>
+        </UserProvider>
       </Suspense>
     </Router>
   );

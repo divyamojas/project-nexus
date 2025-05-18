@@ -7,7 +7,7 @@ import {
   getMyBooks,
   getRequests,
   getTransfers,
-} from '@/services/userService';
+} from '../services/userService';
 import { useAuth } from './AuthContext';
 
 const UserContext = createContext();

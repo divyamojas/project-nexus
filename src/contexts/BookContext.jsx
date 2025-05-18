@@ -7,9 +7,9 @@ import {
   deleteBook,
   archiveBook,
   subscribeToBookChanges,
-} from '@features/books/services/bookService';
-import { useUser } from '@/contexts/UserContext';
-import { INITIAL_BOOK_FORM_DATA } from '@/constants/constants';
+} from '../services/bookService';
+import { useUser } from '../contexts/UserContext';
+import { INITIAL_BOOK_FORM_DATA } from '../constants/constants';
 
 const BookContext = createContext();
 const BookFormContext = createContext();

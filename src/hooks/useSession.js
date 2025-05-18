@@ -1,7 +1,7 @@
 // /src/hooks/useSession.js
 
 import { useEffect, useState } from 'react';
-import { supabase } from '@/services/supabaseClient';
+import { supabase } from '../services/supabaseClient';
 
 export function useSession() {
   const [session, setSession] = useState(null);
@@ -10,7 +10,6 @@ export function useSession() {
   useEffect(() => {
     let isMounted = true;
 
-    // eslint-disable-next-line no-unused-vars
     supabase.auth.getSession().then(({ data, error }) => {
       if (isMounted) {
         setSession(data?.session || null);

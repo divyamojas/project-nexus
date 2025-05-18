@@ -1,6 +1,7 @@
 // src/pages/auth/Login.jsx
 
 import React, { useEffect, useState } from 'react';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import {
   Container,
   Typography,
@@ -15,9 +16,9 @@ import {
   IconButton,
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { useAuth } from '@contexts/AuthContext';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import { processLogin } from '@features/auth/services/authService';
+
+import { useAuth } from '../../contexts/AuthContext';
+import { processLogin } from '../../services/authService';
 
 export default function Login() {
   const { login, isAuthenticated } = useAuth();

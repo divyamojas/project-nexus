@@ -15,6 +15,7 @@
 │   │       └── leaflet-logo-full.png
 │   ├── components
 │   │   └── Common
+│   │       ├── Layout.jsx
 │   │       ├── PageLoader.jsx
 │   │       └── PrivateRoute.jsx
 │   ├── constants
@@ -25,44 +26,34 @@
 │   │   └── UserContext.jsx
 │   ├── features
 │   │   ├── auth
-│   │   │   ├── components
-│   │   │   │   ├── ForgotPassword.jsx
-│   │   │   │   ├── Login.jsx
-│   │   │   │   └── Signup.jsx
-│   │   │   └── services
-│   │   │       └── authService.js
+│   │   │   ├── ForgotPassword.jsx
+│   │   │   ├── Login.jsx
+│   │   │   └── Signup.jsx
 │   │   ├── books
-│   │   │   ├── components
-│   │   │   │   ├── AddBookModal.jsx
-│   │   │   │   ├── BookCard.jsx
-│   │   │   │   ├── BookCarouselSection.jsx
-│   │   │   │   └── BookModal.jsx
-│   │   │   ├── pages
-│   │   │   │   └── BrowseBooks.jsx
-│   │   │   └── services
-│   │   │       └── bookService.js
+│   │   │   ├── BrowseBooks.jsx
+│   │   │   └── components
+│   │   │       ├── AddBookModal.jsx
+│   │   │       ├── BookCard.jsx
+│   │   │       └── BookModal.jsx
 │   │   ├── dashboard
 │   │   │   ├── components
+│   │   │   │   ├── BookCarouselSection.jsx
 │   │   │   │   ├── FeedbackSection.jsx
 │   │   │   │   └── MyBooksSection.jsx
-│   │   │   └── pages
-│   │   │       └── Dashboard.jsx
-│   │   └── feedback
-│   │       ├── pages
-│   │       │   └── Feedback.jsx
-│   │       └── services
-│   │           └── feedbackService.js
+│   │   │   └── Dashboard.jsx
+│   │   ├── feedback
+│   │   │   └── Feedback.jsx
+│   │   └── pageNotFound
+│   │       └── NotFound.jsx
 │   ├── hooks
 │   │   ├── useDebounce.js
 │   │   ├── useSession.js
 │   │   └── useSessionTracker.jsx
-│   ├── index.css
-│   ├── layouts
-│   │   └── Layout.jsx
 │   ├── main.jsx
-│   ├── pages
-│   │   └── NotFound.jsx
 │   ├── services
+│   │   ├── authService.js
+│   │   ├── bookService.js
+│   │   ├── feedbackService.js
 │   │   ├── supabaseClient.js
 │   │   └── userService.js
 │   └── theme
@@ -71,4 +62,4 @@
 ├── vercel.json
 └── vite.config.js
 
-29 directories, 43 files
+21 directories, 42 files

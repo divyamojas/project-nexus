@@ -1,6 +1,6 @@
 // /src/services/userService.js
 
-import { supabase } from '@/services/supabaseClient';
+import { supabase } from './supabaseClient';
 
 // =========================
 // Book Management

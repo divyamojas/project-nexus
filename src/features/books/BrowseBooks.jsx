@@ -17,12 +17,13 @@ import {
   Switch,
   Divider,
 } from '@mui/material';
-import BookCard from '@features/books/components/BookCard';
-import { useDebounce } from '@/hooks/useDebounce';
-import { toggleSaveBook, requestBook } from '@features/books/services/bookService';
-import BookModal from '@features/books/components/BookModal';
-import { useAuth } from '@/contexts/AuthContext';
-import { useBookContext } from '@/contexts/BookContext';
+import { useDebounce } from '../../hooks/useDebounce';
+import BookModal from './components/BookModal';
+import BookCard from './components/BookCard';
+
+import { toggleSaveBook, requestBook } from '../../services/bookService';
+import { useAuth } from '../../contexts/AuthContext';
+import { useBookContext } from '../../contexts/BookContext';
 
 export default function BrowseBooks() {
   const [searchTerm, setSearchTerm] = useState('');

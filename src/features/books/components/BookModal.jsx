@@ -31,8 +31,8 @@ import {
   toggleSaveBook,
   requestBookReturn,
   updateRequestStatus,
-} from '@features/books/services/bookService';
-import { useBookContext } from '@/contexts/BookContext';
+} from '../../../services/bookService';
+import { useBookContext } from '../../../contexts/BookContext';
 
 export default function BookModal({
   open,

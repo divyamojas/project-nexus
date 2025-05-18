@@ -60,33 +60,72 @@ At its heart, Leaflet celebrates slower living and story-driven connection.
 
 ---
 
-## 📁 Project Structure
+## 📁 Folder Structure
 
-```
+Here’s a quick breakdown of how this spaceship is organized (cause let’s be real — clean code = clean vibes ✨):
+
+```txt
 .
-├── public/                  # Static assets
-├── src/                    # Source code
-│   ├── api/                # Server APIs (optional)
-│   ├── assets/             # Images, logos, etc.
-│   ├── components/         # Reusable UI components
-│   ├── constants/          # App-wide constants
-│   ├── contexts/           # Auth, User, Book contexts
-│   ├── features/           # Domain-specific modules (auth, books, feedback)
-│   ├── hooks/              # Custom React hooks
-│   ├── layouts/            # App-wide layouts (Header, Footer)
-│   ├── pages/              # Top-level route pages
-│   ├── services/           # Supabase clients, external services
-│   ├── theme/              # Global theme and styling
-│   ├── App.jsx             # Main App component
-│   ├── main.jsx            # App bootstrap entry point
-│   └── index.css           # Global CSS
-├── .env                    # Environment variables
-├── eslint.config.js        # Linting rules
-├── vite.config.js          # Vite config
-└── README.md               # Project guide
+├── eslint.config.js           # Linter rules to keep the code ✨
+├── index.html                 # Root HTML file
+├── package.json               # Dependencies & scripts
+├── package-lock.json          # Lockfile
+├── vite.config.js             # Vite power-up config
+├── vercel.json                # Vercel deployment settings
+├── structure.txt              # Raw file tree (if needed)
+├── public/                    # Static assets like favicons and preview
+│   ├── favicon.png
+│   └── leaflet-preview.png
+├── src/                       # Our app lives here 💻
+│   ├── api/                   # Optional server-facing API helpers
+│   ├── assets/                # Images, logos, static media
+│   │   └── images/
+│   │       └── leaflet-logo-full.png
+│   ├── components/            # Reusable components
+│   │   └── Common/
+│   │       ├── Layout.jsx
+│   │       ├── PageLoader.jsx
+│   │       └── PrivateRoute.jsx
+│   ├── constants/             # Global constants and enums
+│   │   └── constants.jsx
+│   ├── contexts/              # Global state using React Context API
+│   │   ├── AuthContext.jsx
+│   │   ├── BookContext.jsx
+│   │   └── UserContext.jsx
+│   ├── features/              # Feature-based modules (modular FTW)
+│   │   ├── auth/              # Login, signup, forgot password
+│   │   ├── books/             # Browse, add, view book modals
+│   │   │   └── components/
+│   │   │       ├── AddBookModal.jsx
+│   │   │       ├── BookCard.jsx
+│   │   │       └── BookModal.jsx
+│   │   ├── dashboard/         # Dashboard views and widgets
+│   │   │   ├── components/
+│   │   │   │   ├── BookCarouselSection.jsx
+│   │   │   │   ├── FeedbackSection.jsx
+│   │   │   │   └── MyBooksSection.jsx
+│   │   │   └── Dashboard.jsx
+│   │   ├── feedback/          # Feedback page
+│   │   │   └── Feedback.jsx
+│   │   └── pageNotFound/      # 404 Not Found route
+│   │       └── NotFound.jsx
+│   ├── hooks/                 # Custom React hooks
+│   │   ├── useDebounce.js
+│   │   ├── useSession.js
+│   │   └── useSessionTracker.jsx
+│   ├── services/              # Supabase + external services logic
+│   │   ├── authService.js
+│   │   ├── bookService.js
+│   │   ├── feedbackService.js
+│   │   ├── supabaseClient.js
+│   │   └── userService.js
+│   ├── theme/                 # Theming & palette
+│   │   └── theme.js
+│   ├── App.jsx                # Main component
+│   └── main.jsx               # App entry point
 ```
 
-✅ Well-modularized and scalable for team collaboration.
+Pretty neat, right? All laid out for scale and fun to code on.
 
 ---
 
@@ -146,8 +185,8 @@ yarn dev
 
 ## 🤝 Contributions
 
-We're currently in our MVP development phase. Contributions are welcome post-beta launch.
-If you’re passionate about books, design systems, or thoughtful community tools — we'd love to hear from you.
+We’re currently in our MVP development phase. Contributions are welcome post-beta launch.
+If you’re passionate about books, design systems, or thoughtful community tools — we’d love to hear from you.
 
 ---
 

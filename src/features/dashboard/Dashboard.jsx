@@ -1,33 +1,32 @@
 // src/pages/Dashboard.jsx
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Container, Typography, Paper } from '@mui/material';
+import { ArchiveOutlined, CloseOutlined } from '@mui/icons-material';
 
-import AddBookModal from '@features/books/components/AddBookModal';
-import BookModal from '@features/books/components/BookModal';
-import BookCarouselSection from '@features/books/components/BookCarouselSection';
-import MyBooksSection from '@features/dashboard/components/MyBooksSection';
-import FeedbackSection from '@features/dashboard/components/FeedbackSection';
+import AddBookModal from '../books/components/AddBookModal';
+import BookModal from '../books/components/BookModal';
+import BookCarouselSection from './components/BookCarouselSection';
+import MyBooksSection from '../dashboard/components/MyBooksSection';
+import FeedbackSection from '../dashboard/components/FeedbackSection';
 
-import { DASHBOARD_SECTIONS } from '@/constants/constants';
 import {
   getCurrentUserFirstName,
   getMyBooks,
   getRequests,
   getTransfers,
   getUserReviews,
-} from '@/services/userService';
+} from '../../services/userService';
 import {
   getSavedBooks,
   toggleSaveBook,
   requestBookReturn,
   updateRequestStatus,
-} from '@features/books/services/bookService';
-import { useBookContext } from '@/contexts/BookContext';
+} from '../../services/bookService';
 
-import ArchiveOutlinedIcon from '@mui/icons-material/Inventory2Outlined';
-import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
-import { useUser } from '@/contexts/UserContext';
+import { DASHBOARD_SECTIONS } from '../../constants/constants';
+import { useUser } from '../../contexts/UserContext';
+import { useBookContext } from '../../contexts/BookContext';
 
 export default function Dashboard() {
   const { user } = useUser();
@@ -149,8 +148,8 @@ export default function Dashboard() {
           status={selectedBook.status}
           onArchive={() => handleArchiveBook(selectedBook)}
           onDelete={() => handleDeleteBook(selectedBook)}
-          archiveIcon={<ArchiveOutlinedIcon />}
-          deleteIcon={<CloseOutlinedIcon />}
+          archiveIcon={<ArchiveOutlined />}
+          deleteIcon={<CloseOutlined />}
           onActionComplete={fetchData}
         />
       )}

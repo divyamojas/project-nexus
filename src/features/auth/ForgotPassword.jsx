@@ -1,6 +1,7 @@
 // src/pages/auth/ForgotPassword.jsx
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import {
   Container,
   Typography,
@@ -12,9 +13,8 @@ import {
   CircularProgress,
   Link,
 } from '@mui/material';
-import { useAuth } from '@contexts/AuthContext';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import { processResetPassword } from '@features/auth/services/authService';
+import { useAuth } from '../../contexts/AuthContext';
+import { processResetPassword } from '../../services/authService';
 
 export default function ForgotPassword() {
   const { resetPassword, isAuthenticated } = useAuth();

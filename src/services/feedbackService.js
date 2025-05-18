@@ -1,6 +1,6 @@
 // src/services/feedbackService.js
 
-import { supabase } from '@/services/supabaseClient';
+import { supabase } from './supabaseClient';
 
 export const fetchUserEmail = async () => {
   const { data } = await supabase.auth.getUser();

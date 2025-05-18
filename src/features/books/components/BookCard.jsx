@@ -14,7 +14,7 @@ import {
   Grow,
   Collapse,
 } from '@mui/material';
-import { actionConfigs, statusColor, fallbackGradients } from '@/constants/constants';
+import { actionConfigs, statusColor, fallbackGradients } from '../../../constants/constants';
 
 export default function BookCard({
   book,
