@@ -12,24 +12,38 @@ export const getMyBooks = async () => {
 
   const { data, error } = await supabase
     .from('books')
-    .select('id, condition, archived, user_id, books_catalog(title, author)')
+    .select(
+      `
+      id,
+      status,
+      condition,
+      created_at,
+      archived,
+      user_id,
+      books_catalog (
+        id,
+        title,
+        author,
+        cover_url
+      )
+    `,
+    )
     .eq('user_id', userData.user.id);
 
-  if (error) console.error('getMyBooks error:', error);
-  return data || [];
-};
+  if (error) {
+    console.error('getMyBooks error:', error);
+    return [];
+  }
 
-export const getSavedBooks = async () => {
-  const { data: userData, error: userError } = await supabase.auth.getUser();
-  if (userError || !userData?.user?.id) return [];
-
-  const { data, error } = await supabase
-    .from('saved_books')
-    .select('catalog_id, books_catalog!fk_saved_books_catalog(title, author)')
-    .eq('user_id', userData.user.id);
-
-  if (error) console.error('getSavedBooks error:', error);
-  return data || [];
+  return data.map((book) => ({
+    id: book.id,
+    user_id: book.user_id,
+    status: book.status,
+    condition: book.condition,
+    created_at: book.created_at,
+    catalog: book.books_catalog,
+    is_saved: false,
+  }));
 };
 
 // =========================
@@ -106,19 +120,28 @@ export const getUserReviews = async () => {
 };
 
 export const getCurrentUserFirstName = async () => {
-  const { data: userData, error: userError } = await supabase.auth.getUser();
-  if (userError || !userData?.user?.id) return null;
+  try {
+    const { data: userData, error: userError } = await supabase.auth.getUser();
 
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('first_name')
-    .eq('id', userData.user.id)
-    .single();
+    // console.log("userData:", userData);
+    // console.log("userError:", userError);
 
-  if (error) {
-    console.error('Error fetching user first_name:', error);
+    if (userError || !userData?.user?.id) return null;
+    // console.log(userData.user.id)
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('first_name')
+      .eq('id', userData.user.id)
+      .single();
+
+    if (error) {
+      console.error('Error fetching user first_name:', error);
+      return null;
+    }
+
+    return data?.first_name || null;
+  } catch (err) {
+    console.error('Unexpected error in getCurrentUserFirstName:', err);
     return null;
   }
-
-  return data?.first_name || null;
 };

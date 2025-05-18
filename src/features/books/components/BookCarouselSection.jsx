@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { Box, Typography, Divider, Stack } from '@mui/material';
-import PropTypes from 'prop-types';
 import BookCard from './BookCard';
 
 export default function BookCarouselSection({
@@ -12,6 +11,13 @@ export default function BookCarouselSection({
   onBookClick,
   onDelete,
   onArchive,
+  onToggleSave,
+  onAccept,
+  onReject,
+  onCancelRequest,
+  onRequestReturn,
+  context = '',
+  editable = true,
 }) {
   return (
     <Box my={5} p={3} bgcolor="#fefefe" borderRadius={3}>
@@ -33,6 +39,13 @@ export default function BookCarouselSection({
                 onClick={() => onBookClick(book)}
                 onDelete={onDelete}
                 onArchive={onArchive}
+                onToggleSave={onToggleSave}
+                onAccept={onAccept}
+                onReject={onReject}
+                onCancelRequest={onCancelRequest}
+                onRequestReturn={onRequestReturn}
+                context={context}
+                editable={editable}
               />
             </Box>
           ))}
@@ -41,12 +54,3 @@ export default function BookCarouselSection({
     </Box>
   );
 }
-
-BookCarouselSection.propTypes = {
-  title: PropTypes.string.isRequired,
-  emoji: PropTypes.string,
-  books: PropTypes.array.isRequired,
-  onBookClick: PropTypes.func.isRequired,
-  onDelete: PropTypes.func,
-  onArchive: PropTypes.func,
-};

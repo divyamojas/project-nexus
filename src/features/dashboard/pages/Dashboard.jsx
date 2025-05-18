@@ -9,12 +9,11 @@ import BookCarouselSection from '@features/books/components/BookCarouselSection'
 import MyBooksSection from '@features/dashboard/components/MyBooksSection';
 import FeedbackSection from '@features/dashboard/components/FeedbackSection';
 
-import { getDashboardSections } from '@/constants/dashboardBookSections';
+import { DASHBOARD_SECTIONS } from '@/constants/constants';
 import {
   getCurrentUserFirstName,
   getMyBooks,
   getRequests,
-  getSavedBooks,
   getTransfers,
   getUserReviews,
 } from '@/services/userService';
@@ -23,7 +22,14 @@ import {
   handleArchiveBookWithRefresh,
   handleDeleteBookWithRefresh,
   categorizeBooks,
+  getSavedBooks,
+  toggleSaveBook,
+  requestBookReturn,
+  updateRequestStatus,
 } from '@features/books/services/bookService';
+
+import ArchiveOutlinedIcon from '@mui/icons-material/Inventory2Outlined';
+import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 
 export default function Dashboard() {
   const [myBooks, setMyBooks] = useState([]);
@@ -52,11 +58,12 @@ export default function Dashboard() {
     setTransfers(trf);
     setSavedBooks(saved);
     setReviews(rev);
-    setUserFirstName(name || 'friend');
+    setUserFirstName(name);
   };
 
   useEffect(() => {
     fetchData();
+
     const channel = subscribeToBooksChanges(() => fetchData());
     return () => channel.unsubscribe();
   }, []);
@@ -65,15 +72,36 @@ export default function Dashboard() {
   const handleCloseModal = () => setSelectedBook(null);
   const handleDeleteBook = (book) => handleDeleteBookWithRefresh(book, fetchData);
   const handleArchiveBook = (book) => handleArchiveBookWithRefresh(book, fetchData);
+  const handleToggleSave = async (book) => {
+    console.log(book, book.id, !book.is_saved);
+    await toggleSaveBook(book.id, false, null);
+    fetchData();
+  };
+  const handleRequestReturn = async (book) => {
+    await requestBookReturn(book.id);
+    fetchData();
+  };
+  const handleAcceptRequest = async (book) => {
+    await updateRequestStatus(book.request_id, 'accepted');
+    fetchData();
+  };
+  const handleRejectRequest = async (book) => {
+    await updateRequestStatus(book.request_id, 'rejected');
+    fetchData();
+  };
+  const handleCancelRequest = async (book) => {
+    await updateRequestStatus(book.request_id, 'cancelled');
+    fetchData();
+  };
 
   const { availableBooks, lentBooks, archivedBooks } = categorizeBooks(myBooks);
-  const bookSections = getDashboardSections({ lentBooks, savedBooks, requests, transfers });
+  const bookSections = DASHBOARD_SECTIONS({ lentBooks, savedBooks, requests, transfers });
 
   return (
     <Container maxWidth="lg" sx={{ py: 5 }}>
       <Paper elevation={2} sx={{ p: 4, borderRadius: 4, bgcolor: '#fdfaf6' }}>
         <Typography variant="h4" fontWeight="medium" gutterBottom sx={{ color: '#5d4037' }}>
-          Hi {userFirstName}, welcome to your dashboard 📘
+          Hi {userFirstName || 'Friend'}, welcome to your dashboard 📘
         </Typography>
 
         <Typography variant="body1" sx={{ color: '#6d4c41', mb: 3 }}>
@@ -92,15 +120,22 @@ export default function Dashboard() {
           onArchive={handleArchiveBook}
         />
 
-        {bookSections.map(({ title, emoji, books }) => (
+        {bookSections.map(({ title, emoji, books, context }) => (
           <BookCarouselSection
             key={title}
             title={title}
             emoji={emoji}
             books={books}
+            context={context}
+            editable={true}
             onBookClick={handleBookClick}
             onDelete={handleDeleteBook}
             onArchive={handleArchiveBook}
+            onToggleSave={handleToggleSave}
+            onRequestReturn={handleRequestReturn}
+            onAccept={handleAcceptRequest}
+            onReject={handleRejectRequest}
+            onCancelRequest={handleCancelRequest}
           />
         ))}
 
@@ -114,9 +149,11 @@ export default function Dashboard() {
           open={!!selectedBook}
           onClose={handleCloseModal}
           book={selectedBook}
-          status={selectedBook.status} // ✅ Passing status explicitly
-          onArchive={() => handleArchiveBook(selectedBook)} // ✅ Pass service handler
-          onDelete={() => handleDeleteBook(selectedBook)} // ✅ Pass service handler
+          status={selectedBook.status}
+          onArchive={() => handleArchiveBook(selectedBook)}
+          onDelete={() => handleDeleteBook(selectedBook)}
+          archiveIcon={<ArchiveOutlinedIcon />}
+          deleteIcon={<CloseOutlinedIcon />}
           onActionComplete={fetchData}
         />
       )}

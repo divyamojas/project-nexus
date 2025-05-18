@@ -15,10 +15,16 @@ import {
   Stack,
   FormControlLabel,
   Switch,
+  Divider,
 } from '@mui/material';
 import BookCard from '@features/books/components/BookCard';
 import { useDebounce } from '@/hooks/useDebounce';
-import { getAvailableBooks, filterAndSortBooks } from '@features/books/services/bookService';
+import {
+  getAvailableBooks,
+  filterAndSortBooks,
+  toggleSaveBook,
+  requestBook,
+} from '@features/books/services/bookService';
 import BookModal from '@features/books/components/BookModal';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -34,18 +40,23 @@ export default function BrowseBooks() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { user } = useAuth();
 
+  const fetchBooks = async () => {
+    setLoading(true);
+    try {
+      const data = await getAvailableBooks();
+      const updated = data.map((book) => ({
+        ...book,
+        is_saved: book?.saved_books?.length > 0 || false,
+      }));
+      setBooks(updated);
+    } catch (e) {
+      console.error('Error fetching books:', e);
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
-    (async () => {
-      setLoading(true);
-      try {
-        const data = await getAvailableBooks();
-        setBooks(data);
-        console.log('books data', data);
-      } catch (e) {
-        console.error('Error fetching books:', e);
-      }
-      setLoading(false);
-    })();
+    fetchBooks();
   }, []);
 
   const filteredBooks = filterAndSortBooks(books, {
@@ -53,10 +64,11 @@ export default function BrowseBooks() {
     statusFilter: filter,
     sortBy,
     userId: user?.id,
-    includeOwn: showOwnBooks,
+    includeOwn: true, // always include own books in data
   });
 
-  console.log(filteredBooks);
+  const myBooks = filteredBooks.filter((book) => book.user_id === user?.id);
+  const otherBooks = filteredBooks.filter((book) => book.user_id !== user?.id);
 
   const handleCardClick = (book) => {
     setSelectedBook(book);
@@ -66,6 +78,25 @@ export default function BrowseBooks() {
   const closeModal = () => {
     setSelectedBook(null);
     setIsModalOpen(false);
+  };
+
+  const handleToggleSave = async (book) => {
+    try {
+      const shouldSave = !book.is_saved;
+      await toggleSaveBook(book.id, shouldSave, book.catalog.id);
+      fetchBooks();
+    } catch (err) {
+      console.error('Failed to toggle save:', err);
+    }
+  };
+
+  const handleRequestBook = async (book) => {
+    try {
+      await requestBook(book.id, 'Hi! I would like to borrow this book.');
+      alert('Borrow request sent!');
+    } catch (err) {
+      console.error('Failed to request book:', err);
+    }
   };
 
   return (
@@ -109,29 +140,66 @@ export default function BrowseBooks() {
               color="primary"
             />
           }
-          label="Show my books"
+          label="Show My Books"
         />
       </Stack>
 
-      <Box>
-        {loading ? (
-          <Typography>Loading books...</Typography>
-        ) : filteredBooks.length === 0 ? (
-          <Typography>No books match your search or filter.</Typography>
-        ) : (
+      {loading ? (
+        <Typography>Loading books...</Typography>
+      ) : filteredBooks.length === 0 ? (
+        <Typography>No books match your search or filter.</Typography>
+      ) : (
+        <>
+          {showOwnBooks && myBooks.length > 0 && (
+            <>
+              <Typography variant="h6" fontWeight={600} gutterBottom>
+                🧾 My Books
+              </Typography>
+              <Grid container spacing={2} mb={4}>
+                {myBooks.map((book) => (
+                  <Grid item xs={12} sm={6} md={4} key={book.id}>
+                    <Fade in timeout={400}>
+                      <Box>
+                        <BookCard
+                          book={book}
+                          editable={true}
+                          isSaved={false} // hide bookmark
+                          onClick={() => handleCardClick(book)}
+                          context="myBooks"
+                        />
+                      </Box>
+                    </Fade>
+                  </Grid>
+                ))}
+              </Grid>
+              <Divider sx={{ my: 4 }} />
+            </>
+          )}
+
+          <Typography variant="h6" fontWeight={600} gutterBottom>
+            📖 Available Books
+          </Typography>
           <Grid container spacing={2}>
-            {filteredBooks.map((book) => (
+            {otherBooks.map((book) => (
               <Grid item xs={12} sm={6} md={4} key={book.id}>
                 <Fade in timeout={400}>
                   <Box>
-                    <BookCard book={book} editable={false} onClick={() => handleCardClick(book)} />
+                    <BookCard
+                      book={book}
+                      editable={true}
+                      isSaved={book.is_saved}
+                      onClick={() => handleCardClick(book)}
+                      context="browse"
+                      onToggleSave={handleToggleSave}
+                      onRequest={handleRequestBook}
+                    />
                   </Box>
                 </Fade>
               </Grid>
             ))}
           </Grid>
-        )}
-      </Box>
+        </>
+      )}
 
       {selectedBook && (
         <BookModal open={isModalOpen} onClose={closeModal} book={selectedBook} context="browse" />

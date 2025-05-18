@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState } from 'react';
 import * as authService from '@/features/auth/services/authService';
-import { ALLOWED_EMAIL_DOMAINS, DOMAIN_ERRORS } from '@/constants/authConstants';
+import { ALLOWED_EMAIL_DOMAINS, DOMAIN_ERRORS } from '@/constants/constants';
 import { useSessionTracker } from '@/hooks/useSessionTracker';
 
 // Create the context
@@ -30,7 +30,7 @@ const getAuthContextValue = (user, signup, login, logout, resetPassword, loading
 });
 
 // Auth Provider component
-// eslint-disable-next-line react/prop-types
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);

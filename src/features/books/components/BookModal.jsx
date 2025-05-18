@@ -1,4 +1,4 @@
-// src/components/books/BookModal.jsx
+// ./src/components/BookModal.jsx
 
 import React, { useEffect, useState } from 'react';
 import {
@@ -6,279 +6,198 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Button,
   Typography,
   IconButton,
-  Button,
-  Divider,
-  Box,
-  Chip,
   Stack,
-  Paper,
+  Box,
   Tooltip,
-  Avatar,
+  Divider,
+  Chip,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ArchiveIcon from '@mui/icons-material/Archive';
+import ArchiveIcon from '@mui/icons-material/Inventory2Outlined';
 import UnarchiveIcon from '@mui/icons-material/Unarchive';
-import { motion, AnimatePresence } from 'framer-motion';
-import PropTypes from 'prop-types';
+import DeleteIcon from '@mui/icons-material/CloseOutlined';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
+import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
+import ReplayIcon from '@mui/icons-material/Replay';
+import CancelIcon from '@mui/icons-material/CancelOutlined';
+import CheckIcon from '@mui/icons-material/CheckCircleOutline';
+import ClearIcon from '@mui/icons-material/HighlightOff';
+
 import {
-  deleteBook,
-  archiveBook,
-  requestBorrowBook,
-  getRequestsForBook,
+  toggleSaveBook,
+  requestBookReturn,
   updateRequestStatus,
+  handleArchiveBookWithRefresh,
+  handleDeleteBookWithRefresh,
 } from '@features/books/services/bookService';
-
-import { useAuth } from '@/contexts/AuthContext';
-
-const statusColor = {
-  available: 'success',
-  scheduled: 'warning',
-  lent: 'default',
-};
 
 export default function BookModal({
   open,
   onClose,
   book,
-  context = 'dashboard',
-  onActionComplete,
+  context = '',
+  onActionComplete = () => {},
 }) {
-  const catalog = book.books_catalog || book.catalog || {};
-  const { title, author, description, cover_image_url } = catalog;
-  const { condition, status, id: bookId, owner_id, archived } = book;
-  const { user } = useAuth();
-
-  const isOwnedByUser = user?.id === owner_id;
-  const [requests, setRequests] = useState([]);
-
-  const fetchRequests = async () => {
-    try {
-      const data = await getRequestsForBook(bookId);
-      setRequests(data);
-    } catch (error) {
-      console.error('Failed to load requests:', error);
-    }
-  };
+  const [isSavedState, setIsSavedState] = useState(false);
 
   useEffect(() => {
-    if (open && isOwnedByUser && context === 'dashboard') {
-      fetchRequests();
+    if (book) {
+      setIsSavedState(book?.is_saved ?? false);
     }
-  }, [open, isOwnedByUser, context]);
+  }, [book]);
 
-  const handleRequestBook = async () => {
-    try {
-      await requestBorrowBook(bookId, user?.id || null, false);
-      alert('Borrow request submitted successfully.');
-      onClose();
-    } catch (error) {
-      console.error('Request failed:', error);
-      alert('Something went wrong while submitting your request.');
-    }
+  if (!book) return null;
+  const { catalog = {} } = book;
+  const { title, author, cover_url } = catalog;
+
+  const handleToggleSave = async () => {
+    const shouldSave = !isSavedState;
+    setIsSavedState(shouldSave);
+    await toggleSaveBook(book.id, shouldSave, catalog.id);
+    onActionComplete();
   };
 
-  const handleStatusUpdate = async (requestId, newStatus) => {
-    try {
-      await updateRequestStatus(requestId, newStatus);
-      fetchRequests();
-    } catch (error) {
-      console.error('Failed to update request:', error);
+  const handleRequestReturn = async () => {
+    await requestBookReturn(book.id);
+    onActionComplete();
+  };
+
+  const handleAcceptRequest = async () => {
+    await updateRequestStatus(book.request_id, 'accepted');
+    onActionComplete();
+  };
+
+  const handleRejectRequest = async () => {
+    await updateRequestStatus(book.request_id, 'rejected');
+    onActionComplete();
+  };
+
+  const handleCancelRequest = async () => {
+    await updateRequestStatus(book.request_id, 'cancelled');
+    onActionComplete();
+  };
+
+  const handleDelete = () => handleDeleteBookWithRefresh(book, onActionComplete);
+  const handleArchive = () => handleArchiveBookWithRefresh(book, onActionComplete);
+
+  const renderActions = () => {
+    if (!book) return null;
+
+    switch (context) {
+      case 'saved':
+      case 'browse':
+        return (
+          <Tooltip title={isSavedState ? 'Unsave' : 'Save'}>
+            <IconButton onClick={handleToggleSave}>
+              {isSavedState ? <BookmarkIcon /> : <BookmarkBorderIcon />}
+            </IconButton>
+          </Tooltip>
+        );
+      case 'myBooks':
+      case 'archived':
+        return (
+          <>
+            <Tooltip title={book.archived ? 'Unarchive' : 'Archive'}>
+              <IconButton onClick={handleArchive}>
+                {book.archived ? <UnarchiveIcon /> : <ArchiveIcon />}
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Delete">
+              <IconButton onClick={handleDelete}>
+                <DeleteIcon />
+              </IconButton>
+            </Tooltip>
+          </>
+        );
+      case 'lent':
+        return (
+          <Tooltip title="Request Book Return">
+            <IconButton onClick={handleRequestReturn}>
+              <ReplayIcon />
+            </IconButton>
+          </Tooltip>
+        );
+      case 'incoming':
+        return (
+          <>
+            <Tooltip title="Accept Request">
+              <IconButton onClick={handleAcceptRequest}>
+                <CheckIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Reject Request">
+              <IconButton onClick={handleRejectRequest}>
+                <ClearIcon />
+              </IconButton>
+            </Tooltip>
+          </>
+        );
+      case 'outgoing':
+        return (
+          <Tooltip title="Cancel Request">
+            <IconButton onClick={handleCancelRequest}>
+              <CancelIcon />
+            </IconButton>
+          </Tooltip>
+        );
+      default:
+        return null;
     }
-  };
-
-  const handleDelete = async () => {
-    await deleteBook(bookId);
-    if (onActionComplete) onActionComplete();
-    onClose();
-  };
-
-  const handleArchive = async () => {
-    await archiveBook(bookId, !archived);
-    if (onActionComplete) onActionComplete();
-    onClose();
   };
 
   return (
-    <AnimatePresence>
-      {open && (
-        <Dialog
-          open={open}
-          onClose={onClose}
-          fullWidth
-          maxWidth="sm"
-          PaperProps={{ sx: { borderRadius: 4, overflow: 'hidden' } }}
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="sm"
+      PaperProps={{ sx: { borderRadius: 4, bgcolor: '#fffdf9' } }}
+    >
+      <DialogTitle sx={{ fontWeight: 600, fontSize: '1.5rem', color: '#4e342e' }}>
+        {title || 'Untitled'}
+        <IconButton
+          aria-label="close"
+          onClick={onClose}
+          sx={{ position: 'absolute', right: 12, top: 12, color: '#4e342e' }}
         >
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 30 }}
-            transition={{ duration: 0.3 }}
-          >
-            <DialogTitle
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
+      <DialogContent dividers sx={{ p: 3 }}>
+        <Stack spacing={2} alignItems="center">
+          {cover_url && (
+            <Box
+              component="img"
+              src={cover_url}
+              alt={title}
               sx={{
-                fontWeight: 600,
-                fontSize: '1.5rem',
-                position: 'relative',
-                px: 3,
-                pt: 2,
-                pb: 1,
+                width: '60%',
+                maxHeight: 300,
+                objectFit: 'cover',
+                borderRadius: 3,
+                boxShadow: 2,
               }}
-            >
-              {title}
-              <IconButton onClick={onClose} sx={{ position: 'absolute', right: 12, top: 12 }}>
-                <CloseIcon />
-              </IconButton>
-            </DialogTitle>
-
-            <DialogContent dividers sx={{ px: 3, pb: 3 }}>
-              {cover_image_url && (
-                <Paper elevation={1} sx={{ mb: 3, borderRadius: 3, overflow: 'hidden' }}>
-                  <img
-                    src={cover_image_url}
-                    alt={title}
-                    style={{ width: '100%', height: 'auto', maxHeight: 280, objectFit: 'cover' }}
-                  />
-                </Paper>
-              )}
-
-              <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-                <strong>Author:</strong> {author}
-              </Typography>
-              <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
-                {description || 'No description available.'}
-              </Typography>
-
-              <Divider sx={{ my: 3 }} />
-
-              <Stack direction="row" spacing={1} mb={2}>
-                <Chip label={`Condition: ${condition}`} color="default" />
-                <Chip label={`Status: ${status}`} color={statusColor[status] || 'default'} />
-              </Stack>
-
-              {context === 'browse' && !isOwnedByUser && (
-                <Box mb={3}>
-                  <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-                    Interested in borrowing?
-                  </Typography>
-                  <Button variant="contained" fullWidth onClick={handleRequestBook}>
-                    Request This Book
-                  </Button>
-                </Box>
-              )}
-
-              {isOwnedByUser && (
-                <Stack direction="row" spacing={2} mb={2}>
-                  <Tooltip title={archived ? 'Unarchive' : 'Archive'}>
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      color="warning"
-                      onClick={handleArchive}
-                      startIcon={archived ? <UnarchiveIcon /> : <ArchiveIcon />}
-                    >
-                      {archived ? 'Unarchive' : 'Archive'}
-                    </Button>
-                  </Tooltip>
-                  <Tooltip title="Delete">
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      color="error"
-                      onClick={handleDelete}
-                      startIcon={<DeleteIcon />}
-                    >
-                      Delete
-                    </Button>
-                  </Tooltip>
-                </Stack>
-              )}
-
-              {context === 'dashboard' && isOwnedByUser && (
-                <Box>
-                  <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-                    Borrow Requests
-                  </Typography>
-                  {requests.length === 0 ? (
-                    <Typography variant="body2" color="text.secondary">
-                      No requests yet.
-                    </Typography>
-                  ) : (
-                    <Stack spacing={2} mt={1}>
-                      {requests.map((req) => (
-                        <Box key={req.id} p={2} border="1px solid #eee" borderRadius={2}>
-                          <Stack direction="row" alignItems="center" spacing={1} mb={0.5}>
-                            <Avatar sx={{ width: 24, height: 24, fontSize: 12 }}>
-                              {req.is_anonymous ? '?' : req.profiles?.first_name?.[0] || 'U'}
-                            </Avatar>
-                            <Typography variant="body2">
-                              {req.is_anonymous
-                                ? 'Anonymous User'
-                                : `${`${req.profiles?.first_name || ''} ${req.profiles?.last_name || ''}`.trim() || 'User'} (${req.profiles?.email || 'no email'})`}
-                            </Typography>
-                          </Stack>
-                          <Typography variant="caption" color="text.secondary">
-                            Requested on {new Date(req.requested_at).toLocaleString()}
-                          </Typography>
-                          <Stack direction="row" spacing={1} mt={1}>
-                            <Chip
-                              label={req.status}
-                              color={
-                                req.status === 'pending'
-                                  ? 'warning'
-                                  : req.status === 'approved'
-                                    ? 'success'
-                                    : req.status === 'rejected'
-                                      ? 'error'
-                                      : 'default'
-                              }
-                            />
-                            {req.status === 'pending' && (
-                              <>
-                                <Button
-                                  size="small"
-                                  variant="outlined"
-                                  onClick={() => handleStatusUpdate(req.id, 'approved')}
-                                >
-                                  Approve
-                                </Button>
-                                <Button
-                                  size="small"
-                                  variant="outlined"
-                                  color="error"
-                                  onClick={() => handleStatusUpdate(req.id, 'rejected')}
-                                >
-                                  Reject
-                                </Button>
-                              </>
-                            )}
-                          </Stack>
-                        </Box>
-                      ))}
-                    </Stack>
-                  )}
-                </Box>
-              )}
-            </DialogContent>
-
-            <DialogActions sx={{ px: 3, py: 2 }}>
-              <Button onClick={onClose} variant="text" color="primary">
-                Close
-              </Button>
-            </DialogActions>
-          </motion.div>
-        </Dialog>
-      )}
-    </AnimatePresence>
+            />
+          )}
+          <Typography variant="subtitle1" fontWeight={500} color="text.secondary">
+            {author || 'Unknown Author'}
+          </Typography>
+          <Divider sx={{ width: '100%' }} />
+          <Stack direction="row" spacing={2}>
+            <Chip label={`Status: ${book.status}`} variant="outlined" color="primary" />
+            <Chip label={`Condition: ${book.condition}`} variant="outlined" color="secondary" />
+          </Stack>
+        </Stack>
+      </DialogContent>
+      <DialogActions sx={{ px: 3, pb: 2, justifyContent: 'space-between' }}>
+        <Typography variant="body2" color="text.secondary">
+          Choose an action:
+        </Typography>
+        <Box>{renderActions()}</Box>
+      </DialogActions>
+    </Dialog>
   );
 }
-
-BookModal.propTypes = {
-  onActionComplete: PropTypes.func,
-  open: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
-  book: PropTypes.object.isRequired,
-  context: PropTypes.string,
-};

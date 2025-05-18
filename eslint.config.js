@@ -7,18 +7,25 @@ import { defineConfig } from 'eslint/config';
 export default defineConfig([
   {
     files: ['**/*.{js,mjs,cjs,jsx}'],
-    plugins: { js },
-    extends: ['js/recommended'],
-  },
-  {
-    files: ['**/*.{js,mjs,cjs,jsx}'],
-    languageOptions: { globals: globals.browser },
-  },
-  {
-    ...pluginReact.configs.flat.recommended,
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: globals.browser,
+      parserOptions: {
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
+    },
+    plugins: {
+      js,
+      react: pluginReact,
+    },
     rules: {
-      ...pluginReact.configs.flat.recommended.rules,
-      'react/prop-types': 'warn', // set prop-types rule to warning
+      ...pluginReact.configs.recommended.rules,
+      'react/prop-types': 'off',
+      'react/react-in-jsx-scope': 'off',
+      'no-unused-vars': 'off',
     },
   },
 ]);

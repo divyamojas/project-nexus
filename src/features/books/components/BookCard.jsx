@@ -1,6 +1,6 @@
 // src/components/books/BookCard.jsx
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -11,86 +11,93 @@ import {
   Stack,
   IconButton,
   Tooltip,
-  Fade,
   Grow,
+  Collapse,
 } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ArchiveIcon from '@mui/icons-material/Archive';
-import UnarchiveIcon from '@mui/icons-material/Unarchive';
-import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
-import PropTypes from 'prop-types';
-
-const statusColor = {
-  available: 'success',
-  scheduled: 'warning',
-  lent: 'default',
-};
-
-const fallbackGradients = [
-  'linear-gradient(135deg, #fdeff9 0%, #ec38bc 100%)',
-  'linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%)',
-  'linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%)',
-  'linear-gradient(135deg, #f6d365 0%, #fda085 100%)',
-  'linear-gradient(135deg, #cfd9df 0%, #e2ebf0 100%)',
-];
+import { actionConfigs, statusColor, fallbackGradients } from '@/constants/constants';
 
 export default function BookCard({
   book,
   onClick,
   onDelete = () => {},
   onArchive = () => {},
+  onToggleSave = () => {},
+  onAccept = () => {},
+  onReject = () => {},
+  onCancelRequest = () => {},
+  onRequestReturn = () => {},
   editable = true,
+  isSaved: isSavedProp,
+  context = '',
 }) {
-  const [hovered, setHovered] = useState(false);
-  const catalog = book.books_catalog || book.catalog || {};
-  const { title, author, cover_image_url } = catalog;
+  const [hovered, setHovered] = useState(true);
+  const [isSavedState, setIsSavedState] = useState(
+    context === 'saved' ? true : (isSavedProp ?? book?.is_saved ?? false),
+  );
+  const [showCard, setShowCard] = useState(true);
+  const catalog = book.catalog || {};
+  const { title, author, cover_url } = catalog;
   const condition = book.condition;
   const status = book.status || 'available';
   const archived = book.archived;
-
   const gradientIndex = (title || author || '').length % fallbackGradients.length;
 
-  const handleDelete = (e) => {
-    e.stopPropagation();
-    onDelete(book);
+  useEffect(() => {
+    // console.log(catalog);
+
+    setIsSavedState(context === 'saved' ? true : (isSavedProp ?? book?.is_saved ?? false));
+  }, [context, isSavedProp, book?.is_saved]);
+
+  const handlers = {
+    onDelete,
+    onArchive,
+    onToggleSave: (b) => {
+      const newState = !isSavedState;
+      setIsSavedState(newState);
+      onToggleSave(b);
+      if (!newState && context === 'saved') {
+        setTimeout(() => setShowCard(false), 2000);
+      }
+    },
+    onAccept,
+    onReject,
+    onCancelRequest,
+    onRequestReturn,
   };
 
-  const handleArchiveToggle = (e) => {
-    e.stopPropagation();
-    onArchive(book);
-  };
+  const actions = actionConfigs[context] || [];
 
   return (
-    <Box
-      sx={{
-        transition: 'transform 0.2s ease',
-        transform: hovered ? 'scale(1.02)' : 'scale(1)',
-        zIndex: hovered ? 10 : 1,
-      }}
-    >
-      <Grow in timeout={300}>
-        <Card
-          onClick={onClick}
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
-          sx={{
-            cursor: 'pointer',
-            width: 240,
-            height: 360,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            position: 'relative',
-            overflow: 'hidden',
-            borderRadius: 4,
-            transition: 'box-shadow 0.2s ease',
-            bgcolor: '#fffefc',
-            boxShadow: hovered ? '0 12px 24px rgba(0,0,0,0.15)' : '0 1px 4px rgba(0,0,0,0.08)',
-          }}
-          elevation={0}
-        >
-          {editable && (
-            <Fade in={hovered}>
+    <Collapse in={showCard} timeout={300} unmountOnExit>
+      <Box
+        sx={{
+          transition: 'transform 0.2s ease',
+          transform: hovered ? 'scale(1.02)' : 'scale(1)',
+          zIndex: hovered ? 10 : 1,
+        }}
+      >
+        <Grow in timeout={300}>
+          <Card
+            onClick={onClick}
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+            sx={{
+              cursor: 'pointer',
+              width: 240,
+              height: 360,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              position: 'relative',
+              overflow: 'hidden',
+              borderRadius: 4,
+              transition: 'box-shadow 0.2s ease',
+              bgcolor: '#fffefc',
+              boxShadow: hovered ? '0 12px 24px rgba(0,0,0,0.15)' : '0 1px 4px rgba(0,0,0,0.08)',
+            }}
+            elevation={0}
+          >
+            {editable && hovered && (
               <Box
                 sx={{
                   position: 'absolute',
@@ -101,114 +108,84 @@ export default function BookCard({
                   gap: 1,
                 }}
               >
-                <Tooltip title={archived ? 'Unarchive' : 'Archive'}>
-                  <IconButton
-                    size="small"
-                    onClick={handleArchiveToggle}
-                    sx={{
-                      bgcolor: '#fff',
-                      boxShadow: 2,
-                      transition: 'all 0.2s ease-in-out',
-                      '&:hover': { bgcolor: '#f0e6ff', color: '#6a1b9a' },
-                    }}
+                {actions.map((action, idx) => (
+                  <Tooltip
+                    key={idx}
+                    title={
+                      typeof action.title === 'function'
+                        ? action.title(book, action.toggleState ? isSavedState : undefined)
+                        : action.title
+                    }
                   >
-                    {archived ? (
-                      <UnarchiveIcon fontSize="small" />
-                    ) : (
-                      <ArchiveIcon fontSize="small" />
-                    )}
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title="Delete">
-                  <IconButton
-                    size="small"
-                    onClick={handleDelete}
-                    sx={{
-                      bgcolor: '#fff',
-                      boxShadow: 2,
-                      transition: 'all 0.2s ease-in-out',
-                      '&:hover': { bgcolor: '#ffebee', color: '#c62828' },
-                    }}
-                  >
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
+                    <IconButton
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlers[action.handler]?.(book);
+                      }}
+                      sx={{ bgcolor: '#fff', boxShadow: 2 }}
+                    >
+                      {typeof action.icon === 'function'
+                        ? action.icon(book, action.toggleState ? isSavedState : undefined)
+                        : action.icon}
+                    </IconButton>
+                  </Tooltip>
+                ))}
               </Box>
-            </Fade>
-          )}
+            )}
 
-          <Box
-            sx={{
-              position: 'absolute',
-              top: 8,
-              left: 8,
-              zIndex: 2,
-            }}
-          >
-            <BookmarkBorderIcon fontSize="small" sx={{ color: '#d1c4e9' }} />
-          </Box>
+            {cover_url ? (
+              <CardMedia
+                component="img"
+                height="160"
+                image={cover_url}
+                alt={`${title} cover`}
+                sx={{
+                  objectFit: 'cover',
+                  borderBottom: '1px solid #eee',
+                  borderRadius: '4px 4px 0 0',
+                }}
+              />
+            ) : (
+              <Box
+                height={160}
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                sx={{ background: fallbackGradients[gradientIndex] }}
+              >
+                <Typography variant="body2" color="text.secondary">
+                  No cover image
+                </Typography>
+              </Box>
+            )}
 
-          {cover_image_url ? (
-            <CardMedia
-              component="img"
-              height="160"
-              image={cover_image_url}
-              alt={`${title} cover`}
-              sx={{
-                objectFit: 'cover',
-                borderBottom: '1px solid #eee',
-                borderRadius: '4px 4px 0 0',
-              }}
-            />
-          ) : (
-            <Box
-              height={160}
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              sx={{
-                background: fallbackGradients[gradientIndex],
-              }}
-            >
-              <Typography variant="body2" color="text.secondary">
-                No cover image
+            <CardContent sx={{ px: 2, py: 1.5, flexGrow: 1 }}>
+              <Typography variant="subtitle1" fontWeight={600} gutterBottom noWrap>
+                {title || 'Untitled'}
               </Typography>
-            </Box>
-          )}
-
-          <CardContent sx={{ px: 2, py: 1.5, flexGrow: 1 }}>
-            <Typography variant="subtitle1" fontWeight={600} gutterBottom noWrap>
-              {title || 'Untitled'}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" noWrap>
-              {author || 'Unknown author'}
-            </Typography>
-            <Stack direction="row" spacing={1} mt={1}>
-              <Chip
-                label={condition || 'Unknown'}
-                size="small"
-                variant="outlined"
-                sx={{ fontWeight: 500 }}
-              />
-              <Chip
-                label={status}
-                size="small"
-                color={statusColor[status] || 'default'}
-                variant="filled"
-                sx={{ fontWeight: 500 }}
-              />
-            </Stack>
-          </CardContent>
-        </Card>
-      </Grow>
-    </Box>
+              <Typography variant="body2" color="text.secondary" noWrap>
+                {author || 'Unknown author'}
+              </Typography>
+              <Stack direction="row" spacing={1} mt={1}>
+                <Chip
+                  label={condition || 'Unknown'}
+                  size="small"
+                  variant="outlined"
+                  sx={{ fontWeight: 500 }}
+                />
+                <Chip
+                  label={status}
+                  size="small"
+                  color={statusColor[status] || 'default'}
+                  variant="filled"
+                  sx={{ fontWeight: 500 }}
+                />
+              </Stack>
+            </CardContent>
+          </Card>
+        </Grow>
+      </Box>
+    </Collapse>
   );
 }
-
-BookCard.propTypes = {
-  book: PropTypes.object.isRequired,
-  onClick: PropTypes.func,
-  onDelete: PropTypes.func,
-  onArchive: PropTypes.func,
-  editable: PropTypes.bool,
-};

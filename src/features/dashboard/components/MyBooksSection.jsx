@@ -3,7 +3,6 @@
 import React from 'react';
 import { Box, Typography, Button, Collapse, Chip } from '@mui/material';
 import BookCarouselSection from '@features/books/components/BookCarouselSection';
-import PropTypes from 'prop-types';
 
 export default function MyBooksSection({
   availableBooks = [],
@@ -19,7 +18,7 @@ export default function MyBooksSection({
     <>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
         <Typography variant="h6" sx={{ color: '#4e342e' }}>
-          📗 Available Books
+          📗 My Books
         </Typography>
         <Button
           variant="contained"
@@ -35,6 +34,8 @@ export default function MyBooksSection({
         onBookClick={onBookClick}
         onDelete={onDelete}
         onArchive={onArchive}
+        context="myBooks"
+        editable={true}
       />
 
       <Box mt={2} mb={2}>
@@ -58,19 +59,10 @@ export default function MyBooksSection({
           onBookClick={onBookClick}
           onDelete={onDelete}
           onArchive={onArchive}
+          context="archived"
+          editable={true}
         />
       </Collapse>
     </>
   );
 }
-
-MyBooksSection.propTypes = {
-  availableBooks: PropTypes.array.isRequired,
-  archivedBooks: PropTypes.array.isRequired,
-  showArchived: PropTypes.bool.isRequired,
-  setShowArchived: PropTypes.func.isRequired,
-  onAdd: PropTypes.func.isRequired,
-  onBookClick: PropTypes.func.isRequired,
-  onDelete: PropTypes.func,
-  onArchive: PropTypes.func,
-};

@@ -125,16 +125,165 @@ export const categorizeBooks = (books) => ({
 // Book Browsing
 // =========================
 
+// /src/services/bookService.js
+
 export async function getAvailableBooks() {
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError || !userData?.user?.id) return [];
+
+  const userId = userData.user.id;
+
   const { data, error } = await supabase
     .from('books')
-    .select(`id, status, condition, created_at, user_id, catalog:catalog_id (title, author)`) // join
+    .select(
+      `
+      id,
+      status,
+      condition,
+      created_at,
+      user_id,
+      catalog:catalog_id (id, title, author, cover_url),
+      saved_books (user_id)
+    `,
+    )
     .eq('archived', false);
-  // .eq('status', 'available');
 
   if (error) throw error;
-  return data || [];
+
+  return data.map((book) => {
+    const isSaved = Array.isArray(book.saved_books)
+      ? book.saved_books.some((entry) => entry.user_id === userId)
+      : false;
+
+    // console.log("Book ID:", book.id, "Saved By:", book.saved_books, "User ID:", userId, "is_saved:", isSaved, book);
+
+    return {
+      id: book.id,
+      user_id: book.user_id,
+      status: book.status,
+      condition: book.condition,
+      created_at: book.created_at,
+      catalog: book.catalog,
+      is_saved: isSaved,
+    };
+  });
 }
+
+export const getSavedBooks = async () => {
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError || !userData?.user?.id) return [];
+
+  const userId = userData.user.id;
+
+  const { data, error } = await supabase
+    .from('saved_books')
+    .select(
+      `
+      id,
+      catalog_id,
+      created_at,
+      book:book_id(
+        id,
+        user_id,
+        status,
+        condition,
+        created_at,
+        books_catalog(id, title, author, cover_url)
+      )
+    `,
+    )
+    .eq('user_id', userId);
+
+  if (error) {
+    console.error('getSavedBooks error:', error);
+    return [];
+  }
+
+  return data.map((entry) => ({
+    id: entry.book.id,
+    user_id: entry.book.user_id,
+    status: entry.book.status,
+    condition: entry.book.condition,
+    created_at: entry.book.created_at,
+    catalog: entry.book.books_catalog,
+    is_saved: true,
+  }));
+};
+
+// export async function getAvailableBooks() {
+//   const { data: userData, error: userError } = await supabase.auth.getUser();
+//   if (userError || !userData?.user?.id) return [];
+
+//   const userId = userData.user.id;
+
+//   const { data, error } = await supabase
+//     .from('books')
+//     .select(`
+//       id,
+//       status,
+//       condition,
+//       created_at,
+//       user_id,
+//       catalog:catalog_id (id, title, author, cover_url),
+//       saved_books (user_id)
+//     `)
+//     .eq('archived', false);
+
+//   if (error) throw error;
+
+//   return data.map((book) => (
+
+//     {
+//     id: book.id,
+//     user_id: book.user_id,
+//     status: book.status,
+//     condition: book.condition,
+//     created_at: book.created_at,
+//     catalog: book.catalog,
+//     is_saved: Array.isArray(book.saved_books)
+//       ? book.saved_books.some((entry) => entry.user_id === userId)
+//       : false,
+//   }));
+// }
+
+// export const getSavedBooks = async () => {
+//   const { data: userData, error: userError } = await supabase.auth.getUser();
+//   if (userError || !userData?.user?.id) return [];
+
+//   const userId = userData.user.id;
+
+//   const { data, error } = await supabase
+//     .from('saved_books')
+//     .select(`
+//       id,
+//       catalog_id,
+//       created_at,
+//       book:book_id(
+//         id,
+//         user_id,
+//         status,
+//         condition,
+//         created_at,
+//         books_catalog(id, title, author, cover_url)
+//       )
+//     `)
+//     .eq('user_id', userId);
+
+//   if (error) {
+//     console.error('getSavedBooks error:', error);
+//     return [];
+//   }
+
+//   return data.map((entry) => ({
+//     id: entry.book.id,
+//     user_id: entry.book.user_id,
+//     status: entry.book.status,
+//     condition: entry.book.condition,
+//     created_at: entry.book.created_at,
+//     catalog: entry.book.books_catalog,
+//     is_saved: true,
+//   }));
+// };
 
 export function filterAndSortBooks(books, options = {}) {
   const {
@@ -215,6 +364,59 @@ export async function getRequestsForBook(book_id) {
 
   if (error) throw error;
   return data;
+}
+
+export async function requestBookReturn(bookId) {
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError || !userData?.user?.id) throw userError;
+
+  const userId = userData.user.id;
+
+  const { error } = await supabase.from('return_requests').insert([
+    {
+      book_id: bookId,
+      requested_by: userId,
+      requested_at: new Date().toISOString(),
+    },
+  ]);
+
+  if (error) {
+    console.error('requestBookReturn error:', error);
+    throw error;
+  }
+
+  return true;
+}
+
+export async function toggleSaveBook(id, should_save, catalog_id) {
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError || !userData?.user?.id) throw userError;
+
+  const userId = userData.user.id;
+
+  if (should_save) {
+    const { error } = await supabase.from('saved_books').insert({
+      book_id: id,
+      user_id: userId,
+      catalog_id: catalog_id,
+    });
+    if (error) throw error;
+  } else {
+    const query = supabase.from('saved_books').delete().eq('user_id', userId).eq('book_id', id);
+
+    const { error } = await query;
+    if (error) throw error;
+  }
+
+  return true;
+}
+
+export async function requestBook(bookId, message = '') {
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError || !userData?.user?.id) throw userError;
+
+  const userId = userData.user.id;
+  return await requestBorrowBook(bookId, userId, message);
 }
 
 // =========================
