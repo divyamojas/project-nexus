@@ -1,6 +1,6 @@
 // src/components/books/BookCard.jsx
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -14,7 +14,7 @@ import {
   Grow,
   Collapse,
 } from '@mui/material';
-import { actionConfigs, statusColor, fallbackGradients } from '../../../constants/constants';
+import { ACTION_CONFIGS, STATUS_COLOR, FALLBACK_GRADIENTS } from '../../../constants/constants';
 
 export default function BookCard({
   book,
@@ -26,11 +26,11 @@ export default function BookCard({
   onReject = () => {},
   onCancelRequest = () => {},
   onRequestReturn = () => {},
-  editable = true,
+  editable = false,
   isSaved: isSavedProp,
   context = '',
 }) {
-  const [hovered, setHovered] = useState(true);
+  const [hovered, setHovered] = useState(false);
   const [isSavedState, setIsSavedState] = useState(
     context === 'saved' ? true : (isSavedProp ?? book?.is_saved ?? false),
   );
@@ -40,7 +40,7 @@ export default function BookCard({
   const condition = book.condition;
   const status = book.status || 'available';
   const archived = book.archived;
-  const gradientIndex = (title || author || '').length % fallbackGradients.length;
+  const gradientIndex = (title || author || '').length % FALLBACK_GRADIENTS.length;
 
   useEffect(() => {
     setIsSavedState(context === 'saved' ? true : (isSavedProp ?? book?.is_saved ?? false));
@@ -63,7 +63,7 @@ export default function BookCard({
     onRequestReturn,
   };
 
-  const actions = actionConfigs[context] || [];
+  const actions = ACTION_CONFIGS[context] || [];
 
   return (
     <Collapse in={showCard} timeout={300} unmountOnExit>
@@ -150,7 +150,7 @@ export default function BookCard({
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
-                sx={{ background: fallbackGradients[gradientIndex] }}
+                sx={{ background: FALLBACK_GRADIENTS[gradientIndex] }}
               >
                 <Typography variant="body2" color="text.secondary">
                   No cover image
@@ -175,7 +175,7 @@ export default function BookCard({
                 <Chip
                   label={status}
                   size="small"
-                  color={statusColor[status] || 'default'}
+                  color={STATUS_COLOR[status] || 'default'}
                   variant="filled"
                   sx={{ fontWeight: 500 }}
                 />

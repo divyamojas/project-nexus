@@ -1,6 +1,6 @@
 // src/pages/BrowseBooks.jsx
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Container,
   Typography,
@@ -21,7 +21,6 @@ import { useDebounce } from '../../hooks/useDebounce';
 import BookModal from './components/BookModal';
 import BookCard from './components/BookCard';
 
-import { toggleSaveBook, requestBook } from '../../services/bookService';
 import { useAuth } from '../../contexts/AuthContext';
 import { useBookContext } from '../../contexts/BookContext';
 
@@ -37,7 +36,7 @@ export default function BrowseBooks() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { user } = useAuth();
 
-  const { filteredBooks, setFilters, loading, refreshBooks } = useBookContext();
+  const { filteredBooks, setFilters, loading } = useBookContext();
 
   // sync filters to context
   useEffect(() => {

@@ -1,6 +1,6 @@
 // ./src/components/BookModal.jsx
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogTitle,

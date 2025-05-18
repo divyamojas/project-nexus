@@ -1,4 +1,14 @@
 // src/constants/constants.js
+// src/components/Common/PageLoader.jsx
+
+export const QUOTES = {
+  '/': 'Warming up your bookshelf 🌞',
+  '/login': 'Settling your reading nook, just a moment ☕',
+  '/signup': 'Every great story starts with a sign-up ✨',
+  '/forgot-password': 'Sometimes even passwords need a second chance 🔁',
+  '/dashboard': 'Opening your chapter dashboard 📖',
+  '/browse': 'Searching your next escape route 🧭',
+};
 
 // src/constants/bookCardActions.js
 
@@ -14,13 +24,13 @@ import {
   Replay as ReplayIcon,
 } from '@mui/icons-material';
 
-export const statusColor = {
+export const STATUS_COLOR = {
   available: 'success',
   scheduled: 'warning',
   lent: 'default',
 };
 
-export const fallbackGradients = [
+export const FALLBACK_GRADIENTS = [
   'linear-gradient(135deg, #fdeff9 0%, #ec38bc 100%)',
   'linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%)',
   'linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%)',
@@ -28,7 +38,7 @@ export const fallbackGradients = [
   'linear-gradient(135deg, #cfd9df 0%, #e2ebf0 100%)',
 ];
 
-export const actionConfigs = {
+export const ACTION_CONFIGS = {
   myBooks: [
     {
       title: (book) => (book.archived ? 'Unarchive' : 'Archive'),

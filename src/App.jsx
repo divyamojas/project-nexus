@@ -1,6 +1,6 @@
 // /src/App.jsx
 
-import React, { Suspense, lazy, useEffect, useState } from 'react';
+import { Suspense, lazy, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
 import PageLoader from './components/Common/PageLoader';

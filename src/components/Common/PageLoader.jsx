@@ -1,22 +1,14 @@
 // src/components/Common/PageLoader.jsx
 
-import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { Container, Card, CircularProgress, Typography } from '@mui/material';
 import { Spa } from '@mui/icons-material';
 
-const quotes = {
-  '/': 'Warming up your bookshelf 🌞',
-  '/login': 'Settling your reading nook, just a moment ☕',
-  '/signup': 'Every great story starts with a sign-up ✨',
-  '/forgot-password': 'Sometimes even passwords need a second chance 🔁',
-  '/dashboard': 'Opening your chapter dashboard 📖',
-  '/browse': 'Searching your next escape route 🧭',
-};
+import { QUOTES } from '../../constants/constants';
 
 export default function PageLoader() {
   const location = useLocation();
-  const message = quotes[location.pathname] || 'One moment... loading 📚';
+  const message = QUOTES[location.pathname] || 'One moment... loading 📚';
 
   return (
     <Container maxWidth="xs" style={{ marginTop: '4rem' }}>

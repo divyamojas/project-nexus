@@ -1,6 +1,6 @@
 // /src/pages/NotFound.jsx
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Typography, CircularProgress, Fade } from '@mui/material';
 

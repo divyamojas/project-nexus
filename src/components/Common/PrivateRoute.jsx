@@ -1,6 +1,5 @@
 // src/components/Common/PrivateRoute.jsx
 
-import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';

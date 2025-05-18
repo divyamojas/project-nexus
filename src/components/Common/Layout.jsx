@@ -1,6 +1,6 @@
 // src/layouts/Layout.jsx
 
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   AppBar,
   Toolbar,
@@ -22,7 +22,7 @@ export default function Layout({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleScroll = () => {
       const currentY = window.scrollY;
       const scrollingUp = currentY - lastScrollY < -10;
