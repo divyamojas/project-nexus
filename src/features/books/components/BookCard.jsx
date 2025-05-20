@@ -14,7 +14,12 @@ import {
   Grow,
   Collapse,
 } from '@mui/material';
-import { ACTION_CONFIGS, STATUS_COLOR, FALLBACK_GRADIENTS } from '../../../constants/constants';
+import {
+  ACTION_CONFIGS,
+  STATUS_COLOR,
+  FALLBACK_GRADIENTS,
+  ACTION_STYLES,
+} from '../../../constants/constants';
 
 export default function BookCard({
   book,
@@ -106,29 +111,47 @@ export default function BookCard({
                   gap: 1,
                 }}
               >
-                {actions.map((action, idx) => (
-                  <Tooltip
-                    key={idx}
-                    title={
-                      typeof action.title === 'function'
-                        ? action.title(book, action.toggleState ? isSavedState : undefined)
-                        : action.title
-                    }
-                  >
-                    <IconButton
-                      size="small"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handlers[action.handler]?.(book);
-                      }}
-                      sx={{ bgcolor: '#fff', boxShadow: 2 }}
+                {actions.map((action, idx) => {
+                  const styleKey =
+                    typeof action.styleKey === 'function'
+                      ? action.styleKey(book, action.toggleState ? isSavedState : undefined)
+                      : action.styleKey;
+
+                  const actionStyle = ACTION_STYLES[styleKey] || {};
+                  console.log(actions);
+                  return (
+                    <Tooltip
+                      key={idx}
+                      title={
+                        typeof action.title === 'function'
+                          ? action.title(book, action.toggleState ? isSavedState : undefined)
+                          : action.title
+                      }
                     >
-                      {typeof action.icon === 'function'
-                        ? action.icon(book, action.toggleState ? isSavedState : undefined)
-                        : action.icon}
-                    </IconButton>
-                  </Tooltip>
-                ))}
+                      <IconButton
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlers[action.handler]?.(book);
+                        }}
+                        sx={{
+                          bgcolor: '#fff',
+                          color: 'action.active', // default gray icon
+                          boxShadow: 2,
+                          transition: 'all 0.2s ease',
+                          '&:hover': {
+                            bgcolor: actionStyle.hover || '#f5f5f5',
+                            color: actionStyle.hoverText || 'inherit',
+                          },
+                        }}
+                      >
+                        {typeof action.icon === 'function'
+                          ? action.icon(book, action.toggleState ? isSavedState : undefined)
+                          : action.icon}
+                      </IconButton>
+                    </Tooltip>
+                  );
+                })}
               </Box>
             )}
 

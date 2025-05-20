@@ -38,6 +38,8 @@ export const FALLBACK_GRADIENTS = [
   'linear-gradient(135deg, #cfd9df 0%, #e2ebf0 100%)',
 ];
 
+// src/constants/bookCardActions.js
+
 export const ACTION_CONFIGS = {
   myBooks: [
     {
@@ -45,8 +47,14 @@ export const ACTION_CONFIGS = {
       icon: (book) =>
         book.archived ? <UnarchiveIcon fontSize="small" /> : <ArchiveIcon fontSize="small" />,
       handler: 'onArchive',
+      styleKey: (book) => (book.archived ? 'unarchive' : 'archive'),
     },
-    { title: 'Delete', icon: <DeleteIcon fontSize="small" />, handler: 'onDelete' },
+    {
+      title: 'Delete',
+      icon: <DeleteIcon fontSize="small" />,
+      handler: 'onDelete',
+      styleKey: 'delete',
+    },
   ],
   archived: [
     {
@@ -54,8 +62,14 @@ export const ACTION_CONFIGS = {
       icon: (book) =>
         book.archived ? <UnarchiveIcon fontSize="small" /> : <ArchiveIcon fontSize="small" />,
       handler: 'onArchive',
+      styleKey: (book) => (book.archived ? 'unarchive' : 'archive'),
     },
-    { title: 'Delete', icon: <DeleteIcon fontSize="small" />, handler: 'onDelete' },
+    {
+      title: 'Delete',
+      icon: <DeleteIcon fontSize="small" />,
+      handler: 'onDelete',
+      styleKey: 'delete',
+    },
   ],
   saved: [
     {
@@ -64,6 +78,7 @@ export const ACTION_CONFIGS = {
         isSaved ? <BookmarkIcon fontSize="small" /> : <BookmarkBorderIcon fontSize="small" />,
       handler: 'onToggleSave',
       toggleState: true,
+      styleKey: (book, isSaved) => (isSaved ? 'unsave' : 'save'),
     },
   ],
   browse: [
@@ -73,17 +88,38 @@ export const ACTION_CONFIGS = {
         isSaved ? <BookmarkIcon fontSize="small" /> : <BookmarkBorderIcon fontSize="small" />,
       handler: 'onToggleSave',
       toggleState: true,
+      styleKey: (book, isSaved) => (isSaved ? 'unsave' : 'save'),
     },
   ],
   incoming: [
-    { title: 'Accept', icon: <CheckIcon fontSize="small" />, handler: 'onAccept' },
-    { title: 'Reject', icon: <ClearIcon fontSize="small" />, handler: 'onReject' },
+    {
+      title: 'Accept',
+      icon: <CheckIcon fontSize="small" />,
+      handler: 'onAccept',
+      styleKey: 'accept',
+    },
+    {
+      title: 'Reject',
+      icon: <ClearIcon fontSize="small" />,
+      handler: 'onReject',
+      styleKey: 'reject',
+    },
   ],
   outgoing: [
-    { title: 'Cancel Request', icon: <CancelIcon fontSize="small" />, handler: 'onCancelRequest' },
+    {
+      title: 'Cancel Request',
+      icon: <CancelIcon fontSize="small" />,
+      handler: 'onCancelRequest',
+      styleKey: 'reject', // reuse red tone for cancellation
+    },
   ],
   lent: [
-    { title: 'Request Return', icon: <ReplayIcon fontSize="small" />, handler: 'onRequestReturn' },
+    {
+      title: 'Request Return',
+      icon: <ReplayIcon fontSize="small" />,
+      handler: 'onRequestReturn',
+      styleKey: 'requestReturn',
+    },
   ],
 };
 
@@ -149,4 +185,39 @@ export const INITIAL_BOOK_FORM_DATA = {
   coverUrl: '',
   condition: 'new',
   notes: '',
+};
+
+export const ACTION_STYLES = {
+  delete: {
+    hover: '#d32f2f', // red
+    hoverText: '#fff',
+  },
+  archive: {
+    hover: '#616161', // gray
+    hoverText: '#fff',
+  },
+  unarchive: {
+    hover: '#388e3c', // green
+    hoverText: '#fff',
+  },
+  save: {
+    hover: '#1976d2', // blue
+    hoverText: '#fff',
+  },
+  unsave: {
+    hover: '#1976d2',
+    hoverText: '#fff',
+  },
+  requestReturn: {
+    hover: '#f57c00', // orange
+    hoverText: '#fff',
+  },
+  reject: {
+    hover: '#c62828', // dark red
+    hoverText: '#fff',
+  },
+  accept: {
+    hover: '#2e7d32', // dark green
+    hoverText: '#fff',
+  },
 };
