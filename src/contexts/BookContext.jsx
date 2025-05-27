@@ -59,6 +59,9 @@ export const BookProvider = ({ children }) => {
     const search = filters.searchTerm.toLowerCase();
     return books
       .filter((book) => {
+        return book.archived !== true;
+      })
+      .filter((book) => {
         return (
           book.catalog?.title?.toLowerCase().includes(search) ||
           book.catalog?.author?.toLowerCase().includes(search)
