@@ -8,6 +8,7 @@ import {
   archiveBook,
   subscribeToBookChanges,
   toggleSaveBook,
+  requestBook,
 } from '../services/bookService';
 
 import { useUser } from '../contexts/UserContext';
@@ -125,7 +126,8 @@ export const BookProvider = ({ children }) => {
 
   const sendBookRequest = async (book, message = 'Hi! I would like to borrow this book.') => {
     try {
-      await requestBook(book.id, message);
+      console.log('in context : ', book);
+      await requestBook(book, message);
       return true;
     } catch (err) {
       console.error('Failed to request book:', err);

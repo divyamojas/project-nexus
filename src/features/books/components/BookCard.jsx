@@ -1,4 +1,4 @@
-// src/components/books/BookCard.jsx
+// ./src/components/BookCard.jsx
 
 import { useState, useEffect } from 'react';
 import {
@@ -13,6 +13,7 @@ import {
   Tooltip,
   Grow,
   Collapse,
+  Button,
 } from '@mui/material';
 import {
   ACTION_CONFIGS,
@@ -20,6 +21,8 @@ import {
   FALLBACK_GRADIENTS,
   ACTION_STYLES,
 } from '../../../constants/constants';
+import { useBookContext } from '../../../contexts/BookContext';
+import { useAuth } from '../../../contexts/AuthContext';
 
 export default function BookCard({
   book,
@@ -31,6 +34,7 @@ export default function BookCard({
   onReject = () => {},
   onCancelRequest = () => {},
   onRequestReturn = () => {},
+  onRequest = () => {},
   editable = false,
   isSaved: isSavedProp,
   context = '',
@@ -46,6 +50,9 @@ export default function BookCard({
   const status = book.status || 'available';
   const archived = book.archived;
   const gradientIndex = (title || author || '').length % FALLBACK_GRADIENTS.length;
+
+  const { sendBookRequest } = useBookContext();
+  const { user } = useAuth();
 
   useEffect(() => {
     setIsSavedState(context === 'saved' ? true : (isSavedProp ?? book?.is_saved ?? false));
@@ -69,6 +76,7 @@ export default function BookCard({
   };
 
   const actions = ACTION_CONFIGS[context] || [];
+  const isRequestPending = book.request_status === 'pending' && book.requested_by === user?.id;
 
   return (
     <Collapse in={showCard} timeout={300} unmountOnExit>
@@ -118,7 +126,6 @@ export default function BookCard({
                       : action.styleKey;
 
                   const actionStyle = ACTION_STYLES[styleKey] || {};
-                  console.log(actions);
                   return (
                     <Tooltip
                       key={idx}
@@ -136,7 +143,7 @@ export default function BookCard({
                         }}
                         sx={{
                           bgcolor: '#fff',
-                          color: 'action.active', // default gray icon
+                          color: 'action.active',
                           boxShadow: 2,
                           transition: 'all 0.2s ease',
                           '&:hover': {
@@ -204,6 +211,37 @@ export default function BookCard({
                 />
               </Stack>
             </CardContent>
+
+            {/* Request/Withdraw Button */}
+            {status === 'available' && user?.id && book.user_id !== user.id && (
+              <Box px={2} pb={2}>
+                {isRequestPending ? (
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    fullWidth
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onCancelRequest(book);
+                    }}
+                  >
+                    Withdraw Request
+                  </Button>
+                ) : (
+                  <Button
+                    variant="contained"
+                    size="small"
+                    fullWidth
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRequest(book);
+                    }}
+                  >
+                    Request Book
+                  </Button>
+                )}
+              </Box>
+            )}
           </Card>
         </Grow>
       </Box>

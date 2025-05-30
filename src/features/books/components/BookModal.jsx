@@ -13,6 +13,7 @@ import {
   Tooltip,
   Divider,
   Chip,
+  Button,
 } from '@mui/material';
 import {
   Close as CloseIcon,
@@ -33,6 +34,7 @@ import {
   updateRequestStatus,
 } from '../../../services/bookService';
 import { useBookContext } from '../../../contexts/BookContext';
+import { useAuth } from '../../../contexts/AuthContext';
 
 export default function BookModal({
   open,
@@ -42,7 +44,8 @@ export default function BookModal({
   onActionComplete = () => {},
 }) {
   const [isSavedState, setIsSavedState] = useState(false);
-  const { handleDeleteBook, handleArchiveBook } = useBookContext();
+  const { handleDeleteBook, handleArchiveBook, sendBookRequest } = useBookContext();
+  const { user } = useAuth();
 
   useEffect(() => {
     if (book) {
@@ -95,7 +98,6 @@ export default function BookModal({
     handleArchiveBook(book);
     onActionComplete();
     if (book.archived) {
-      // unarchiving case
       onActionComplete();
     }
     onClose();
@@ -166,6 +168,8 @@ export default function BookModal({
     }
   };
 
+  const isRequestPending = book.request_status === 'pending' && book.requested_by === user?.id;
+
   return (
     <Dialog
       open={open}
@@ -214,7 +218,28 @@ export default function BookModal({
         <Typography variant="body2" color="text.secondary">
           Choose an action:
         </Typography>
-        <Box>{renderActions()}</Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {book.status === 'available' &&
+            user?.id &&
+            book.user_id !== user.id &&
+            (isRequestPending ? (
+              <Button variant="outlined" size="small" onClick={handleCancelRequest}>
+                Withdraw Request
+              </Button>
+            ) : (
+              <Button
+                variant="contained"
+                size="small"
+                onClick={() => {
+                  sendBookRequest(book.id);
+                  onClose();
+                }}
+              >
+                Request Book
+              </Button>
+            ))}
+          {renderActions()}
+        </Box>
       </DialogActions>
     </Dialog>
   );

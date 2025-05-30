@@ -239,13 +239,14 @@ export const getSavedBooks = async () => {
 export async function requestBorrowBook(book_id, requester_id, message = '') {
   const { data: bookData, error: bookError } = await supabase
     .from('books')
-    .select('owner_id')
+    .select('user_id')
     .eq('id', book_id)
     .single();
 
   if (bookError) throw bookError;
 
-  const requested_to = bookData.owner_id;
+  const requested_to = bookData.user_id;
+  console.log([{ book_id, requested_by: requester_id, requested_to, status: 'pending', message }]);
   const { data, error } = await supabase
     .from('book_requests')
     .insert([{ book_id, requested_by: requester_id, requested_to, status: 'pending', message }]);
