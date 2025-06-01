@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { Container, Card, CircularProgress, Typography } from '@mui/material';
 import { Spa } from '@mui/icons-material';
 
-import { QUOTES } from '../../constants/constants';
+import { QUOTES } from '../constants/constants';
 
 export default function PageLoader() {
   const location = useLocation();

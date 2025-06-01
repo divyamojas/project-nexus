@@ -3,21 +3,21 @@
 import { Suspense, lazy, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
-import PageLoader from './components/Common/PageLoader';
-import PrivateRoute from './components/Common/PrivateRoute';
-import Layout from './components/Common/Layout';
+import PageLoader from './commonComponents/PageLoader';
+import PrivateRoute from './commonComponents/PrivateRoute';
+import Layout from './commonComponents/Layout';
 import { UserProvider } from './contexts/UserContext';
 import { BookProvider } from './contexts/BookContext';
-import { useSession } from './hooks/useSession';
+import { useSession } from './hooks';
 
 // Lazy loading pages
-const Signup = lazy(() => import('./features/auth/Signup'));
-const Login = lazy(() => import('./features/auth/Login'));
-const ForgotPassword = lazy(() => import('./features/auth/ForgotPassword'));
-const Dashboard = lazy(() => import('./features/dashboard/Dashboard'));
-const BrowseBooks = lazy(() => import('./features/books/BrowseBooks'));
-const Feedback = lazy(() => import('./features/feedback/Feedback'));
-const NotFound = lazy(() => import('./features/pageNotFound/NotFound'));
+const Signup = lazy(() => import('./pages/auth/Signup'));
+const Login = lazy(() => import('./pages/auth/Login'));
+const ForgotPassword = lazy(() => import('./pages/auth/ForgotPassword'));
+const Dashboard = lazy(() => import('./pages/dashboard/Dashboard'));
+const BrowseBooks = lazy(() => import('./pages/browseBooks/BrowseBooks'));
+const Feedback = lazy(() => import('./pages/feedback/Feedback'));
+const NotFound = lazy(() => import('./pages/pageNotFound/NotFound'));
 
 const protectedRoutes = [
   { path: '/dashboard', element: <Dashboard /> },

@@ -1,24 +1,21 @@
-// /src/hooks/useSession.js
+// /src/hooks/useSessionTracker.js
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { getSession, onAuthStateChange } from '../services/authService';
 
-export default function useSession() {
-  const [session, setSession] = useState(null);
-  const [loading, setLoading] = useState(true);
-
+export default function useSessionTracker(setUser, setLoading) {
   useEffect(() => {
     let isMounted = true;
 
     const init = async () => {
       const { data } = await getSession();
       if (isMounted) {
-        setSession(data?.session ?? null);
+        setUser(data?.session?.user ?? null);
         setLoading(false);
       }
 
       const { data: { subscription } = {} } = onAuthStateChange((_event, newSession) => {
-        if (isMounted) setSession(newSession);
+        if (isMounted) setUser(newSession?.user ?? null);
       });
 
       return () => subscription?.unsubscribe?.();
@@ -30,7 +27,5 @@ export default function useSession() {
       isMounted = false;
       cleanup?.then?.((fn) => typeof fn === 'function' && fn());
     };
-  }, []);
-
-  return { session, loading };
+  }, [setUser, setLoading]);
 }

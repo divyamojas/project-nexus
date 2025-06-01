@@ -1,0 +1,40 @@
+// File: ./services/index.js
+
+export { default as supabase } from './supabaseClient';
+
+export { signup, login, logout, resetPassword, getSession, onAuthStateChange } from './authService';
+
+export {
+  fetchCatalogBookEntry,
+  searchBooksCatalogByTitle,
+  addBookToCatalog,
+} from './bookCatalogService';
+
+export {
+  requestBorrowBook,
+  updateRequestStatus,
+  getRequestsForBook,
+  getIncomingRequestsForBooks,
+  getOutgoingRequestsForUser,
+} from './bookRequestService';
+
+export {
+  getBookById,
+  getMyBooks,
+  addBookInstance,
+  deleteBook,
+  archiveBook,
+  getBooks,
+} from './bookService';
+
+export { insertFeedback } from './feedbackService';
+
+export { getCurrentUserFirstName } from './profileService';
+
+export { subscribeToBookChanges, unsubscribeFromBookChanges } from './realtimeService';
+
+export { getSavedBooks, toggleSaveBook } from './savedBookService';
+
+export { getUserReviews } from './userReviewService';
+
+export { getTransfers } from './transferService';

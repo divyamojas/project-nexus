@@ -1,7 +1,7 @@
 // src/components/books/BookCarouselSection.jsx
 
 import { Box, Typography, Divider, Stack } from '@mui/material';
-import BookCard from '../../books/components/BookCard';
+import BookCard from '../../browseBooks/components/BookCard';
 
 export default function BookCarouselSection({
   title,

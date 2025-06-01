@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { logout } from '../../services/authService';
+import { logout } from '../services/authService';
 
 export default function Layout({ children }) {
   const [showNavbar, setShowNavbar] = useState(true);

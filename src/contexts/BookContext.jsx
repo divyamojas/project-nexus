@@ -1,19 +1,19 @@
 // /src/contexts/BookContext.jsx
 
 import { createContext, useState, useEffect, useMemo, useContext, useCallback } from 'react';
-import {
-  getBooks,
-  getSavedBooks,
-  deleteBook,
-  archiveBook,
-  subscribeToBookChanges,
-  toggleSaveBook,
-  requestBook,
-} from '../services/bookService';
 
 import { useUser } from '../contexts/UserContext';
 
 import { INITIAL_BOOK_FORM_DATA } from '../constants/constants';
+import {
+  archiveBook,
+  deleteBook,
+  getBooks,
+  getSavedBooks,
+  subscribeToBookChanges,
+  toggleSaveBook,
+} from '../services';
+import { requestBorrowBook } from '../services/bookRequestService';
 
 const BookContext = createContext();
 const BookFormContext = createContext();
@@ -127,7 +127,7 @@ export const BookProvider = ({ children }) => {
   const sendBookRequest = async (book, message = 'Hi! I would like to borrow this book.') => {
     try {
       console.log('in context : ', book);
-      await requestBook(book, message);
+      await requestBorrowBook(book, message);
       return true;
     } catch (err) {
       console.error('Failed to request book:', err);

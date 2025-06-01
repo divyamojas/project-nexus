@@ -1,14 +1,15 @@
 // src/contexts/UserContext.jsx
 
 import { createContext, useContext, useEffect, useState } from 'react';
+
+import { useAuth } from './AuthContext';
 import {
   getCurrentUserFirstName,
-  getUserReviews,
   getMyBooks,
-  getRequests,
+  getRequestsForBook,
   getTransfers,
-} from '../services/userService';
-import { useAuth } from './AuthContext';
+  getUserReviews,
+} from '../services';
 
 const UserContext = createContext();
 
@@ -37,7 +38,7 @@ export const UserProvider = ({ children }) => {
   };
 
   const fetchRequests = async () => {
-    const reqs = await getRequests();
+    const reqs = await getRequestsForBook();
     setRequests(reqs);
   };
 

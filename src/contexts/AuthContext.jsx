@@ -1,67 +1,69 @@
 // src/contexts/AuthContext.jsx
 
-import { createContext, useContext, useState } from 'react';
-import * as authService from '../services/authService';
-import { ALLOWED_EMAIL_DOMAINS, DOMAIN_ERRORS } from '../constants/constants';
-import { useSessionTracker } from '../hooks/useSessionTracker';
+import { createContext, useContext, useState, useMemo } from 'react';
 
-// Create the context
+import { ALLOWED_EMAIL_DOMAINS, DOMAIN_ERRORS } from '../constants/constants';
+import { useSessionTracker } from '../hooks';
+import * as authService from '../services/authService';
+
+// 1. Create the context
 const AuthContext = createContext();
 
-// Hook for accessing the context
+// 2. Hook to use AuthContext
 export function useAuth() {
   return useContext(AuthContext);
 }
 
-// Domain validator
-const isValidDomain = (email) => {
-  return ALLOWED_EMAIL_DOMAINS.some((domain) => email.endsWith(`@${domain}`));
-};
+// 3. Helper to check email domain
+const isValidDomain = (email) =>
+  ALLOWED_EMAIL_DOMAINS.some((domain) => email.endsWith(`@${domain}`));
 
-// Helper to create auth context value
-const getAuthContextValue = (user, signup, login, logout, resetPassword, loading) => ({
-  user,
-  signup,
-  login,
-  logout,
-  resetPassword,
-  loading,
-  isAuthenticated: !!user,
-});
-
-// Auth Provider component
-
+// 4. Provider component
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Track session from Supabase
   useSessionTracker(setUser, setLoading);
 
-  // Wrapped auth service functions with domain validation
+  // Auth operations (with domain validation)
   const signup = async (email, password) => {
     if (!isValidDomain(email)) {
       return { error: { message: DOMAIN_ERRORS.signup } };
     }
-    return await authService.signup(email, password);
+    return authService.signup(email, password);
   };
 
   const login = async (email, password) => {
     if (!isValidDomain(email)) {
       return { error: { message: DOMAIN_ERRORS.login } };
     }
-    return await authService.login(email, password);
+    return authService.login(email, password);
   };
 
   const logout = async () => {
     await authService.logout();
-    setUser(null);
+    setUser(null); // local logout
   };
 
-  const resetPassword = async (email) => {
-    return await authService.resetPassword(email);
-  };
+  const resetPassword = (email) => authService.resetPassword(email);
 
-  const value = getAuthContextValue(user, signup, login, logout, resetPassword, loading);
+  // 5. Stable memoized context value
+  const value = useMemo(
+    () => ({
+      user,
+      signup,
+      login,
+      logout,
+      resetPassword,
+      loading,
+      isAuthenticated: !!user,
+    }),
+    [user, loading],
+  );
 
-  return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
+  // 6. Show nothing until session is resolved
+  if (loading) return null;
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

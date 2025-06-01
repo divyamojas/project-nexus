@@ -18,7 +18,7 @@ import {
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 import { useAuth } from '../../contexts/AuthContext';
-import { processLogin } from '../../services/authService';
+import { processLogin } from '../../utilities';
 
 export default function Login() {
   const { login, isAuthenticated } = useAuth();
