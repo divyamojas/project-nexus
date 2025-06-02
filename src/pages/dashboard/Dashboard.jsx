@@ -47,7 +47,7 @@ export default function Dashboard() {
       getTransfers(),
       getSavedBooks(),
       getUserReviews(),
-      getCurrentUserFirstName(),
+      getCurrentUserFirstName(user),
     ]);
     setRequests(req);
     setTransfers(trf);

@@ -28,8 +28,10 @@ import { useBookForm } from '../../../contexts/BookContext';
 import { BOOK_FORM_FIELDS } from '../../../constants/constants';
 import { searchBooksCatalogByTitle } from '../../../services';
 import { validateAndSubmitBookForm } from '../../../utilities';
+import { useUser } from '../../../contexts/UserContext';
 
 export default function AddBookModal({ open, onClose }) {
+  const { user } = useUser();
   const {
     formData,
     setFormData,
@@ -69,6 +71,7 @@ export default function AddBookModal({ open, onClose }) {
       setErrors,
       resetForm,
       onSuccess: onClose,
+      user: user,
     });
   };
 

@@ -3,7 +3,7 @@
 import supabase from './supabaseClient';
 
 export const insertFeedback = async ({ message, user }) => {
-  if (!userData?.user?.id) return false;
+  if (!userData?.id) return false;
 
   const email = userData.user.email;
 

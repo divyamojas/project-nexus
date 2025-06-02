@@ -1,9 +1,15 @@
 // src/utilities/validateAndSubmitBookForm.js
 
+import addBookToCatalogAndStock from './addBookToCatalogAndStock';
+
 export default async function validateAndSubmitBookForm(
   formData,
-  { setErrors, resetForm, onSuccess },
+  { setErrors, resetForm, onSuccess, user },
 ) {
+  if (!user?.id) {
+    console.log('no use in valr');
+    return false;
+  }
   const newErrors = {};
   if (!formData.title.trim()) newErrors.title = 'Title is required';
   if (!formData.author.trim()) newErrors.author = 'Author is required';
@@ -34,6 +40,7 @@ export default async function validateAndSubmitBookForm(
     cover_url: formData.coverUrl,
     condition: formData.condition,
     notes: formData.notes,
+    user: user,
   });
 
   if (success) {

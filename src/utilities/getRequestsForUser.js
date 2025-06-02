@@ -4,9 +4,9 @@ import { getIncomingRequestsForBooks, getOutgoingRequestsForUser } from '../serv
 import { getMyBooks } from '../services/bookService';
 
 export default async function getRequestsForUser(userData) {
-  if (!userData?.user?.id) return { incoming: [], outgoing: [] };
+  if (!userData?.id) return { incoming: [], outgoing: [] };
 
-  const userId = userData.user.id;
+  const userId = userData.id;
 
   // 1. Get IDs of books owned by this user
   const { data: ownedBooks, error: booksErr } = await getMyBooks(userData, true);

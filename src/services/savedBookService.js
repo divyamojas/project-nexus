@@ -1,9 +1,9 @@
 // src/servies/savedBookService.js
 
 export async function getSavedBooks(userData) {
-  if (!userData?.user?.id) return [];
+  if (!userData?.id) return [];
 
-  const userId = userData.user.id;
+  const userId = userData.id;
 
   const { data, error } = await supabase
     .from('saved_books')
@@ -41,9 +41,9 @@ export async function getSavedBooks(userData) {
 }
 
 export async function toggleSaveBook(id, should_save, catalog_id, userData) {
-  if (!userData?.user?.id) return false;
+  if (!userData?.id) return false;
 
-  const userId = userData.user.id;
+  const userId = userData.id;
 
   if (should_save) {
     const { error } = await supabase.from('saved_books').insert({

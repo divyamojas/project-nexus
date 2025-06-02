@@ -1,9 +1,9 @@
 // // /src/servicesreturnRequestService.js
 
 export async function requestBookReturn(bookId, userData) {
-  if (!userData?.user?.id) return false;
+  if (!userData?.id) return false;
 
-  const userId = userData.user.id;
+  const userId = userData.id;
 
   const { error } = await supabase.from('return_requests').insert([
     {

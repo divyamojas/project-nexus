@@ -1,13 +1,15 @@
 // src/services/profileService.js
 
+import supabase from './supabaseClient';
+
 export const getCurrentUserFirstName = async (userData) => {
-  if (!userData?.user?.id) return null;
+  if (!userData?.id) return null;
 
   try {
     const { data, error } = await supabase
       .from('profiles')
       .select('first_name')
-      .eq('id', userData.user.id)
+      .eq('id', userData.id)
       .single();
 
     if (error) {

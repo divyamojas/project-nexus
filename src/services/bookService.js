@@ -13,7 +13,7 @@ export async function getBookById(book_id) {
 }
 
 export async function getMyBooks(userData, onlyId = false) {
-  if (!userData?.user?.id) return [];
+  if (!userData?.id) return [];
 
   const { data, error } = await supabase
     .from('books')
@@ -33,7 +33,7 @@ export async function getMyBooks(userData, onlyId = false) {
       )
     `,
     )
-    .eq('user_id', userData.user.id);
+    .eq('user_id', userData.id);
 
   if (error) {
     console.error('getMyBooks error:', error);
@@ -86,9 +86,9 @@ export async function archiveBook(bookId, archive = true) {
 }
 
 export async function getBooks({ includeArchived = true, userData } = {}) {
-  if (!userData?.user?.id) return [];
+  if (!userData?.id) return [];
 
-  const userId = userData.user.id;
+  const userId = userData.id;
 
   let query = supabase.from('books').select(`
     id,

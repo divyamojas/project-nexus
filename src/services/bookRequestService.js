@@ -11,7 +11,7 @@ export async function requestBorrowBook(book_id, message = '', userData) {
   const { data: bookData, error: bookError } = await getBookById(book_id);
   if (bookError) throw bookError;
 
-  const requester_id = userData.user.id;
+  const requester_id = userData.id;
   const requested_to = bookData.user_id;
 
   const { data, error } = await supabase
@@ -34,7 +34,7 @@ export async function updateRequestStatus(requestId, status) {
 
 export async function getRequestsForBook(book_id) {
   if (!book_id) {
-    console.error('getRequestsForBook: book_id is undefined or null');
+    // console.warn('getRequestsForBook: book_id is undefined or null');
     return [];
   }
   const { data, error } = await supabase

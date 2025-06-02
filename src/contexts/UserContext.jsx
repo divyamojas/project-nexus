@@ -3,13 +3,8 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 
 import { useAuth } from './AuthContext';
-import {
-  getCurrentUserFirstName,
-  getMyBooks,
-  getRequestsForBook,
-  getTransfers,
-  getUserReviews,
-} from '../services';
+import { getCurrentUserFirstName, getMyBooks, getTransfers, getUserReviews } from '../services';
+import { getRequestsForBooksOfUsers } from '../utilities';
 
 const UserContext = createContext();
 
@@ -37,8 +32,8 @@ export const UserProvider = ({ children }) => {
     setMyBooks(books);
   };
 
-  const fetchRequests = async () => {
-    const reqs = await getRequestsForBook();
+  const fetchRequests = async (user) => {
+    const reqs = await getRequestsForBooksOfUsers(user);
     setRequests(reqs);
   };
 
@@ -53,7 +48,7 @@ export const UserProvider = ({ children }) => {
       fetchUserProfile(),
       fetchUserReviews(),
       fetchMyBooks(),
-      fetchRequests(),
+      fetchRequests(user),
       fetchTransfers(),
     ]);
     setLoading(false);

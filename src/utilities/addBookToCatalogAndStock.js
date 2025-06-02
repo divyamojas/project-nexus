@@ -2,21 +2,41 @@
 
 import { addBookInstance, addBookToCatalog, fetchCatalogBookEntry } from '../services';
 
-export default async function addBookToCatalogAndStock({ title, author, condition, user }) {
+export default async function addBookToCatalogAndStock({
+  title,
+  author,
+  isbn,
+  cover_url,
+  condition,
+  notes,
+  user,
+}) {
   if (!user?.id) {
+    console.warn('addBookToCatalogAndStock: User not provided or invalid');
     return false;
   }
-
+  console.log(user);
   try {
     const trimmedTitle = title?.trim();
     const trimmedAuthor = author?.trim();
 
     const existing = await fetchCatalogBookEntry(trimmedTitle, trimmedAuthor);
-    const catalogId =
-      existing?.id ?? (await addBookToCatalog({ title: trimmedTitle, author: trimmedAuthor }))?.id;
+    let catalogId = existing?.id;
 
     if (!catalogId) {
-      console.error('Catalog entry missing in addBookToCatalogAndStock');
+      const addedCatalog = await addBookToCatalog({
+        title: trimmedTitle,
+        author: trimmedAuthor,
+        isbn: isbn?.trim() || null,
+        cover_url: cover_url || null,
+        created_by: user.id,
+      });
+
+      catalogId = addedCatalog?.id;
+    }
+    console.log(catalogId);
+    if (!catalogId) {
+      console.error('addBookToCatalogAndStock: Failed to resolve catalog ID');
       return false;
     }
 
@@ -25,6 +45,7 @@ export default async function addBookToCatalogAndStock({ title, author, conditio
       condition,
       user_id: user.id,
       archived: false,
+      notes: notes?.trim() || null,
     });
   } catch (err) {
     console.error('Error in addBookToCatalogAndStock:', err);

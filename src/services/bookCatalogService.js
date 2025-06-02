@@ -1,5 +1,7 @@
 // /src/services/bookCatalogService.js
 
+import supabase from './supabaseClient';
+
 export const fetchCatalogBookEntry = async (title, author) => {
   try {
     const { data, error } = await supabase
@@ -36,17 +38,13 @@ export const searchBooksCatalogByTitle = async (title) => {
   }
 };
 
-export const addBookToCatalog = async ({ title, author, isbn, cover_url, user }) => {
-  if (!user?.id) {
-    return false;
-  }
-
+export const addBookToCatalog = async ({ title, author, isbn, cover_url, created_by }) => {
   const payload = {
     title: title?.trim(),
     author: author?.trim(),
     isbn: isbn?.trim(),
     cover_url,
-    created_by: user.id,
+    created_by: created_by,
   };
 
   try {
