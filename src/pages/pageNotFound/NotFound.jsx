@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Typography, CircularProgress, Fade } from '@mui/material';
 
-import { useSession } from '../../hooks/useSession';
+import { useSession } from '../../hooks';
 
 export default function NotFound() {
   const navigate = useNavigate();
