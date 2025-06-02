@@ -14,7 +14,7 @@ import {
   Link,
 } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
-import { processResetPassword } from '../../services/authService';
+import { processResetPassword } from '../../utilities';
 
 export default function ForgotPassword() {
   const { resetPassword, isAuthenticated } = useAuth();

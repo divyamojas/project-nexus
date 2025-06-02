@@ -28,13 +28,9 @@ import {
   HighlightOff as ClearIcon,
 } from '@mui/icons-material';
 
-import {
-  toggleSaveBook,
-  requestBookReturn,
-  updateRequestStatus,
-} from '../../../services/bookService';
 import { useBookContext } from '../../../contexts/BookContext';
 import { useAuth } from '../../../contexts/AuthContext';
+import { requestBookReturn, toggleSaveBook, updateRequestStatus } from '../../../services';
 
 export default function BookModal({
   open,

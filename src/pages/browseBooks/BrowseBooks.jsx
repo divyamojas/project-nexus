@@ -17,7 +17,7 @@ import {
   Switch,
   Divider,
 } from '@mui/material';
-import { useDebounce } from '../../hooks/useDebounce';
+import { useDebounce } from '../../hooks';
 import BookModal from './components/BookModal';
 import BookCard from './components/BookCard';
 

@@ -3,16 +3,17 @@
 import { useState, useEffect } from 'react';
 import { Container, Typography, TextField, Button, Box } from '@mui/material';
 
-import { insertFeedback, fetchUserEmail } from '../../services/feedbackService';
+import { insertFeedback } from '../../services';
+import { useUser } from '../../contexts/UserContext';
 
 export default function Feedback() {
+  const { user } = useUser();
   const [message, setMessage] = useState('');
   const [email, setEmail] = useState(null);
   const [status, setStatus] = useState(null);
 
   useEffect(() => {
-    const fetch = async () => setEmail(await fetchUserEmail());
-    fetch();
+    setEmail(user.email);
   }, []);
 
   const handleSubmit = async () => {

@@ -33,6 +33,8 @@ export { getCurrentUserFirstName } from './profileService';
 
 export { subscribeToBookChanges, unsubscribeFromBookChanges } from './realtimeService';
 
+export { requestBookReturn } from './returnRequestService';
+
 export { getSavedBooks, toggleSaveBook } from './savedBookService';
 
 export { getUserReviews } from './userReviewService';
