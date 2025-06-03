@@ -154,7 +154,7 @@ export default function BrowseBooks() {
           </Typography>
           <Grid container spacing={2}>
             {otherBooks.map((book) => (
-              <Grid item xs={12} sm={6} key={book.id}>
+              <Grid size={{ xs: 12, sm: 6 }} key={book.id}>
                 <Fade in timeout={400}>
                   <Box>
                     <BookCard
