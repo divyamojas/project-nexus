@@ -3,20 +3,19 @@
 import { getBookById } from './bookService';
 import supabase from './supabaseClient';
 
-export async function requestBorrowBook(book_id, message = '', userData) {
-  if (!userData?.id) {
+export async function requestBorrowBook(book, message = '', userData) {
+  if (!userData?.id || !book.id) {
     return false;
   }
 
-  const { data: bookData, error: bookError } = await getBookById(book_id);
-  if (bookError) throw bookError;
-
   const requester_id = userData.id;
-  const requested_to = bookData.user_id;
+  const requested_to = book.user_id;
 
   const { data, error } = await supabase
     .from('book_requests')
-    .insert([{ book_id, requested_by: requester_id, requested_to, status: 'pending', message }]);
+    .insert([
+      { book_id: book.id, requested_by: requester_id, requested_to, status: 'pending', message },
+    ]);
 
   if (error) throw error;
   return data;

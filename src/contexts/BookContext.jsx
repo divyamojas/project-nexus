@@ -126,8 +126,7 @@ export const BookProvider = ({ children }) => {
 
   const sendBookRequest = async (book, message = 'Hi! I would like to borrow this book.') => {
     try {
-      console.log('in context : ', book);
-      await requestBorrowBook(book, message);
+      await requestBorrowBook(book, message, user);
       return true;
     } catch (err) {
       console.error('Failed to request book:', err);
