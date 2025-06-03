@@ -79,6 +79,7 @@ export default function Dashboard() {
     fetchData();
   };
   const handleAcceptRequest = async (book) => {
+    console.log(book);
     await updateRequestStatus(book.request_id, 'accepted');
     fetchData();
   };

@@ -1,10 +1,9 @@
 // src/utilities/getRequestsForBooksOfUsers.js
 
-import { getRequestsForBook, getMyBooks } from '../services'; // assuming this gets user's books
+import { getRequestsForBook, getMyBooks } from '../services';
 
 export default async function getRequestsForBooksOfUsers(userData) {
   if (!userData?.id) {
-    // console.warn('getRequestsForBooksOfUsers: userData is missing');
     return [];
   }
 

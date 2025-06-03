@@ -14,7 +14,7 @@ export function subscribeToBookChanges(onChange) {
       onChange?.(payload);
     })
     .subscribe((status) => {
-      console.log('[Realtime] Subscription status:', status);
+      // console.log('[Realtime] Subscription status:', status);
     });
 
   return channel;
