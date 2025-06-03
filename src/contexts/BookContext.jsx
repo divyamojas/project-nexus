@@ -88,7 +88,7 @@ export const BookProvider = ({ children }) => {
   const refreshBooks = async () => {
     setLoading(true);
     try {
-      const data = await getBooks({ includeArchived: true });
+      const data = await getBooks({ includeArchived: true, userData: user });
       setBooks(data);
       setError(null);
     } catch (err) {
