@@ -18,11 +18,12 @@ import PageLoader from '../../commonComponents/PageLoader';
 import {
   getCurrentUserFirstName,
   getMyBooks,
-  getRequestsForBook,
   getSavedBooks,
   getTransfers,
   getUserReviews,
+  updateRequestStatus,
 } from '../../services';
+import { getRequestsForUser } from '../../utilities';
 
 export default function Dashboard() {
   const { user } = useUser();
@@ -43,7 +44,7 @@ export default function Dashboard() {
   const fetchData = async () => {
     const [books, req, trf, saved, rev, name] = await Promise.all([
       getMyBooks(),
-      getRequestsForBook(),
+      getRequestsForUser(user),
       getTransfers(),
       getSavedBooks(),
       getUserReviews(),

@@ -18,6 +18,7 @@ export default function BookCarouselSection({
   context = '',
   editable = true,
 }) {
+  // if (context == 'outgoing') console.log(books);
   return (
     <Box my={5} p={3} bgcolor="#fefefe" borderRadius={3}>
       <Typography variant="h6" sx={{ mb: 2, color: '#4e342e' }}>

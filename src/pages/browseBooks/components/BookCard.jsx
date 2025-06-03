@@ -39,6 +39,7 @@ export default function BookCard({
   isSaved: isSavedProp,
   context = '',
 }) {
+  console.log(book);
   const [hovered, setHovered] = useState(false);
   const [isSavedState, setIsSavedState] = useState(
     context === 'saved' ? true : (isSavedProp ?? book?.is_saved ?? false),

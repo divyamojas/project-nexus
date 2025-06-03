@@ -13,10 +13,10 @@ export default async function getRequestsForUser(userData) {
   const ownedBookIds = ownedBooks?.map((book) => book.id) ?? [];
 
   // 2. Get incoming requests (for books the user owns)
-  const { data: incoming, error: inErr } = await getIncomingRequestsForBooks(ownedBookIds);
+  const { InReq: incoming, error: inErr } = await getIncomingRequestsForBooks(ownedBookIds);
 
   // 3. Get outgoing requests (user is the requester)
-  const { data: outgoing, error: outErr } = await getOutgoingRequestsForUser(userId);
+  const { OutReq: outgoing, error: outErr } = await getOutgoingRequestsForUser(userId);
 
   if (booksErr) console.error('getRequests booksErr:', booksErr);
   if (inErr) console.error('getRequests incoming error:', inErr);

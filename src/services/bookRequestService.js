@@ -63,17 +63,102 @@ export async function getRequestsForBook(book_id) {
 export async function getIncomingRequestsForBooks(ownedBookIds) {
   const { data, error } = await supabase
     .from('book_requests')
-    .select('*, book:book_id(user_id, books_catalog(title))')
-    .in('book_id', ownedBookIds);
+    .select(
+      `
+      id,
+      requested_by,
+      requested_to,
+      status,
+      message,
+      created_at,
+      updated_at,
+      book:book_id (
+        id,
+        user_id,
+        status,
+        condition,
+        archived,
+        created_at,
+        books_catalog (
+          id,
+          title,
+          author,
+          cover_url
+        )
+      )
+    `,
+    )
+    .in('book_id', ownedBookIds)
+    .neq('status', 'cancelled');
 
-  return { data, error };
+  if (error) throw error;
+
+  const InReq = (data || []).map((entry) => ({
+    id: entry.book.id,
+    user_id: entry.book.user_id,
+    status: entry.book.status,
+    condition: entry.book.condition,
+    created_at: entry.book.created_at,
+    catalog: entry.book.books_catalog,
+    archived: entry.book.archived,
+    request_status: entry.status,
+    requested_by: entry.requested_by,
+    requested_to: entry.requested_to,
+    request_id: entry.id,
+  }));
+
+  return {
+    InReq,
+    error,
+  };
 }
 
 export async function getOutgoingRequestsForUser(userId) {
   const { data, error } = await supabase
     .from('book_requests')
-    .select('*, book:book_id(user_id, books_catalog(title))')
-    .eq('requested_by', userId);
+    .select(
+      `
+      id,
+      requested_by,
+      requested_to,
+      status,
+      message,
+      created_at,
+      updated_at,
+      book:book_id (
+        id,
+        user_id,
+        status,
+        condition,
+        archived,
+        created_at,
+        books_catalog (
+          id,
+          title,
+          author,
+          cover_url
+        )
+      )
+    `,
+    )
+    .eq('requested_by', userId)
+    .neq('status', 'cancelled');
 
-  return { data, error };
+  if (error) throw error;
+
+  const OutReq = (data || []).map((entry) => ({
+    book_id: entry.book.id,
+    user_id: entry.book.user_id,
+    status: entry.book.status,
+    condition: entry.book.condition,
+    created_at: entry.book.created_at,
+    catalog: entry.book.books_catalog,
+    archived: entry.book.archived,
+    request_status: entry.status,
+    requested_by: entry.requested_by,
+    requested_to: entry.requested_to,
+    request_id: entry.id,
+  }));
+
+  return { OutReq, error };
 }
