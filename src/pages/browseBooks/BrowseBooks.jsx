@@ -25,7 +25,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useBookContext } from '../../contexts/BookContext';
 
 export default function BrowseBooks() {
-  const { toggleBookSaveStatus, sendBookRequest } = useBookContext();
+  const { toggleBookSaveStatus, sendBookRequest, handleDeleteBook, handleArchiveBook } =
+    useBookContext();
 
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearch = useDebounce(searchTerm, 300);
@@ -136,6 +137,8 @@ export default function BrowseBooks() {
                           isSaved={false}
                           onClick={() => handleCardClick(book)}
                           context="myBooks"
+                          onArchive={handleArchiveBook}
+                          onDelete={handleDeleteBook}
                         />
                       </Box>
                     </Fade>
