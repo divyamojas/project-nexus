@@ -125,3 +125,20 @@ export async function getBooks({ includeArchived = true, userData } = {}) {
     };
   });
 }
+
+export async function uploadBookCover({ user, file }) {
+  try {
+    const ext = file.name.split('.').pop();
+    const filePath = `covers/${user.id}-${Date.now()}.${ext}`;
+    const { error: uploadError } = await supabase.storage
+      .from('book-bucket')
+      .upload(filePath, file, { upsert: true });
+    if (uploadError) {
+      return { error: 'Failed to upload cover image.' };
+    }
+    const { data } = supabase.storage.from('book-bucket').getPublicUrl(filePath);
+    return { url: data?.publicUrl || '' };
+  } catch (err) {
+    return { error: 'Unexpected error during cover upload.' };
+  }
+}

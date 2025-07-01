@@ -24,11 +24,13 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import { motion } from 'framer-motion';
 
-import { useBookForm } from '../../../contexts/BookContext';
 import { BOOK_FORM_FIELDS } from '../../../constants/constants';
 import { searchBooksCatalogByTitle } from '../../../services';
 import { validateAndSubmitBookForm } from '../../../utilities';
+
+import { useBookForm } from '../../../contexts/BookContext';
 import { useUser } from '../../../contexts/UserContext';
+import { useBookCoverUpload } from '../../../hooks';
 
 export default function AddBookModal({ open, onClose, setShowAddModal }) {
   const { user } = useUser();
@@ -62,21 +64,58 @@ export default function AddBookModal({ open, onClose, setShowAddModal }) {
       title: option.title,
       author: option.author,
       isbn: option.isbn || '',
-      coverUrl: option.cover_url || '',
+      // coverUrl: option.cover_url || '', // Remove this, handled by upload
     }));
   };
 
-  const handleSubmit = () => {
-    validateAndSubmitBookForm(formData, {
-      setErrors,
-      resetForm,
-      onSuccess: onClose,
-      user: user,
-    }).then(setShowAddModal(false));
+  // --- New Hook for Book Cover Upload ---
+  const {
+    coverFile,
+    coverPreviewUrl,
+    coverError,
+    setCoverFile,
+    setCoverPreviewUrl,
+    setCoverError,
+    getRootProps,
+    getInputProps,
+    resetCover,
+  } = useBookCoverUpload();
+
+  // --- On Submit: upload cover (if any), then save ---
+  const handleSubmit = async () => {
+    setErrors({});
+    let coverUrl = formData.coverUrl;
+    if (coverFile) {
+      const { url, error } = await validateAndSubmitBookForm.uploadBookCover({
+        user,
+        file: coverFile,
+      });
+      if (error) {
+        setCoverError(error);
+        return;
+      }
+      coverUrl = url;
+    }
+    // Now validate and submit form
+    validateAndSubmitBookForm(
+      { ...formData, coverUrl },
+      {
+        setErrors,
+        resetForm,
+        onSuccess: onClose,
+        user,
+      },
+    ).then(() => {
+      setShowAddModal(false);
+      resetCover();
+    });
   };
 
   useEffect(() => {
-    if (!open) resetForm();
+    if (!open) {
+      resetForm();
+      resetCover();
+    }
   }, [open]);
 
   return (
@@ -178,7 +217,7 @@ export default function AddBookModal({ open, onClose, setShowAddModal }) {
             )}
           />
 
-          {BOOK_FORM_FIELDS.map((field) => (
+          {BOOK_FORM_FIELDS.filter((f) => f.stateKey !== 'coverUrl').map((field) => (
             <React.Fragment key={field.stateKey}>
               <TextField
                 placeholder={field.placeholder}
@@ -206,13 +245,6 @@ export default function AddBookModal({ open, onClose, setShowAddModal }) {
                 onChange={(e) => {
                   const value = e.target.value;
                   setFormData((prev) => ({ ...prev, [field.stateKey]: value }));
-                  if (field.stateKey === 'coverUrl') {
-                    setImageStatus('loading');
-                    const img = new Image();
-                    img.onload = () => setImageStatus('success');
-                    img.onerror = () => setImageStatus('error');
-                    img.src = value;
-                  }
                 }}
               >
                 {field.select &&
@@ -222,46 +254,45 @@ export default function AddBookModal({ open, onClose, setShowAddModal }) {
                     </MenuItem>
                   ))}
               </TextField>
-
-              {field.stateKey === 'coverUrl' && (
-                <Box mt={1} textAlign="center">
-                  {formData.coverUrl.trim() && formData.coverUrl.startsWith('http') ? (
-                    imageStatus === 'loading' ? (
-                      <CircularProgress size={24} sx={{ mt: 1 }} />
-                    ) : imageStatus === 'success' ? (
-                      <Fade in={true}>
-                        <Box>
-                          <Avatar
-                            variant="rounded"
-                            src={formData.coverUrl}
-                            sx={{
-                              width: 80,
-                              height: 120,
-                              mx: 'auto',
-                              mb: 1,
-                              borderRadius: 2,
-                              boxShadow: 1,
-                            }}
-                          />
-                          <Typography variant="caption" color="text.secondary">
-                            Cover preview
-                          </Typography>
-                        </Box>
-                      </Fade>
-                    ) : (
-                      <Typography variant="caption" color="error">
-                        Invalid image URL
-                      </Typography>
-                    )
-                  ) : (
-                    <Typography variant="caption" color="text.secondary">
-                      Add URL to preview image
-                    </Typography>
-                  )}
-                </Box>
-              )}
             </React.Fragment>
           ))}
+
+          {/* --- Cover Image Upload --- */}
+          <Box
+            {...getRootProps()}
+            sx={{
+              mt: 1,
+              p: 2,
+              border: '2px dashed #bbb',
+              borderRadius: 2,
+              textAlign: 'center',
+              bgcolor: '#f9f9f9',
+              cursor: 'pointer',
+            }}
+          >
+            <input {...getInputProps()} />
+            {coverPreviewUrl ? (
+              <Box>
+                <Avatar
+                  variant="rounded"
+                  src={coverPreviewUrl}
+                  sx={{ width: 80, height: 120, mx: 'auto', mb: 1, borderRadius: 2, boxShadow: 1 }}
+                />
+                <Typography variant="caption" color="text.secondary">
+                  Cover preview
+                </Typography>
+              </Box>
+            ) : (
+              <Typography variant="caption" color="text.secondary">
+                Drag & drop or click to upload cover image (JPG/PNG/WebP, max 500 KB)
+              </Typography>
+            )}
+            {coverError && (
+              <Typography variant="caption" color="error">
+                {coverError}
+              </Typography>
+            )}
+          </Box>
         </Stack>
       </DialogContent>
 

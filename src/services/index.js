@@ -25,6 +25,7 @@ export {
   deleteBook,
   archiveBook,
   getBooks,
+  uploadBookCover,
 } from './bookService';
 
 export { insertFeedback } from './feedbackService';
