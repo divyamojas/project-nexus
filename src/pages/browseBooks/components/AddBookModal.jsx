@@ -30,7 +30,7 @@ import { searchBooksCatalogByTitle } from '../../../services';
 import { validateAndSubmitBookForm } from '../../../utilities';
 import { useUser } from '../../../contexts/UserContext';
 
-export default function AddBookModal({ open, onClose }) {
+export default function AddBookModal({ open, onClose, setShowAddModal }) {
   const { user } = useUser();
   const {
     formData,
@@ -72,7 +72,7 @@ export default function AddBookModal({ open, onClose }) {
       resetForm,
       onSuccess: onClose,
       user: user,
-    });
+    }).then(setShowAddModal(false));
   };
 
   useEffect(() => {

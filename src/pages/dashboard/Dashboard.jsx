@@ -141,7 +141,11 @@ export default function Dashboard() {
           <FeedbackSection feedbacks={reviews.received} />
         </Paper>
 
-        <AddBookModal open={showAddModal} onClose={() => setShowAddModal(false)} />
+        <AddBookModal
+          open={showAddModal}
+          onClose={() => setShowAddModal(false)}
+          setShowAddModal={setShowAddModal}
+        />
 
         {selectedBook && (
           <BookModal

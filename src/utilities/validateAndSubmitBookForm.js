@@ -7,7 +7,7 @@ export default async function validateAndSubmitBookForm(
   { setErrors, resetForm, onSuccess, user },
 ) {
   if (!user?.id) {
-    console.log('no use in valr');
+    console.log('no user in valr');
     return false;
   }
   const newErrors = {};
