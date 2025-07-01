@@ -3,7 +3,13 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 
 import { useAuth } from './AuthContext';
-import { getCurrentUserFirstName, getMyBooks, getTransfers, getUserReviews } from '../services';
+import {
+  getCurrentUserFirstName,
+  getMyBooks,
+  getTransfers,
+  getUserProfile,
+  getUserReviews,
+} from '../services';
 import { getRequestsForBooksOfUsers } from '../utilities';
 
 const UserContext = createContext();
@@ -11,6 +17,7 @@ const UserContext = createContext();
 export const UserProvider = ({ children }) => {
   const { user } = useAuth();
   const [firstName, setFirstName] = useState('');
+  const [userProfile, setUserProfile] = useState('');
   const [userReviews, setUserReviews] = useState({ given: [], received: [] });
   const [myBooks, setMyBooks] = useState([]);
   const [requests, setRequests] = useState({ incoming: [], outgoing: [] });
@@ -20,6 +27,12 @@ export const UserProvider = ({ children }) => {
   const fetchUserProfile = async () => {
     const name = await getCurrentUserFirstName();
     setFirstName(name || '');
+  };
+
+  const fetchCompleteUserProfile = async () => {
+    const profile = await getUserProfile(user);
+
+    setUserProfile(profile || []);
   };
 
   const fetchUserReviews = async () => {
@@ -50,6 +63,7 @@ export const UserProvider = ({ children }) => {
       fetchMyBooks(),
       fetchRequests(user),
       fetchTransfers(),
+      fetchCompleteUserProfile(),
     ]);
     setLoading(false);
   };
@@ -62,6 +76,7 @@ export const UserProvider = ({ children }) => {
     <UserContext.Provider
       value={{
         user,
+        userProfile,
         firstName,
         userReviews,
         myBooks,

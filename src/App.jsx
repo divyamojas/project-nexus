@@ -18,11 +18,13 @@ const Dashboard = lazy(() => import('./pages/dashboard/Dashboard'));
 const BrowseBooks = lazy(() => import('./pages/browseBooks/BrowseBooks'));
 const Feedback = lazy(() => import('./pages/feedback/Feedback'));
 const NotFound = lazy(() => import('./pages/pageNotFound/NotFound'));
+const ProfileSetup = lazy(() => import('./pages/profile/ProfileSetup'));
 
 const protectedRoutes = [
   { path: '/dashboard', element: <Dashboard /> },
   { path: '/browse', element: <BrowseBooks /> },
   { path: '/feedback', element: <Feedback /> },
+  { path: '/profile', element: <ProfileSetup /> },
 ];
 
 function RouteWrapper() {

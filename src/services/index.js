@@ -29,7 +29,7 @@ export {
 
 export { insertFeedback } from './feedbackService';
 
-export { getCurrentUserFirstName } from './profileService';
+export { getCurrentUserFirstName, getUserProfile } from './profileService';
 
 export { subscribeToBookChanges, unsubscribeFromBookChanges } from './realtimeService';
 

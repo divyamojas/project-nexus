@@ -74,6 +74,9 @@ export default function Layout({ children }) {
           </Typography>
 
           <Box display={{ xs: 'none', sm: 'flex' }} gap={2}>
+            <Button color="inherit" component={Link} to="/profile">
+              Profile
+            </Button>
             <Button color="inherit" component={Link} to="/dashboard">
               Dashboard
             </Button>
@@ -90,6 +93,9 @@ export default function Layout({ children }) {
               <MenuIcon />
             </IconButton>
             <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
+              <MenuItem component={Link} to="/profile" onClick={handleMenuClose}>
+                Profile
+              </MenuItem>
               <MenuItem component={Link} to="/dashboard" onClick={handleMenuClose}>
                 Dashboard
               </MenuItem>
