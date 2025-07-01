@@ -8,7 +8,7 @@ import BookCarouselSection from './components/BookCarouselSection';
 import MyBooksSection from '../dashboard/components/MyBooksSection';
 import FeedbackSection from '../dashboard/components/FeedbackSection';
 
-const AddBookModal = lazy(() => import('../browseBooks/components/AddBookModal'));
+const AddBookModal = lazy(() => import('./components/AddBookModal'));
 const BookModal = lazy(() => import('../browseBooks/components/BookModal'));
 
 import { DASHBOARD_SECTIONS } from '../../constants/constants';
