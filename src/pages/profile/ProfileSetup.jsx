@@ -49,6 +49,15 @@ export default function ProfileSetup() {
     setAvatarUrl,
   });
 
+  // When the profile loads from DB, initialize the form fields.
+  useEffect(() => {
+    if (!userProfile) return;
+    if (userProfile.username) setUsername(userProfile.username);
+    if (userProfile.first_name) setFirstName(userProfile.first_name);
+    if (userProfile.last_name) setLastName(userProfile.last_name);
+    if (userProfile.bio) setBio(userProfile.bio);
+  }, [userProfile]);
+
   useEffect(() => {
     if (userProfile?.avatar_url) {
       setAvatarUrl(userProfile.avatar_url);
