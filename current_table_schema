@@ -1,0 +1,195 @@
+-- Combined schema file with all provided definitions. Nothing removed.
+
+create table public.book_loans (
+  id uuid not null default extensions.uuid_generate_v4 (),
+  book_id uuid not null,
+  lender_id uuid not null,
+  borrower_id uuid not null,
+  loaned_at timestamp with time zone not null default now(),
+  due_date timestamp with time zone null,
+  status text not null default 'active'::text,
+  returned_at timestamp with time zone null,
+  notes text null,
+  constraint book_loans_pkey primary key (id),
+  constraint book_loans_book_fkey foreign KEY (book_id) references books (id) on delete CASCADE,
+  constraint book_loans_borrower_fkey foreign KEY (borrower_id) references auth.users (id) on delete CASCADE,
+  constraint book_loans_lender_fkey foreign KEY (lender_id) references auth.users (id) on delete CASCADE,
+  constraint book_loans_status_check check (
+    (
+      status = any (
+        array[
+          'active'::text,
+          'returned'::text,
+          'cancelled'::text
+        ]
+      )
+    )
+  )
+) TABLESPACE pg_default;
+
+create table public.book_requests (
+  id uuid not null default extensions.uuid_generate_v4 (),
+  book_id uuid null,
+  requested_by uuid not null default auth.uid (),
+  requested_to uuid not null,
+  status text null default 'pending'::text,
+  message text null,
+  created_at timestamp with time zone null default now(),
+  updated_at timestamp with time zone null default now(),
+  constraint book_requests_pkey primary key (id),
+  constraint book_requests_book_id_fkey foreign KEY (book_id) references books (id) on delete CASCADE,
+  constraint book_requests_requested_by_fkey foreign KEY (requested_by) references auth.users (id) on update CASCADE on delete CASCADE,
+  constraint book_requests_requested_to_fkey foreign KEY (requested_to) references auth.users (id) on update CASCADE on delete CASCADE,
+  constraint fk_requested_by_profiles foreign KEY (requested_by) references profiles (id),
+  constraint book_requests_status_check check (
+    (
+      status = any (
+        array[
+          'pending'::text,
+          'accepted'::text,
+          'rejected'::text,
+          'cancelled'::text
+        ]
+      )
+    )
+  )
+) TABLESPACE pg_default;
+
+create unique INDEX IF not exists unique_active_book_request on public.book_requests using btree (book_id, requested_by) TABLESPACE pg_default
+where
+  (status = 'pending'::text);
+
+create unique INDEX IF not exists unique_pending_request_constraint on public.book_requests using btree (book_id, requested_by, requested_to) TABLESPACE pg_default
+where
+  (status = 'pending'::text);
+
+create table public.book_reviews (
+  id uuid not null default extensions.uuid_generate_v4 (),
+  book_id uuid null,
+  reviewer_id uuid null,
+  rating integer null,
+  comment text null,
+  created_at timestamp with time zone null default now(),
+  constraint book_reviews_pkey primary key (id),
+  constraint book_reviews_book_id_fkey foreign KEY (book_id) references books (id) on delete CASCADE,
+  constraint book_reviews_rating_check check (
+    (
+      (rating >= 1)
+      and (rating <= 5)
+    )
+  )
+) TABLESPACE pg_default;
+
+create table public.books (
+  id uuid not null default extensions.uuid_generate_v4 (),
+  user_id uuid null,
+  catalog_id uuid not null,
+  condition text not null,
+  notes text null,
+  status text null default 'available'::text,
+  created_at timestamp with time zone null default now(),
+  archived boolean not null default false,
+  constraint books_pkey primary key (id),
+  constraint unique_catalog_condition unique (catalog_id, condition),
+  constraint books_catalog_id_fkey foreign KEY (catalog_id) references books_catalog (id) on delete CASCADE,
+  constraint books_user_id_fkey foreign KEY (user_id) references auth.users (id) on update CASCADE on delete CASCADE
+) TABLESPACE pg_default;
+
+create table public.books_catalog (
+  id uuid not null default extensions.uuid_generate_v4 (),
+  title text not null,
+  author text null,
+  isbn text null,
+  cover_url text null,
+  created_at timestamp with time zone null default now(),
+  created_by uuid null default auth.uid (),
+  constraint books_catalog_pkey primary key (id),
+  constraint books_catalog_isbn_key unique (isbn)
+) TABLESPACE pg_default;
+
+create table public.return_requests (
+  id uuid not null default extensions.uuid_generate_v4 (),
+  book_id uuid not null,
+  loan_id uuid not null,
+  requested_by uuid not null,
+  requested_at timestamp with time zone not null default now(),
+  status text not null default 'pending'::text,
+  resolved_at timestamp with time zone null,
+  notes text null,
+  constraint return_requests_pkey primary key (id),
+  constraint return_requests_book_fkey foreign KEY (book_id) references books (id) on delete CASCADE,
+  constraint return_requests_loan_fkey foreign KEY (loan_id) references book_loans (id) on delete CASCADE,
+  constraint return_requests_requested_by_fkey foreign KEY (requested_by) references auth.users (id) on delete CASCADE,
+  constraint return_requests_status_check check (
+    (
+      status = any (
+        array[
+          'pending'::text,
+          'approved'::text,
+          'rejected'::text
+        ]
+      )
+    )
+  )
+) TABLESPACE pg_default;
+
+create unique INDEX IF not exists unique_active_return_request on public.return_requests using btree (loan_id) TABLESPACE pg_default
+where
+  (status = 'pending'::text);
+
+create table public.saved_books (
+  id uuid not null default extensions.uuid_generate_v4 (),
+  user_id uuid not null,
+  book_id uuid not null,
+  catalog_id uuid not null,
+  created_at timestamp with time zone null default now(),
+  constraint saved_books_pkey primary key (id),
+  constraint unique_user_book unique (user_id, book_id),
+  constraint unique_user_catalog unique (user_id, catalog_id),
+  constraint fk_saved_books_book foreign KEY (book_id) references books (id) on delete CASCADE,
+  constraint fk_saved_books_catalog foreign KEY (catalog_id) references books_catalog (id) on delete CASCADE,
+  constraint fk_saved_books_user foreign KEY (user_id) references auth.users (id) on update CASCADE on delete CASCADE
+) TABLESPACE pg_default;
+
+create table public.transfers (
+  id uuid not null default extensions.uuid_generate_v4 (),
+  request_id uuid null,
+  book_id uuid null,
+  from_user uuid null,
+  to_user uuid null,
+  status text null default 'pending'::text,
+  scheduled_at timestamp with time zone null,
+  completed_at timestamp with time zone null,
+  created_at timestamp with time zone null default now(),
+  constraint transfers_pkey primary key (id),
+  constraint transfers_book_id_fkey foreign KEY (book_id) references books (id) on delete CASCADE,
+  constraint transfers_request_id_fkey foreign KEY (request_id) references book_requests (id) on delete set null,
+  constraint transfers_status_check check (
+    (
+      status = any (
+        array[
+          'pending'::text,
+          'confirmed'::text,
+          'transferred'::text,
+          'cancelled'::text
+        ]
+      )
+    )
+  )
+) TABLESPACE pg_default;
+
+create table public.user_reviews (
+  id uuid not null default extensions.uuid_generate_v4 (),
+  reviewer_id uuid null,
+  reviewee_id uuid null,
+  rating integer null,
+  comment text null,
+  created_at timestamp with time zone null default now(),
+  constraint user_reviews_pkey primary key (id),
+  constraint user_reviews_rating_check check (
+    (
+      (rating >= 1)
+      and (rating <= 5)
+    )
+  )
+) TABLESPACE pg_default;
