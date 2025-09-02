@@ -19,7 +19,7 @@ import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { logout } from '../services/authService';
-import { useColorMode } from '../theme/ThemeModeProvider';
+import { useColorMode } from '../theme/useColorMode';
 
 export default function Layout({ children }) {
   const [showNavbar, setShowNavbar] = useState(true);

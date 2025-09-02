@@ -1,8 +1,9 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { useLocation } from 'react-router-dom';
 import { brandTokens, designTokens } from './tokens';
+import { colorModeContext } from './colorModeContext';
 
 const STORAGE_KEY = 'leaflet-color-mode';
 
@@ -62,11 +63,8 @@ function getDesignTokens(mode) {
   };
 }
 
-const ColorModeContext = createContext({ mode: 'light', toggleColorMode: () => {} });
-
-export function useColorMode() {
-  return useContext(ColorModeContext);
-}
+// colorModeContext is defined in its own module to keep this file's export surface
+// limited to a React component for more reliable Fast Refresh boundaries.
 
 // Sizing tokens moved to ./tokens for stable export surface
 
@@ -150,12 +148,12 @@ export function ThemeModeProvider({ children }) {
   const theme = useMemo(() => createTheme(getDesignTokens(mode)), [mode]);
 
   return (
-    <ColorModeContext.Provider value={colorMode}>
+    <colorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
         {children}
       </ThemeProvider>
-    </ColorModeContext.Provider>
+    </colorModeContext.Provider>
   );
 }
 

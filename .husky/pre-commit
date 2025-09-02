@@ -1,1 +1,15 @@
-npx lint-staged
+set -e
+
+# Allow skipping the hook: SKIP_HUSKY=1 git commit -m "..."
+if [ "${SKIP_HUSKY:-0}" = "1" ]; then
+  exit 0
+fi
+
+# Detect package manager and run lint-staged on staged files only
+if [ -f pnpm-lock.yaml ] && command -v pnpm >/dev/null 2>&1; then
+  pnpm exec lint-staged
+elif [ -f yarn.lock ] && command -v yarn >/dev/null 2>&1; then
+  yarn lint-staged
+else
+  npx lint-staged
+fi
