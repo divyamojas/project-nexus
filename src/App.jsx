@@ -3,24 +3,25 @@
 import { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
-import PageLoader from './commonComponents/PageLoader';
-import DelayedLoader from './commonComponents/DelayedLoader';
-import PrivateRoute from './commonComponents/PrivateRoute';
-import Layout from './commonComponents/Layout';
-import { UserProvider } from './contexts/UserContext';
-import { BookProvider } from './contexts/BookContext';
-import { useSession } from './hooks';
-import { ThemeModeProvider } from './theme/ThemeModeProvider';
+import PageLoader from '@/commonComponents/PageLoader';
+import DelayedLoader from '@/commonComponents/DelayedLoader';
+import PrivateRoute from '@/commonComponents/PrivateRoute';
+import Layout from '@/commonComponents/Layout';
+import { UserProvider } from '@/contexts/UserContext';
+import { BookProvider } from '@/contexts/BookContext';
+import { useSession } from '@/hooks';
+import { ThemeModeProvider } from '@/theme/ThemeModeProvider';
+import { SnackbarProvider } from '@/components/providers/SnackbarProvider';
 
 // Lazy loading pages
-const Signup = lazy(() => import('./pages/auth/Signup'));
-const Login = lazy(() => import('./pages/auth/Login'));
-const ForgotPassword = lazy(() => import('./pages/auth/ForgotPassword'));
-const Dashboard = lazy(() => import('./pages/dashboard/Dashboard'));
-const BrowseBooks = lazy(() => import('./pages/browseBooks/BrowseBooks'));
-const Feedback = lazy(() => import('./pages/feedback/Feedback'));
-const NotFound = lazy(() => import('./pages/pageNotFound/NotFound'));
-const ProfileSetup = lazy(() => import('./pages/profile/ProfileSetup'));
+const Signup = lazy(() => import('@/features/auth/Signup'));
+const Login = lazy(() => import('@/features/auth/Login'));
+const ForgotPassword = lazy(() => import('@/features/auth/ForgotPassword'));
+const Dashboard = lazy(() => import('@/features/dashboard/Dashboard'));
+const BrowseBooks = lazy(() => import('@/features/books/BrowseBooks'));
+const Feedback = lazy(() => import('@/features/feedback/Feedback'));
+const NotFound = lazy(() => import('@/features/notFound/NotFound'));
+const ProfileSetup = lazy(() => import('@/features/profile/ProfileSetup'));
 
 const protectedRoutes = [
   { path: '/dashboard', element: <Dashboard /> },
@@ -74,13 +75,15 @@ export default function App() {
   return (
     <Router>
       <ThemeModeProvider>
-        <Suspense fallback={<DelayedLoader delay={250} />}>
-          <UserProvider>
-            <BookProvider>
-              <RouteWrapper />
-            </BookProvider>
-          </UserProvider>
-        </Suspense>
+        <SnackbarProvider>
+          <Suspense fallback={<DelayedLoader delay={250} />}>
+            <UserProvider>
+              <BookProvider>
+                <RouteWrapper />
+              </BookProvider>
+            </UserProvider>
+          </Suspense>
+        </SnackbarProvider>
       </ThemeModeProvider>
     </Router>
   );
