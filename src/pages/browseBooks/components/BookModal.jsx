@@ -30,7 +30,14 @@ import {
 
 import { useBookContext } from '../../../contexts/hooks/useBookContext';
 import { useAuth } from '../../../contexts/hooks/useAuth';
-import { requestBookReturn, toggleSaveBook, updateRequestStatus } from '../../../services';
+import {
+  requestBookReturn,
+  toggleSaveBook,
+  updateRequestStatus,
+  completeTransfer,
+} from '../../../services';
+import { approveReturnRequest } from '../../../services/returnRequestService';
+import ReviewsSection from './ReviewsSection';
 
 export default function BookModal({
   open,
@@ -48,6 +55,8 @@ export default function BookModal({
       setIsSavedState(book?.is_saved ?? false);
     }
   }, [book]);
+
+  // Reviews loaded via ReviewsSection
 
   if (!book) return null;
   const { catalog = {} } = book;
@@ -67,6 +76,13 @@ export default function BookModal({
     onClose();
   };
 
+  const handleApproveReturn = async () => {
+    if (!book?.return_request_id) return;
+    await approveReturnRequest(book.return_request_id);
+    onActionComplete();
+    onClose();
+  };
+
   const handleAcceptRequest = async () => {
     await updateRequestStatus(book.request_id, 'accepted');
     onActionComplete();
@@ -81,6 +97,13 @@ export default function BookModal({
 
   const handleCancelRequest = async () => {
     await updateRequestStatus(book.request_id, 'cancelled');
+    onActionComplete();
+    onClose();
+  };
+
+  const handleCompleteTransfer = async () => {
+    if (!book?.transfer_id) return;
+    await completeTransfer({ transfer_id: book.transfer_id });
     onActionComplete();
     onClose();
   };
@@ -128,11 +151,19 @@ export default function BookModal({
             </Tooltip>
           </>
         );
-      case 'lent':
+      case 'lentBorrowed':
         return (
           <Tooltip title="Request Book Return">
             <IconButton onClick={handleRequestReturn}>
               <ReplayIcon />
+            </IconButton>
+          </Tooltip>
+        );
+      case 'lentOwned':
+        return (
+          <Tooltip title="Approve Return">
+            <IconButton onClick={handleApproveReturn} disabled={!book?.return_request_id}>
+              <CheckIcon />
             </IconButton>
           </Tooltip>
         );
@@ -156,6 +187,14 @@ export default function BookModal({
           <Tooltip title="Cancel Request">
             <IconButton onClick={handleCancelRequest}>
               <CancelIcon />
+            </IconButton>
+          </Tooltip>
+        );
+      case 'transfers':
+        return (
+          <Tooltip title="Complete Transfer">
+            <IconButton onClick={handleCompleteTransfer}>
+              <CheckIcon />
             </IconButton>
           </Tooltip>
         );
@@ -208,6 +247,7 @@ export default function BookModal({
             <Chip label={`Status: ${book.status}`} variant="outlined" color="primary" />
             <Chip label={`Condition: ${book.condition}`} variant="outlined" color="secondary" />
           </Stack>
+          <ReviewsSection bookId={book.id} ownerId={book.user_id} user={user} />
         </Stack>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2, justifyContent: 'space-between' }}>
@@ -227,7 +267,7 @@ export default function BookModal({
                 variant="contained"
                 size="small"
                 onClick={() => {
-                  sendBookRequest(book.id);
+                  sendBookRequest(book);
                   onClose();
                 }}
               >

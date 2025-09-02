@@ -4,12 +4,12 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 import { Container, Typography, Paper } from '@mui/material';
 import { ArchiveOutlined, CloseOutlined } from '@mui/icons-material';
 
-import BookCarouselSection from './components/BookCarouselSection';
-import MyBooksSection from '../dashboard/components/MyBooksSection';
-import FeedbackSection from '../dashboard/components/FeedbackSection';
+import BookCarouselSection from '@/features/dashboard/components/BookCarouselSection';
+import MyBooksSection from '@/features/dashboard/components/MyBooksSection';
+import FeedbackSection from '@/features/dashboard/components/FeedbackSection';
 
-const AddBookModal = lazy(() => import('./components/AddBookModal'));
-const BookModal = lazy(() => import('../browseBooks/components/BookModal'));
+const AddBookModal = lazy(() => import('@/features/books/components/AddBookModal'));
+const BookModal = lazy(() => import('@/features/books/components/BookModal'));
 
 import { DASHBOARD_SECTIONS } from '../../constants/constants';
 import { useUser } from '../../contexts/hooks/useUser';
@@ -20,11 +20,11 @@ import {
   getSavedBooks,
   getTransfers,
   getUserReviews,
-  updateRequestStatus,
-  toggleSaveBook,
-  requestBookReturn,
+  getMyBooks,
+  getMyLoans,
 } from '../../services';
 import { getRequestsForUser } from '../../utilities';
+import useDashboardHandlers from './hooks/useDashboardHandlers';
 
 export default function Dashboard() {
   const { user } = useUser();
@@ -34,6 +34,7 @@ export default function Dashboard() {
   const [transfers, setTransfers] = useState([]);
   const [savedBooks, setSavedBooks] = useState([]);
   const [reviews, setReviews] = useState({ given: [], received: [] });
+  const [borrowedBooks, setBorrowedBooks] = useState([]);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedBook, setSelectedBook] = useState(null);
@@ -43,18 +44,32 @@ export default function Dashboard() {
   const { categorizedBooks, handleDeleteBook, handleArchiveBook, refreshBooks } = useBookContext();
 
   const fetchData = async () => {
-    const [req, trf, saved, rev, name] = await Promise.all([
+    const [req, trf, saved, rev, name, myLoans] = await Promise.all([
       getRequestsForUser(user),
       getTransfers(),
       getSavedBooks(user),
       getUserReviews(user),
       getCurrentUserFirstName(user),
+      getMyLoans({ role: 'borrower' }),
     ]);
     setRequests(req);
     setTransfers(trf);
     setSavedBooks(saved);
     setReviews(rev);
     setUserFirstName(name);
+    // Normalize loans -> book-like
+    const borrowed = (myLoans || []).map((l) => ({
+      id: l.book?.id,
+      user_id: l.book?.user_id,
+      status: 'lent',
+      condition: l.book?.condition,
+      created_at: l.book?.created_at,
+      catalog: l.book?.books_catalog,
+      archived: false,
+      loan_id: l.id,
+      loan_due_date: l.due_date,
+    }));
+    setBorrowedBooks(borrowed);
     refreshBooks();
   };
 
@@ -70,29 +85,31 @@ export default function Dashboard() {
     setModalContext(context);
   };
   const handleCloseModal = () => setSelectedBook(null);
-  const handleToggleSave = async (book) => {
-    await toggleSaveBook(book.id, false, null, user);
-    fetchData();
-  };
-  const handleRequestReturn = async (book) => {
-    await requestBookReturn(book.id, user);
-    fetchData();
-  };
-  const handleAcceptRequest = async (book) => {
-    await updateRequestStatus(book.request_id, 'accepted');
-    fetchData();
-  };
-  const handleRejectRequest = async (book) => {
-    await updateRequestStatus(book.request_id, 'rejected');
-    fetchData();
-  };
-  const handleCancelRequest = async (book) => {
-    await updateRequestStatus(book.request_id, 'cancelled');
-    fetchData();
-  };
+  const {
+    onToggleSave: handleToggleSave,
+    onRequestReturn: handleRequestReturn,
+    onAcceptRequest: handleAcceptRequest,
+    onRejectRequest: handleRejectRequest,
+    onCancelRequest: handleCancelRequest,
+    onCompleteTransfer: handleCompleteTransfer,
+    onApproveReturn: handleApproveReturn,
+    onArchive: handleArchive,
+    onDelete: handleDelete,
+  } = useDashboardHandlers({
+    user,
+    refetch: fetchData,
+    archiveBook: handleArchiveBook,
+    deleteBook: handleDeleteBook,
+  });
 
   const { lentBooks, archivedBooks, myActiveBooks } = categorizedBooks;
-  const bookSections = DASHBOARD_SECTIONS({ lentBooks, savedBooks, requests, transfers });
+  const bookSections = DASHBOARD_SECTIONS({
+    lentBooks,
+    savedBooks,
+    requests,
+    transfers,
+    borrowedBooks,
+  });
 
   return (
     <Suspense fallback={<PageLoader />}>
@@ -127,13 +144,15 @@ export default function Dashboard() {
               context={context}
               editable={true}
               onBookClick={(book) => handleBookClick(book, context)}
-              onDelete={handleDeleteBook}
-              onArchive={handleArchiveBook}
+              onDelete={handleDelete}
+              onArchive={handleArchive}
               onToggleSave={handleToggleSave}
               onRequestReturn={handleRequestReturn}
+              onApproveReturn={handleApproveReturn}
               onAccept={handleAcceptRequest}
               onReject={handleRejectRequest}
               onCancelRequest={handleCancelRequest}
+              onCompleteTransfer={handleCompleteTransfer}
             />
           ))}
 

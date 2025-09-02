@@ -15,10 +15,12 @@ import {
   Collapse,
   Button,
 } from '@mui/material';
-import { ACTION_CONFIGS, STATUS_COLOR, ACTION_STYLES } from '../../../constants/constants';
-import { useTheme } from '@mui/material/styles';
+import { ACTION_CONFIGS } from '../../../constants/constants';
 import { useBookContext } from '../../../contexts/hooks/useBookContext';
 import { useAuth } from '../../../contexts/hooks/useAuth';
+import BookCardActions from './BookCardActions';
+import BookCover from './BookCover';
+import BookBadges from './BookBadges';
 
 export default function BookCard({
   book,
@@ -30,6 +32,8 @@ export default function BookCard({
   onReject = () => {},
   onCancelRequest = () => {},
   onRequestReturn = () => {},
+  onApproveReturn = () => {},
+  onCompleteTransfer = () => {},
   onRequest = () => {},
   editable = false,
   isSaved: isSavedProp,
@@ -45,15 +49,6 @@ export default function BookCard({
   const condition = book.condition;
   const status = book.status || 'available';
   const archived = book.archived;
-  const theme = useTheme();
-  const gradients = [
-    `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.secondary.light} 100%)`,
-    `linear-gradient(135deg, ${theme.palette.info.light} 0%, ${theme.palette.primary.main} 100%)`,
-    `linear-gradient(135deg, ${theme.palette.warning.light} 0%, ${theme.palette.secondary.main} 100%)`,
-    `linear-gradient(135deg, ${theme.palette.success.light} 0%, ${theme.palette.primary.main} 100%)`,
-    `linear-gradient(135deg, ${theme.palette.grey[200]} 0%, ${theme.palette.grey[300]} 100%)`,
-  ];
-  const gradientIndex = (title || author || '').length % gradients.length;
 
   const { sendBookRequest } = useBookContext();
   const { user } = useAuth();
@@ -77,9 +72,16 @@ export default function BookCard({
     onReject,
     onCancelRequest,
     onRequestReturn,
+    onApproveReturn,
+    onCompleteTransfer,
   };
 
-  const actions = ACTION_CONFIGS[context] || [];
+  const actions = (ACTION_CONFIGS[context] || []).filter((action) => {
+    if (context === 'lentOwned' && action.handler === 'onApproveReturn') {
+      return Boolean(book.return_request_id);
+    }
+    return true;
+  });
   const isRequestPending = book.request_status === 'pending' && book.requested_by === user?.id;
 
   return (
@@ -124,74 +126,16 @@ export default function BookCard({
                   gap: 1,
                 }}
               >
-                {actions.map((action, idx) => {
-                  const styleKey =
-                    typeof action.styleKey === 'function'
-                      ? action.styleKey(book, action.toggleState ? isSavedState : undefined)
-                      : action.styleKey;
-
-                  const actionStyle = ACTION_STYLES[styleKey] || {};
-                  return (
-                    <Tooltip
-                      key={idx}
-                      title={
-                        typeof action.title === 'function'
-                          ? action.title(book, action.toggleState ? isSavedState : undefined)
-                          : action.title
-                      }
-                    >
-                      <IconButton
-                        size="small"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handlers[action.handler]?.(book);
-                        }}
-                        sx={{
-                          bgcolor: 'background.paper',
-                          color: 'action.active',
-                          boxShadow: 2,
-                          transition: 'all 0.2s ease',
-                          '&:hover': {
-                            bgcolor: actionStyle.hover || 'action.hover',
-                            color: actionStyle.hoverText || 'inherit',
-                          },
-                        }}
-                      >
-                        {typeof action.icon === 'function'
-                          ? action.icon(book, action.toggleState ? isSavedState : undefined)
-                          : action.icon}
-                      </IconButton>
-                    </Tooltip>
-                  );
-                })}
+                <BookCardActions
+                  actions={actions}
+                  book={book}
+                  isSavedState={isSavedState}
+                  onAction={(handler) => handlers[handler]?.(book)}
+                />
               </Box>
             )}
 
-            {cover_url ? (
-              <CardMedia
-                component="img"
-                height="160"
-                image={cover_url}
-                alt={`${title} cover`}
-                sx={{
-                  objectFit: 'cover',
-                  borderBottom: (t) => `1px solid ${t.palette.divider}`,
-                  borderRadius: '4px 4px 0 0',
-                }}
-              />
-            ) : (
-              <Box
-                height={160}
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                sx={{ background: gradients[gradientIndex] }}
-              >
-                <Typography variant="body2" color="text.secondary">
-                  No cover image
-                </Typography>
-              </Box>
-            )}
+            <BookCover title={title} cover_url={cover_url} />
 
             <CardContent sx={{ px: 2, py: 1.5, flexGrow: 1 }}>
               <Typography variant="subtitle1" fontWeight={600} gutterBottom noWrap>
@@ -200,21 +144,7 @@ export default function BookCard({
               <Typography variant="body2" color="text.secondary" noWrap>
                 {author || 'Unknown author'}
               </Typography>
-              <Stack direction="row" spacing={1} mt={1}>
-                <Chip
-                  label={condition || 'Unknown'}
-                  size="small"
-                  variant="outlined"
-                  sx={{ fontWeight: 500 }}
-                />
-                <Chip
-                  label={status}
-                  size="small"
-                  color={STATUS_COLOR[status] || 'default'}
-                  variant="filled"
-                  sx={{ fontWeight: 500 }}
-                />
-              </Stack>
+              <BookBadges condition={condition} status={status} />
             </CardContent>
 
             {/* Request/Withdraw Button */}
