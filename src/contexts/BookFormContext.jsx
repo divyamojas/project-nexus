@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useCallback } from 'react';
 import { INITIAL_BOOK_FORM_DATA } from '../constants/constants';
 
-export const BookFormContext = createContext();
+export const bookFormContext = createContext();
 
 export const BookFormProvider = ({ children }) => {
   const [formData, setFormData] = useState(INITIAL_BOOK_FORM_DATA);
@@ -20,7 +20,7 @@ export const BookFormProvider = ({ children }) => {
   }, []);
 
   return (
-    <BookFormContext.Provider
+    <bookFormContext.Provider
       value={{
         formData,
         setFormData,
@@ -36,7 +36,7 @@ export const BookFormProvider = ({ children }) => {
       }}
     >
       {children}
-    </BookFormContext.Provider>
+    </bookFormContext.Provider>
   );
 };
 

@@ -15,7 +15,7 @@ import {
 import { requestBorrowBook } from '../services/bookRequestService';
 import { BookFormProvider } from './BookFormContext';
 
-export const BookContext = createContext();
+export const bookContext = createContext();
 
 /**
  * Provides book lists, filters, and actions (archive/delete/save/request).
@@ -148,7 +148,7 @@ export const BookProvider = ({ children }) => {
   }, []);
 
   return (
-    <BookContext.Provider
+    <bookContext.Provider
       value={{
         books,
         savedBooks,
@@ -168,7 +168,7 @@ export const BookProvider = ({ children }) => {
       }}
     >
       <BookFormProvider>{children}</BookFormProvider>
-    </BookContext.Provider>
+    </bookContext.Provider>
   );
 };
 

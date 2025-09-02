@@ -12,7 +12,7 @@ import {
 } from '../services';
 import { getRequestsForBooksOfUsers } from '../utilities';
 
-export const UserContext = createContext();
+export const userContext = createContext();
 
 export const UserProvider = ({ children }) => {
   const { user } = useAuth();
@@ -73,7 +73,7 @@ export const UserProvider = ({ children }) => {
   }, [user]);
 
   return (
-    <UserContext.Provider
+    <userContext.Provider
       value={{
         user,
         userProfile,
@@ -87,7 +87,7 @@ export const UserProvider = ({ children }) => {
       }}
     >
       {children}
-    </UserContext.Provider>
+    </userContext.Provider>
   );
 };
 

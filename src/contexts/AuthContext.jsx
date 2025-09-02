@@ -7,7 +7,7 @@ import { useSessionTracker } from '../hooks';
 import * as authService from '../services/authService';
 
 // 1. Create the context (exported for external hooks)
-export const AuthContext = createContext();
+export const authContext = createContext();
 
 // 3. Helper to check email domain
 const isValidDomain = (email) =>
@@ -60,5 +60,5 @@ export function AuthProvider({ children }) {
   // 6. Show nothing until session is resolved
   if (loading) return null;
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return <authContext.Provider value={value}>{children}</authContext.Provider>;
 }
