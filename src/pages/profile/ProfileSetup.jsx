@@ -8,11 +8,11 @@ import {
   Card,
   CardContent,
   CircularProgress,
-  Grid,
   Stack,
   TextField,
   Typography,
   Alert,
+  Container,
 } from '@mui/material';
 import { useAvatarDrop, useProfileSave } from '../../hooks';
 import { useUser } from '../../contexts/hooks/useUser';
@@ -56,9 +56,9 @@ export default function ProfileSetup() {
   }, [userProfile?.avatar_url]);
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#FFF8F1', pt: 6 }}>
-      <Grid container justifyContent="center">
-        <Grid item xs={12} sm={10} md={6} lg={4}>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pt: 6 }}>
+      <Container maxWidth="sm">
+        <Box>
           <Card sx={{ borderRadius: 4, boxShadow: 3 }}>
             <CardContent>
               <Typography variant="h5" gutterBottom>
@@ -85,13 +85,13 @@ export default function ProfileSetup() {
                     width: 96,
                     height: 96,
                     mb: 1,
-                    bgcolor: '#FFD7BA',
+                    bgcolor: 'secondary.main',
                     fontSize: 40,
                   }}
                 >
                   {!avatarUrl && username ? username[0].toUpperCase() : ''}
                 </Avatar>
-                <Typography variant="caption" sx={{ color: '#888' }}>
+                <Typography variant="caption" color="text.secondary">
                   Drag & drop a profile picture, or click to select <br />
                   JPG/PNG/WebP, max 300 KB.
                 </Typography>
@@ -106,24 +106,26 @@ export default function ProfileSetup() {
                     required
                     fullWidth
                   />
-                  <Grid container spacing={2}>
-                    <Grid item xs={6}>
-                      <TextField
-                        label="First Name"
-                        value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
-                        fullWidth
-                      />
-                    </Grid>
-                    <Grid item xs={6}>
-                      <TextField
-                        label="Last Name"
-                        value={lastName}
-                        onChange={(e) => setLastName(e.target.value)}
-                        fullWidth
-                      />
-                    </Grid>
-                  </Grid>
+                  <Box
+                    sx={{
+                      display: 'grid',
+                      gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+                      gap: 2,
+                    }}
+                  >
+                    <TextField
+                      label="First Name"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      fullWidth
+                    />
+                    <TextField
+                      label="Last Name"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      fullWidth
+                    />
+                  </Box>
                   <TextField
                     label="Short Bio"
                     value={bio}
@@ -140,10 +142,10 @@ export default function ProfileSetup() {
                     type="submit"
                     fullWidth
                     variant="contained"
-                    color="warning"
+                    color="primary"
                     size="large"
                     disabled={loading}
-                    sx={{ bgcolor: '#8d6e63', '&:hover': { bgcolor: '#795548' } }}
+                    sx={{ borderRadius: 2 }}
                     onSubmit={handleSave}
                   >
                     {loading ? (
@@ -154,15 +156,18 @@ export default function ProfileSetup() {
                       'Save & Continue'
                     )}
                   </Button>
-                  <Typography variant="caption" sx={{ textAlign: 'center', color: '#bbb', mt: 1 }}>
+                  <Typography
+                    variant="caption"
+                    sx={{ textAlign: 'center', color: 'text.disabled', mt: 1 }}
+                  >
                     You can update your profile anytime from your account.
                   </Typography>
                 </Stack>
               </form>
             </CardContent>
           </Card>
-        </Grid>
-      </Grid>
+        </Box>
+      </Container>
     </Box>
   );
 }

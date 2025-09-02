@@ -11,22 +11,22 @@ export default function PageLoader() {
   const message = QUOTES[location.pathname] || 'One moment... loading 📚';
 
   return (
-    <Container maxWidth="xs" style={{ marginTop: '4rem' }}>
+    <Container maxWidth="xs" sx={{ mt: 4 }}>
       <Card
-        style={{
-          backgroundColor: '#f0fdf4',
-          padding: '2rem',
-          borderRadius: '16px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+        sx={{
+          bgcolor: 'background.paper',
+          p: 3,
+          borderRadius: 2,
+          boxShadow: 2,
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
           flexDirection: 'column',
-          gap: '1rem',
+          gap: 2,
         }}
       >
-        <Spa style={{ fontSize: 40, color: '#66bb6a' }} />
-        <Typography variant="subtitle1" style={{ color: '#66bb6a' }}>
+        <Spa sx={{ fontSize: 40, color: 'success.main' }} />
+        <Typography variant="subtitle1" sx={{ color: 'success.main' }}>
           {message}
         </Typography>
         <CircularProgress color="success" />

@@ -9,6 +9,7 @@ import Layout from './commonComponents/Layout';
 import { UserProvider } from './contexts/UserContext';
 import { BookProvider } from './contexts/BookContext';
 import { useSession } from './hooks';
+import { ThemeModeProvider } from './theme/ThemeModeProvider';
 
 // Lazy loading pages
 const Signup = lazy(() => import('./pages/auth/Signup'));
@@ -78,13 +79,15 @@ function RouteWrapper() {
 export default function App() {
   return (
     <Router>
-      <Suspense fallback={<PageLoader />}>
-        <UserProvider>
-          <BookProvider>
-            <RouteWrapper />
-          </BookProvider>
-        </UserProvider>
-      </Suspense>
+      <ThemeModeProvider>
+        <Suspense fallback={<PageLoader />}>
+          <UserProvider>
+            <BookProvider>
+              <RouteWrapper />
+            </BookProvider>
+          </UserProvider>
+        </Suspense>
+      </ThemeModeProvider>
     </Router>
   );
 }

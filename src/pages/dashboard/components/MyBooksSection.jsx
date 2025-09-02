@@ -16,14 +16,10 @@ export default function MyBooksSection({
   return (
     <>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h6" sx={{ color: '#4e342e' }}>
+        <Typography variant="h6" color="text.primary">
           📗 My Books
         </Typography>
-        <Button
-          variant="contained"
-          onClick={onAdd}
-          sx={{ bgcolor: '#8d6e63', '&:hover': { bgcolor: '#795548' } }}
-        >
+        <Button variant="contained" color="primary" onClick={onAdd} sx={{ borderRadius: 2 }}>
           + Add Book
         </Button>
       </Box>
@@ -45,8 +41,8 @@ export default function MyBooksSection({
           onClick={() => setShowArchived(!showArchived)}
           sx={{
             fontStyle: 'italic',
-            bgcolor: '#fcf8f4',
-            '&:hover': { bgcolor: '#f3ede9' },
+            bgcolor: 'background.default',
+            '&:hover': { bgcolor: 'action.hover' },
             cursor: 'pointer',
           }}
         />

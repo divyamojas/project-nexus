@@ -30,13 +30,7 @@ export const STATUS_COLOR = {
   lent: 'default',
 };
 
-export const FALLBACK_GRADIENTS = [
-  'linear-gradient(135deg, #fdeff9 0%, #ec38bc 100%)',
-  'linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%)',
-  'linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%)',
-  'linear-gradient(135deg, #f6d365 0%, #fda085 100%)',
-  'linear-gradient(135deg, #cfd9df 0%, #e2ebf0 100%)',
-];
+// Gradients are now derived from theme in components (no hardcoded hex).
 
 // src/constants/bookCardActions.js
 
@@ -187,37 +181,14 @@ export const INITIAL_BOOK_FORM_DATA = {
   notes: '',
 };
 
+// Use palette reference keys understood by MUI's sx (no hex).
 export const ACTION_STYLES = {
-  delete: {
-    hover: '#d32f2f', // red
-    hoverText: '#fff',
-  },
-  archive: {
-    hover: '#616161', // gray
-    hoverText: '#fff',
-  },
-  unarchive: {
-    hover: '#388e3c', // green
-    hoverText: '#fff',
-  },
-  save: {
-    hover: '#1976d2', // blue
-    hoverText: '#fff',
-  },
-  unsave: {
-    hover: '#1976d2',
-    hoverText: '#fff',
-  },
-  requestReturn: {
-    hover: '#f57c00', // orange
-    hoverText: '#fff',
-  },
-  reject: {
-    hover: '#c62828', // dark red
-    hoverText: '#fff',
-  },
-  accept: {
-    hover: '#2e7d32', // dark green
-    hoverText: '#fff',
-  },
+  delete: { hover: 'error.main', hoverText: 'common.white' },
+  archive: { hover: 'grey.600', hoverText: 'common.white' },
+  unarchive: { hover: 'success.main', hoverText: 'common.white' },
+  save: { hover: 'primary.main', hoverText: 'common.white' },
+  unsave: { hover: 'primary.main', hoverText: 'common.white' },
+  requestReturn: { hover: 'warning.main', hoverText: 'common.white' },
+  reject: { hover: 'error.dark', hoverText: 'common.white' },
+  accept: { hover: 'success.main', hoverText: 'common.white' },
 };

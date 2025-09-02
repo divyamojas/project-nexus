@@ -15,12 +15,8 @@ import {
   Collapse,
   Button,
 } from '@mui/material';
-import {
-  ACTION_CONFIGS,
-  STATUS_COLOR,
-  FALLBACK_GRADIENTS,
-  ACTION_STYLES,
-} from '../../../constants/constants';
+import { ACTION_CONFIGS, STATUS_COLOR, ACTION_STYLES } from '../../../constants/constants';
+import { useTheme } from '@mui/material/styles';
 import { useBookContext } from '../../../contexts/hooks/useBookContext';
 import { useAuth } from '../../../contexts/hooks/useAuth';
 
@@ -49,7 +45,15 @@ export default function BookCard({
   const condition = book.condition;
   const status = book.status || 'available';
   const archived = book.archived;
-  const gradientIndex = (title || author || '').length % FALLBACK_GRADIENTS.length;
+  const theme = useTheme();
+  const gradients = [
+    `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.secondary.light} 100%)`,
+    `linear-gradient(135deg, ${theme.palette.info.light} 0%, ${theme.palette.primary.main} 100%)`,
+    `linear-gradient(135deg, ${theme.palette.warning.light} 0%, ${theme.palette.secondary.main} 100%)`,
+    `linear-gradient(135deg, ${theme.palette.success.light} 0%, ${theme.palette.primary.main} 100%)`,
+    `linear-gradient(135deg, ${theme.palette.grey[200]} 0%, ${theme.palette.grey[300]} 100%)`,
+  ];
+  const gradientIndex = (title || author || '').length % gradients.length;
 
   const { sendBookRequest } = useBookContext();
   const { user } = useAuth();
@@ -102,9 +106,10 @@ export default function BookCard({
               position: 'relative',
               overflow: 'hidden',
               borderRadius: 4,
-              transition: 'box-shadow 0.2s ease',
-              bgcolor: '#fffefc',
-              boxShadow: hovered ? '0 12px 24px rgba(0,0,0,0.15)' : '0 1px 4px rgba(0,0,0,0.08)',
+              transition: 'box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease',
+              bgcolor: 'background.paper',
+              border: (t) => `1px solid ${t.palette.divider}`,
+              boxShadow: hovered ? 6 : 1,
             }}
             elevation={0}
           >
@@ -142,12 +147,12 @@ export default function BookCard({
                           handlers[action.handler]?.(book);
                         }}
                         sx={{
-                          bgcolor: '#fff',
+                          bgcolor: 'background.paper',
                           color: 'action.active',
                           boxShadow: 2,
                           transition: 'all 0.2s ease',
                           '&:hover': {
-                            bgcolor: actionStyle.hover || '#f5f5f5',
+                            bgcolor: actionStyle.hover || 'action.hover',
                             color: actionStyle.hoverText || 'inherit',
                           },
                         }}
@@ -170,7 +175,7 @@ export default function BookCard({
                 alt={`${title} cover`}
                 sx={{
                   objectFit: 'cover',
-                  borderBottom: '1px solid #eee',
+                  borderBottom: (t) => `1px solid ${t.palette.divider}`,
                   borderRadius: '4px 4px 0 0',
                 }}
               />
@@ -180,7 +185,7 @@ export default function BookCard({
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
-                sx={{ background: FALLBACK_GRADIENTS[gradientIndex] }}
+                sx={{ background: gradients[gradientIndex] }}
               >
                 <Typography variant="body2" color="text.secondary">
                   No cover image

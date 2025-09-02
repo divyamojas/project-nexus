@@ -130,23 +130,15 @@ export default function AddBookModal({ open, onClose, setShowAddModal }) {
         animate: { opacity: 1, scale: 1, y: 0 },
         exit: { opacity: 0, scale: 0.95, y: 20 },
         transition: { duration: 0.35, ease: 'easeInOut' },
-        sx: {
+        sx: (theme) => ({
           borderRadius: 4,
-          boxShadow: '0 10px 30px rgba(0, 0, 0, 0.2)',
+          boxShadow: 6,
           transform: 'perspective(1200px) translateZ(10px)',
-          background: 'linear-gradient(180deg, #ffffff, #f7f8fc)',
-        },
+          background: `linear-gradient(180deg, ${theme.palette.background.paper}, ${theme.palette.background.default})`,
+        }),
       }}
     >
-      <DialogTitle
-        sx={{
-          fontWeight: 600,
-          fontSize: '1.4rem',
-          position: 'relative',
-          backgroundColor: '#388e3c',
-          color: '#fff',
-        }}
-      >
+      <DialogTitle sx={{ fontWeight: 600, fontSize: '1.4rem', position: 'relative' }}>
         Add a Book
         <IconButton
           aria-label="close"
@@ -159,7 +151,7 @@ export default function AddBookModal({ open, onClose, setShowAddModal }) {
 
       <Divider />
 
-      <DialogContent dividers sx={{ pt: 2, backgroundColor: '#fcfcfd' }}>
+      <DialogContent dividers sx={{ pt: 2, bgcolor: 'background.paper' }}>
         <Stack spacing={2.5}>
           <Autocomplete
             freeSolo
@@ -179,12 +171,12 @@ export default function AddBookModal({ open, onClose, setShowAddModal }) {
                   elevation={3}
                   sx={{
                     borderRadius: 2,
-                    boxShadow: '0px 4px 20px rgba(0,0,0,0.08)',
+                    boxShadow: 3,
                     maxHeight: 240,
                     overflowY: 'auto',
                     px: 1,
                     py: 0.5,
-                    backgroundColor: '#ffffff',
+                    bgcolor: 'background.paper',
                   }}
                 >
                   {props.children}
@@ -204,13 +196,7 @@ export default function AddBookModal({ open, onClose, setShowAddModal }) {
                 InputProps={{
                   ...params.InputProps,
                   disableUnderline: true,
-                  sx: {
-                    backgroundColor: '#f9f9f9',
-                    borderRadius: 2,
-                    px: 1.5,
-                    py: 0.5,
-                    boxShadow: 1,
-                  },
+                  sx: { bgcolor: 'action.hover', borderRadius: 2, px: 1.5, py: 0.5, boxShadow: 1 },
                 }}
                 slotProps={{ inputLabel: { shrink: true } }}
               />
@@ -232,13 +218,7 @@ export default function AddBookModal({ open, onClose, setShowAddModal }) {
                 helperText={errors[field.stateKey]}
                 InputProps={{
                   disableUnderline: true,
-                  sx: {
-                    backgroundColor: '#f9f9f9',
-                    borderRadius: 2,
-                    px: 1.5,
-                    py: 0.5,
-                    boxShadow: 1,
-                  },
+                  sx: { bgcolor: 'action.hover', borderRadius: 2, px: 1.5, py: 0.5, boxShadow: 1 },
                 }}
                 slotProps={{ inputLabel: { shrink: true } }}
                 value={formData[field.stateKey]}
@@ -263,10 +243,10 @@ export default function AddBookModal({ open, onClose, setShowAddModal }) {
             sx={{
               mt: 1,
               p: 2,
-              border: '2px dashed #bbb',
+              border: (theme) => `2px dashed ${theme.palette.divider}`,
               borderRadius: 2,
               textAlign: 'center',
-              bgcolor: '#f9f9f9',
+              bgcolor: 'action.hover',
               cursor: 'pointer',
             }}
           >

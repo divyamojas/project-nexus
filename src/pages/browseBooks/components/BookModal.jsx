@@ -172,14 +172,14 @@ export default function BookModal({
       onClose={onClose}
       fullWidth
       maxWidth="sm"
-      PaperProps={{ sx: { borderRadius: 4, bgcolor: '#fffdf9' } }}
+      PaperProps={{ sx: { borderRadius: 4, bgcolor: 'background.paper' } }}
     >
-      <DialogTitle sx={{ fontWeight: 600, fontSize: '1.5rem', color: '#4e342e' }}>
+      <DialogTitle sx={{ fontWeight: 600, fontSize: '1.5rem' }} color="text.primary">
         {title || 'Untitled'}
         <IconButton
           aria-label="close"
           onClick={onClose}
-          sx={{ position: 'absolute', right: 12, top: 12, color: '#4e342e' }}
+          sx={{ position: 'absolute', right: 12, top: 12 }}
         >
           <CloseIcon />
         </IconButton>

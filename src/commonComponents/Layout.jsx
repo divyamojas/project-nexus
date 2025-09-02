@@ -11,16 +11,23 @@ import {
   IconButton,
   Menu,
   MenuItem,
+  Tooltip,
+  useTheme,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { logout } from '../services/authService';
+import { useColorMode } from '../theme/ThemeModeProvider';
 
 export default function Layout({ children }) {
   const [showNavbar, setShowNavbar] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
+  const muiTheme = useTheme();
+  const { toggleColorMode } = useColorMode();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -73,7 +80,7 @@ export default function Layout({ children }) {
             Leaflet
           </Typography>
 
-          <Box display={{ xs: 'none', sm: 'flex' }} gap={2}>
+          <Box display={{ xs: 'none', sm: 'flex' }} gap={2} alignItems="center">
             <Button color="inherit" component={Link} to="/profile">
               Profile
             </Button>
@@ -83,6 +90,11 @@ export default function Layout({ children }) {
             <Button color="inherit" component={Link} to="/browse">
               Browse
             </Button>
+            <Tooltip title={muiTheme.palette.mode === 'dark' ? 'Light mode' : 'Dark mode'}>
+              <IconButton color="inherit" onClick={toggleColorMode} aria-label="Toggle color mode">
+                {muiTheme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+              </IconButton>
+            </Tooltip>
             <Button color="inherit" onClick={handleLogout}>
               Logout
             </Button>
@@ -101,6 +113,14 @@ export default function Layout({ children }) {
               </MenuItem>
               <MenuItem component={Link} to="/browse" onClick={handleMenuClose}>
                 Browse
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  toggleColorMode();
+                  handleMenuClose();
+                }}
+              >
+                {muiTheme.palette.mode === 'dark' ? 'Light Mode' : 'Dark Mode'}
               </MenuItem>
               <MenuItem
                 onClick={() => {

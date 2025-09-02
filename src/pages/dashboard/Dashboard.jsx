@@ -97,12 +97,12 @@ export default function Dashboard() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Container maxWidth="lg" sx={{ py: 5 }}>
-        <Paper elevation={2} sx={{ p: 4, borderRadius: 4, bgcolor: '#fdfaf6' }}>
-          <Typography variant="h4" fontWeight="medium" gutterBottom sx={{ color: '#5d4037' }}>
+        <Paper elevation={2} sx={{ p: 4, borderRadius: 4, bgcolor: 'background.paper' }}>
+          <Typography variant="h4" fontWeight="medium" gutterBottom color="text.primary">
             Hi {userFirstName || 'Friend'}, welcome to your dashboard 📘
           </Typography>
 
-          <Typography variant="body1" sx={{ color: '#6d4c41', mb: 3 }}>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
             You can view and manage your books here, check recent activity, and share something new
             when you&apos;re ready.
           </Typography>

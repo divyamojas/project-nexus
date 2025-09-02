@@ -42,24 +42,13 @@ export default function Login() {
   };
 
   return (
-    <Container maxWidth="xs" style={{ marginTop: '4rem' }}>
-      <Card
-        style={{
-          backgroundColor: '#f0fdf4',
-          padding: '2rem',
-          borderRadius: '16px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-        }}
-      >
+    <Container maxWidth="xs" sx={{ mt: 4 }}>
+      <Card sx={{ bgcolor: 'background.paper', p: 3, borderRadius: 2, boxShadow: 2 }}>
         <CardContent>
           <Typography variant="h4" gutterBottom align="center" color="primary" fontWeight="bold">
             Welcome Back 🌿
           </Typography>
-          <Typography
-            variant="subtitle2"
-            align="center"
-            style={{ marginBottom: '1rem', color: '#66bb6a' }}
-          >
+          <Typography variant="subtitle2" align="center" sx={{ mb: 1, color: 'success.main' }}>
             Sign in to your Leaflet account
           </Typography>
 
@@ -95,34 +84,28 @@ export default function Login() {
               }}
             />
 
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={loading}
-              fullWidth
-              style={{ backgroundColor: '#388e3c', fontWeight: 'bold', borderRadius: '8px' }}
-            >
+            <Button type="submit" variant="contained" disabled={loading} fullWidth>
               {loading ? <CircularProgress size={24} color="inherit" /> : 'Log In'}
             </Button>
 
             {error && <Alert severity="error">{error}</Alert>}
 
-            <Typography variant="body2" align="center" style={{ marginTop: '1rem' }}>
+            <Typography variant="body2" align="center" sx={{ mt: 1 }}>
               Don&apos;t have an account?{' '}
               <Link
                 component={RouterLink}
                 to="/signup"
-                style={{ color: '#2e7d32', fontWeight: 'bold' }}
+                sx={{ color: 'primary.main', fontWeight: 'bold' }}
               >
                 Sign up
               </Link>
             </Typography>
 
-            <Typography variant="body2" align="center" style={{ marginTop: '0.5rem' }}>
+            <Typography variant="body2" align="center" sx={{ mt: 0.5 }}>
               <Link
                 component={RouterLink}
                 to="/forgot-password"
-                style={{ color: '#4caf50', fontWeight: 'bold' }}
+                sx={{ color: 'success.main', fontWeight: 'bold' }}
               >
                 Forgot your password?
               </Link>

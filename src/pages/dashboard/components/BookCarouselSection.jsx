@@ -20,14 +20,20 @@ export default function BookCarouselSection({
 }) {
   // if (context == 'outgoing') console.log(books);
   return (
-    <Box my={5} p={3} bgcolor="#fefefe" borderRadius={3}>
-      <Typography variant="h6" sx={{ mb: 2, color: '#4e342e' }}>
+    <Box
+      my={5}
+      p={3}
+      bgcolor="background.paper"
+      borderRadius={3}
+      sx={{ border: (t) => `1px solid ${t.palette.divider}`, boxShadow: 1 }}
+    >
+      <Typography variant="h6" color="text.primary" sx={{ mb: 2 }}>
         {emoji} {title}
       </Typography>
       <Divider sx={{ mb: 2 }} />
 
       {books.length === 0 ? (
-        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+        <Typography variant="body2" color="text.secondary">
           No books available.
         </Typography>
       ) : (
