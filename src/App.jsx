@@ -1,9 +1,10 @@
 // /src/App.jsx
 
-import { Suspense, lazy, useEffect, useState } from 'react';
+import { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
 import PageLoader from './commonComponents/PageLoader';
+import DelayedLoader from './commonComponents/DelayedLoader';
 import PrivateRoute from './commonComponents/PrivateRoute';
 import Layout from './commonComponents/Layout';
 import { UserProvider } from './contexts/UserContext';
@@ -29,17 +30,10 @@ const protectedRoutes = [
 ];
 
 function RouteWrapper() {
-  const location = useLocation();
   const { session, loading } = useSession();
-  const [isTransitioning, setIsTransitioning] = useState(true);
 
-  useEffect(() => {
-    setIsTransitioning(true);
-    const timeout = setTimeout(() => setIsTransitioning(false), 10);
-    return () => clearTimeout(timeout);
-  }, [location]);
-
-  if (loading || isTransitioning) return <PageLoader />;
+  // Show a loader only if session resolution takes longer than a short delay.
+  if (loading) return <DelayedLoader delay={250} />;
 
   return (
     <Routes>
@@ -80,7 +74,7 @@ export default function App() {
   return (
     <Router>
       <ThemeModeProvider>
-        <Suspense fallback={<PageLoader />}>
+        <Suspense fallback={<DelayedLoader delay={250} />}>
           <UserProvider>
             <BookProvider>
               <RouteWrapper />
