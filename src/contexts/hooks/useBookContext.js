@@ -1,6 +1,6 @@
 // src/contexts/hooks/useBookContext.js
 import { useContext } from 'react';
-import { bookContext } from '../BookContext';
+import { bookContext } from '../bookContextObject';
 
 export function useBookContext() {
   return useContext(bookContext);

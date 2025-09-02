@@ -1,6 +1,7 @@
 // /src/contexts/BookContext.jsx
 
-import { createContext, useState, useEffect, useMemo, useContext } from 'react';
+import { useState, useEffect, useMemo, useContext } from 'react';
+import { bookContext } from './bookContextObject';
 
 import { useUser } from './hooks/useUser';
 
@@ -15,7 +16,7 @@ import {
 import { requestBorrowBook } from '../services/bookRequestService';
 import { BookFormProvider } from './BookFormContext';
 
-export const bookContext = createContext();
+// context object moved to ./bookContextObject to satisfy Fast Refresh
 
 /**
  * Provides book lists, filters, and actions (archive/delete/save/request).
@@ -38,7 +39,8 @@ export const BookProvider = ({ children }) => {
   const categorizedBooks = useMemo(
     () => ({
       availableBooks: books.filter((b) => !b.archived && !b.borrowed_by),
-      lentBooks: books.filter((b) => !b.archived && b.borrowed_by),
+      // Only books I own that are currently borrowed out
+      lentBooks: books.filter((b) => !b.archived && b.borrowed_by && b.user_id === userId),
       archivedBooks: books.filter((b) => b.archived),
       myActiveBooks: books.filter((b) => !b.archived && b.user_id === userId),
     }),

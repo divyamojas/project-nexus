@@ -1,13 +1,13 @@
 // src/contexts/AuthContext.jsx
 
-import { createContext, useState, useMemo, useContext } from 'react';
+import { useState, useMemo, useContext } from 'react';
+import { authContext } from './authContextObject';
 
 import { ALLOWED_EMAIL_DOMAINS, DOMAIN_ERRORS } from '../constants/constants';
 import { useSessionTracker } from '../hooks';
 import * as authService from '../services/authService';
 
-// 1. Create the context (exported for external hooks)
-export const authContext = createContext();
+// context object moved to ./authContextObject to satisfy Fast Refresh
 
 // 3. Helper to check email domain
 const isValidDomain = (email) =>

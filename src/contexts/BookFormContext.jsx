@@ -1,9 +1,10 @@
 // /src/contexts/BookFormContext.jsx
 
-import { createContext, useContext, useState, useCallback } from 'react';
+import { useContext, useState, useCallback } from 'react';
+import { bookFormContext } from './bookFormContextObject';
 import { INITIAL_BOOK_FORM_DATA } from '../constants/constants';
 
-export const bookFormContext = createContext();
+// context object moved to ./bookFormContextObject to satisfy Fast Refresh
 
 export const BookFormProvider = ({ children }) => {
   const [formData, setFormData] = useState(INITIAL_BOOK_FORM_DATA);

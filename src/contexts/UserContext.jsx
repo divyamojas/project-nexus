@@ -1,6 +1,7 @@
 // src/contexts/UserContext.jsx
 
-import { createContext, useEffect, useState, useContext } from 'react';
+import { useEffect, useState, useContext } from 'react';
+import { userContext } from './userContextObject';
 
 import { useAuth } from './hooks/useAuth';
 import {
@@ -12,7 +13,7 @@ import {
 } from '../services';
 import { getRequestsForBooksOfUsers } from '../utilities';
 
-export const userContext = createContext();
+// context object moved to ./userContextObject to satisfy Fast Refresh
 
 export const UserProvider = ({ children }) => {
   const { user } = useAuth();
