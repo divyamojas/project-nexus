@@ -72,6 +72,7 @@ create table public.book_reviews (
   created_at timestamp with time zone null default now(),
   constraint book_reviews_pkey primary key (id),
   constraint book_reviews_book_id_fkey foreign KEY (book_id) references books (id) on delete CASCADE,
+  constraint book_reviews_reviewer_fkey foreign KEY (reviewer_id) references profiles (id) on delete set null,
   constraint book_reviews_rating_check check (
     (
       (rating >= 1)

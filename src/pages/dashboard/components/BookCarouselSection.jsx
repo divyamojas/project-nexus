@@ -15,6 +15,7 @@ export default function BookCarouselSection({
   onReject,
   onCancelRequest,
   onRequestReturn,
+  onCompleteTransfer,
   context = '',
   editable = true,
 }) {
@@ -50,6 +51,7 @@ export default function BookCarouselSection({
                 onReject={onReject}
                 onCancelRequest={onCancelRequest}
                 onRequestReturn={onRequestReturn}
+                onCompleteTransfer={onCompleteTransfer}
                 context={context}
                 editable={editable}
               />
