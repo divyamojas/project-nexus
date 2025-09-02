@@ -2,10 +2,13 @@
 
 import supabase from './supabaseClient';
 
-export async function getUserReviews(userData, type = 'given') {
-  if (!userData?.id) return { reviews: [] };
+/**
+ * Fetch user-to-user reviews either 'given' or 'received' by the user.
+ */
+export async function getUserReviews(user, type = 'given') {
+  if (!user?.id) return { reviews: [] };
 
-  const userId = userData.id;
+  const userId = user.id;
   const column = type === 'received' ? 'reviewee_id' : 'reviewer_id';
 
   const { data, error } = await supabase.from('user_reviews').select('*').eq(column, userId);

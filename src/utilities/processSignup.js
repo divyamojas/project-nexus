@@ -1,5 +1,8 @@
 // src/utilities/processSignup.js
 
+/**
+ * Validate signup form then call the provided signup method.
+ */
 export default async function processSignup({
   email,
   password,

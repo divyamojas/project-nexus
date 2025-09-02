@@ -16,7 +16,7 @@ import {
   IconButton,
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/hooks/useAuth';
 import { processSignup } from '../../utilities';
 
 export default function Signup() {

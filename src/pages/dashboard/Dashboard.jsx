@@ -12,16 +12,17 @@ const AddBookModal = lazy(() => import('./components/AddBookModal'));
 const BookModal = lazy(() => import('../browseBooks/components/BookModal'));
 
 import { DASHBOARD_SECTIONS } from '../../constants/constants';
-import { useUser } from '../../contexts/UserContext';
-import { useBookContext } from '../../contexts/BookContext';
+import { useUser } from '../../contexts/hooks/useUser';
+import { useBookContext } from '../../contexts/hooks/useBookContext';
 import PageLoader from '../../commonComponents/PageLoader';
 import {
   getCurrentUserFirstName,
-  getMyBooks,
   getSavedBooks,
   getTransfers,
   getUserReviews,
   updateRequestStatus,
+  toggleSaveBook,
+  requestBookReturn,
 } from '../../services';
 import { getRequestsForUser } from '../../utilities';
 
@@ -42,12 +43,11 @@ export default function Dashboard() {
   const { categorizedBooks, handleDeleteBook, handleArchiveBook, refreshBooks } = useBookContext();
 
   const fetchData = async () => {
-    const [books, req, trf, saved, rev, name] = await Promise.all([
-      getMyBooks(),
+    const [req, trf, saved, rev, name] = await Promise.all([
       getRequestsForUser(user),
       getTransfers(),
-      getSavedBooks(),
-      getUserReviews(),
+      getSavedBooks(user),
+      getUserReviews(user),
       getCurrentUserFirstName(user),
     ]);
     setRequests(req);
@@ -71,15 +71,14 @@ export default function Dashboard() {
   };
   const handleCloseModal = () => setSelectedBook(null);
   const handleToggleSave = async (book) => {
-    await toggleSaveBook(book.id, false, null);
+    await toggleSaveBook(book.id, false, null, user);
     fetchData();
   };
   const handleRequestReturn = async (book) => {
-    await requestBookReturn(book.id);
+    await requestBookReturn(book.id, user);
     fetchData();
   };
   const handleAcceptRequest = async (book) => {
-    console.log(book);
     await updateRequestStatus(book.request_id, 'accepted');
     fetchData();
   };

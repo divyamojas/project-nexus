@@ -1,14 +1,16 @@
 // /src/services/bookRequestService.js
 
-import { getBookById } from './bookService';
 import supabase from './supabaseClient';
 
-export async function requestBorrowBook(book, message = '', userData) {
-  if (!userData?.id || !book.id) {
+/**
+ * Create a borrow request for a book by the current user.
+ */
+export async function requestBorrowBook(book, message = '', user) {
+  if (!user?.id || !book.id) {
     return false;
   }
 
-  const requester_id = userData.id;
+  const requester_id = user.id;
   const requested_to = book.user_id;
 
   const { data, error } = await supabase
@@ -21,6 +23,9 @@ export async function requestBorrowBook(book, message = '', userData) {
   return data;
 }
 
+/**
+ * Update the status of a request (accepted/rejected/cancelled).
+ */
 export async function updateRequestStatus(requestId, status) {
   const { data, error } = await supabase
     .from('book_requests')
@@ -31,6 +36,9 @@ export async function updateRequestStatus(requestId, status) {
   return data;
 }
 
+/**
+ * Get all requests for a given book id.
+ */
 export async function getRequestsForBook(book_id) {
   if (!book_id) {
     // console.warn('getRequestsForBook: book_id is undefined or null');
@@ -60,6 +68,9 @@ export async function getRequestsForBook(book_id) {
   return data ?? [];
 }
 
+/**
+ * For a list of owned book IDs, return requests targeting those books (minus cancelled/rejected).
+ */
 export async function getIncomingRequestsForBooks(ownedBookIds) {
   const { data, error } = await supabase
     .from('book_requests')
@@ -114,6 +125,9 @@ export async function getIncomingRequestsForBooks(ownedBookIds) {
   };
 }
 
+/**
+ * Get requests initiated by the given user.
+ */
 export async function getOutgoingRequestsForUser(userId) {
   const { data, error } = await supabase
     .from('book_requests')

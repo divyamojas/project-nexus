@@ -1,5 +1,8 @@
 // src/utilities/processResetPassword.js
 
+/**
+ * Submit reset password request and surface user feedback messages.
+ */
 export default async function processResetPassword({
   email,
   setError,

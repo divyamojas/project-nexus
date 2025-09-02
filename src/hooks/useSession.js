@@ -3,6 +3,9 @@
 import { useEffect, useState } from 'react';
 import { getSession, onAuthStateChange } from '../services/authService';
 
+/**
+ * Subscribe to Supabase auth session; returns { session, loading }.
+ */
 export default function useSession() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);

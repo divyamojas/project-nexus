@@ -1,10 +1,9 @@
 // /src/contexts/BookContext.jsx
 
-import { createContext, useState, useEffect, useMemo, useContext, useCallback } from 'react';
+import { createContext, useState, useEffect, useMemo, useContext } from 'react';
 
-import { useUser } from '../contexts/UserContext';
+import { useUser } from './hooks/useUser';
 
-import { INITIAL_BOOK_FORM_DATA } from '../constants/constants';
 import {
   archiveBook,
   deleteBook,
@@ -14,10 +13,14 @@ import {
   toggleSaveBook,
 } from '../services';
 import { requestBorrowBook } from '../services/bookRequestService';
+import { BookFormProvider } from './BookFormContext';
 
-const BookContext = createContext();
-const BookFormContext = createContext();
+export const BookContext = createContext();
 
+/**
+ * Provides book lists, filters, and actions (archive/delete/save/request).
+ * Composes the separate BookFormProvider to keep form state isolated.
+ */
 export const BookProvider = ({ children }) => {
   const { user } = useUser();
   const userId = user?.id;
@@ -31,20 +34,6 @@ export const BookProvider = ({ children }) => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  // Book form state
-  const [formData, setFormData] = useState(INITIAL_BOOK_FORM_DATA);
-  const [errors, setErrors] = useState({});
-  const [imageStatus, setImageStatus] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
-  const [formLoading, setFormLoading] = useState(false);
-
-  const resetForm = useCallback(() => {
-    setFormData(INITIAL_BOOK_FORM_DATA);
-    setErrors({});
-    setImageStatus('');
-    setSearchResults([]);
-  }, []);
 
   const categorizedBooks = useMemo(
     () => ({
@@ -88,7 +77,7 @@ export const BookProvider = ({ children }) => {
   const refreshBooks = async () => {
     setLoading(true);
     try {
-      const data = await getBooks({ includeArchived: true, userData: user });
+      const data = await getBooks({ includeArchived: true, user });
       setBooks(data);
       setError(null);
     } catch (err) {
@@ -101,7 +90,7 @@ export const BookProvider = ({ children }) => {
 
   const refreshSavedBooks = async () => {
     try {
-      const data = await getSavedBooks();
+      const data = await getSavedBooks(user);
       setSavedBooks(data);
     } catch (err) {
       console.error('refreshSavedBooks error:', err);
@@ -117,7 +106,7 @@ export const BookProvider = ({ children }) => {
   const toggleBookSaveStatus = async (book) => {
     try {
       const shouldSave = !book.is_saved;
-      await toggleSaveBook(book.id, shouldSave, book.catalog.id);
+      await toggleSaveBook(book.id, shouldSave, book.catalog.id, user);
       updateBookSaveStatus(book.id, shouldSave);
     } catch (err) {
       console.error('Failed to toggle save:', err);
@@ -178,26 +167,9 @@ export const BookProvider = ({ children }) => {
         error,
       }}
     >
-      <BookFormContext.Provider
-        value={{
-          formData,
-          setFormData,
-          errors,
-          setErrors,
-          imageStatus,
-          setImageStatus,
-          searchResults,
-          setSearchResults,
-          formLoading,
-          setFormLoading,
-          resetForm,
-        }}
-      >
-        {children}
-      </BookFormContext.Provider>
+      <BookFormProvider>{children}</BookFormProvider>
     </BookContext.Provider>
   );
 };
 
-export const useBookContext = () => useContext(BookContext);
-export const useBookForm = () => useContext(BookFormContext);
+// Book form hook is now exported from src/contexts/hooks/useBookForm.js

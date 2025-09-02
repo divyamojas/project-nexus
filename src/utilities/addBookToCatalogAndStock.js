@@ -2,6 +2,9 @@
 
 import { addBookInstance, addBookToCatalog, fetchCatalogBookEntry } from '../services';
 
+/**
+ * Ensure a catalog entry exists, then create an owned book instance.
+ */
 export default async function addBookToCatalogAndStock({
   title,
   author,
@@ -15,7 +18,6 @@ export default async function addBookToCatalogAndStock({
     console.warn('addBookToCatalogAndStock: User not provided or invalid');
     return false;
   }
-  console.log(user);
   try {
     const trimmedTitle = title?.trim();
     const trimmedAuthor = author?.trim();
@@ -34,7 +36,6 @@ export default async function addBookToCatalogAndStock({
 
       catalogId = addedCatalog?.id;
     }
-    console.log(catalogId);
     if (!catalogId) {
       console.error('addBookToCatalogAndStock: Failed to resolve catalog ID');
       return false;

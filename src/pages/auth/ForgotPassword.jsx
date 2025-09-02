@@ -13,7 +13,7 @@ import {
   CircularProgress,
   Link,
 } from '@mui/material';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/hooks/useAuth';
 import { processResetPassword } from '../../utilities';
 
 export default function ForgotPassword() {

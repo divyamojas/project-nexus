@@ -1,8 +1,8 @@
 // src/contexts/UserContext.jsx
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useEffect, useState, useContext } from 'react';
 
-import { useAuth } from './AuthContext';
+import { useAuth } from './hooks/useAuth';
 import {
   getCurrentUserFirstName,
   getMyBooks,
@@ -12,7 +12,7 @@ import {
 } from '../services';
 import { getRequestsForBooksOfUsers } from '../utilities';
 
-const UserContext = createContext();
+export const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
   const { user } = useAuth();
@@ -25,7 +25,7 @@ export const UserProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   const fetchUserProfile = async () => {
-    const name = await getCurrentUserFirstName();
+    const name = await getCurrentUserFirstName(user);
     setFirstName(name || '');
   };
 
@@ -36,12 +36,12 @@ export const UserProvider = ({ children }) => {
   };
 
   const fetchUserReviews = async () => {
-    const reviews = await getUserReviews();
+    const reviews = await getUserReviews(user);
     setUserReviews(reviews);
   };
 
   const fetchMyBooks = async () => {
-    const books = await getMyBooks();
+    const books = await getMyBooks(user);
     setMyBooks(books);
   };
 
@@ -91,4 +91,5 @@ export const UserProvider = ({ children }) => {
   );
 };
 
-export const useUser = () => useContext(UserContext);
+// Moved to separate hook file to improve Fast Refresh boundaries
+// Hook moved to src/contexts/hooks/useUser.js

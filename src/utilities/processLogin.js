@@ -1,5 +1,8 @@
 // src/utilities/processLogin.js
 
+/**
+ * Validate login form then call the provided login method.
+ */
 export default async function processLogin({ email, password, setError, setLoading, login }) {
   if (!email || !password) {
     setError('Please fill in both email and password.');

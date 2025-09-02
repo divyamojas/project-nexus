@@ -1,14 +1,17 @@
-// src/utilities/getRequestsForBooksOfUsers.js
+// src/utilities/getRequestsForBooksOfOwners.js
 
 import { getRequestsForBook, getMyBooks } from '../services';
 
-export default async function getRequestsForBooksOfUsers(userData) {
-  if (!userData?.id) {
+/**
+ * Fetch all requests for all books owned by the user.
+ */
+export default async function getRequestsForBooksOfUsers(user) {
+  if (!user?.id) {
     return [];
   }
 
   // Step 1: Get all book IDs owned by the user
-  const ownedBookIds = await getMyBooks(userData, true); // onlyId = true returns [id1, id2, ...]
+  const ownedBookIds = await getMyBooks(user, true); // onlyId = true returns [id1, id2, ...]
 
   if (!Array.isArray(ownedBookIds) || ownedBookIds.length === 0) {
     console.info('User has no owned books.');

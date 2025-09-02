@@ -4,8 +4,8 @@ import { Navigate, useLocation } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
 
-import { useAuth } from '../contexts/AuthContext';
-import { useUser } from '../contexts/UserContext';
+import { useAuth } from '../contexts/hooks/useAuth';
+import { useUser } from '../contexts/hooks/useUser';
 
 export default function PrivateRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();

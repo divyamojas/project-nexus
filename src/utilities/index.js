@@ -1,8 +1,4 @@
 import validateAndSubmitBookForm from './validateAndSubmitBookForm';
-import { uploadBookCover } from '../services/bookService';
-
-validateAndSubmitBookForm.uploadBookCover = uploadBookCover;
-
 export { validateAndSubmitBookForm };
 
 export { default as addBookToCatalogAndStock } from './addBookToCatalogAndStock';

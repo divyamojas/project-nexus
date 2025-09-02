@@ -3,13 +3,16 @@
 import { getIncomingRequestsForBooks, getOutgoingRequestsForUser } from '../services';
 import { getMyBooks } from '../services/bookService';
 
-export default async function getRequestsForUser(userData) {
-  if (!userData?.id) return { incoming: [], outgoing: [] };
+/**
+ * Helper to fetch both incoming and outgoing requests for the user.
+ */
+export default async function getRequestsForUser(user) {
+  if (!user?.id) return { incoming: [], outgoing: [] };
 
-  const userId = userData.id;
+  const userId = user.id;
 
   // 1. Get IDs of books owned by this user
-  const ownedBooks = await getMyBooks(userData, true);
+  const ownedBooks = await getMyBooks(user, true);
 
   // 2. Get incoming requests (for books the user owns)
   const { InReq: incoming, error: inErr } = await getIncomingRequestsForBooks(ownedBooks);

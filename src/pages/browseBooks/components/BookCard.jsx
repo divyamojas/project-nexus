@@ -21,8 +21,8 @@ import {
   FALLBACK_GRADIENTS,
   ACTION_STYLES,
 } from '../../../constants/constants';
-import { useBookContext } from '../../../contexts/BookContext';
-import { useAuth } from '../../../contexts/AuthContext';
+import { useBookContext } from '../../../contexts/hooks/useBookContext';
+import { useAuth } from '../../../contexts/hooks/useAuth';
 
 export default function BookCard({
   book,

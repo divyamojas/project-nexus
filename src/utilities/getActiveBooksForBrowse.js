@@ -2,7 +2,9 @@
 
 import { getBooks } from '../services';
 
-//
-export default async function getActiveBooksForBrowse(userData) {
-  return getBooks({ userData, includeArchived: false });
+/**
+ * Convenience wrapper to fetch only non-archived books.
+ */
+export default async function getActiveBooksForBrowse(user) {
+  return getBooks({ user, includeArchived: false });
 }

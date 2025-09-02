@@ -2,14 +2,17 @@
 
 import supabase from './supabaseClient';
 
-export const getCurrentUserFirstName = async (userData) => {
-  if (!userData?.id) return null;
+/**
+ * Fetch only the current user's first name for light UI displays.
+ */
+export const getCurrentUserFirstName = async (user) => {
+  if (!user?.id) return null;
 
   try {
     const { data, error } = await supabase
       .from('profiles')
       .select('first_name')
-      .eq('id', userData.id)
+      .eq('id', user.id)
       .single();
 
     if (error) {
@@ -24,15 +27,14 @@ export const getCurrentUserFirstName = async (userData) => {
   }
 };
 
-export const getUserProfile = async (userData) => {
-  if (!userData?.id) return null;
+/**
+ * Fetch the full user profile row.
+ */
+export const getUserProfile = async (user) => {
+  if (!user?.id) return null;
 
   try {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userData.id)
-      .single();
+    const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
 
     if (error) {
       console.error('Error fetching user profile:', error);
@@ -46,6 +48,9 @@ export const getUserProfile = async (userData) => {
   }
 };
 
+/**
+ * Upload avatar (if provided) and upsert the user's profile.
+ */
 export async function saveProfile({
   user,
   username,

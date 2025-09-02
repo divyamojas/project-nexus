@@ -17,7 +17,7 @@ import {
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/hooks/useAuth';
 import { processLogin } from '../../utilities';
 
 export default function Login() {

@@ -1,8 +1,8 @@
 // src/services/transferService.js
 
+/**
+ * Placeholder: Return an empty list of transfers until the feature is implemented.
+ */
 export const getTransfers = async () => {
-  // let's work on this later
-
-  const data = [];
-  return data || [];
+  return [];
 };

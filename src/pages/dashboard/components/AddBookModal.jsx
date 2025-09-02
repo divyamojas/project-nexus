@@ -25,12 +25,12 @@ import CloseIcon from '@mui/icons-material/Close';
 import { motion } from 'framer-motion';
 
 import { BOOK_FORM_FIELDS } from '../../../constants/constants';
-import { searchBooksCatalogByTitle } from '../../../services';
+import { searchBooksCatalogByTitle, uploadBookCover } from '../../../services';
 import { validateAndSubmitBookForm } from '../../../utilities';
 
-import { useBookForm } from '../../../contexts/BookContext';
-import { useUser } from '../../../contexts/UserContext';
-import { useBookCoverUpload } from '../../../hooks';
+import { useBookForm } from '../../../contexts/hooks/useBookForm';
+import { useUser } from '../../../contexts/hooks/useUser';
+import { useBookCoverUpload, useDebounce } from '../../../hooks';
 
 export default function AddBookModal({ open, onClose, setShowAddModal }) {
   const { user } = useUser();
@@ -47,16 +47,19 @@ export default function AddBookModal({ open, onClose, setShowAddModal }) {
     setFormLoading,
     resetForm,
   } = useBookForm();
+  const debouncedTitle = useDebounce(formData.title, 300);
 
   useEffect(() => {
-    if (formData.title.length > 2) {
+    if (debouncedTitle && debouncedTitle.length > 2) {
       setFormLoading(true);
-      searchBooksCatalogByTitle(formData.title).then((results) => {
+      searchBooksCatalogByTitle(debouncedTitle).then((results) => {
         setSearchResults(results);
         setFormLoading(false);
       });
+    } else if (!debouncedTitle) {
+      setSearchResults([]);
     }
-  }, [formData.title]);
+  }, [debouncedTitle]);
 
   const handleSelectMatch = (option) => {
     setFormData((prev) => ({
@@ -86,10 +89,7 @@ export default function AddBookModal({ open, onClose, setShowAddModal }) {
     setErrors({});
     let coverUrl = formData.coverUrl;
     if (coverFile) {
-      const { url, error } = await validateAndSubmitBookForm.uploadBookCover({
-        user,
-        file: coverFile,
-      });
+      const { url, error } = await uploadBookCover({ user, file: coverFile });
       if (error) {
         setCoverError(error);
         return;

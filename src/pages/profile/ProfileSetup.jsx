@@ -15,7 +15,7 @@ import {
   Alert,
 } from '@mui/material';
 import { useAvatarDrop, useProfileSave } from '../../hooks';
-import { useUser } from '../../contexts/UserContext';
+import { useUser } from '../../contexts/hooks/useUser';
 
 export default function ProfileSetup() {
   const { user, userProfile } = useUser();

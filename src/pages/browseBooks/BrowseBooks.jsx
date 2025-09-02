@@ -21,8 +21,8 @@ import { useDebounce } from '../../hooks';
 import BookModal from './components/BookModal';
 import BookCard from './components/BookCard';
 
-import { useAuth } from '../../contexts/AuthContext';
-import { useBookContext } from '../../contexts/BookContext';
+import { useAuth } from '../../contexts/hooks/useAuth';
+import { useBookContext } from '../../contexts/hooks/useBookContext';
 
 export default function BrowseBooks() {
   const { toggleBookSaveStatus, sendBookRequest, handleDeleteBook, handleArchiveBook } =

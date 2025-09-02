@@ -2,12 +2,14 @@
 
 import addBookToCatalogAndStock from './addBookToCatalogAndStock';
 
+/**
+ * Validate book form inputs and add the book to catalog + stock.
+ */
 export default async function validateAndSubmitBookForm(
   formData,
   { setErrors, resetForm, onSuccess, user },
 ) {
   if (!user?.id) {
-    console.log('no user in valr');
     return false;
   }
   const newErrors = {};

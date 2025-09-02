@@ -1,9 +1,14 @@
-// // /src/servicesreturnRequestService.js
+// src/services/returnRequestService.js
 
-export async function requestBookReturn(bookId, userData) {
-  if (!userData?.id) return false;
+import supabase from './supabaseClient';
 
-  const userId = userData.id;
+/**
+ * Create a return request for a given book from the current user.
+ */
+export async function requestBookReturn(bookId, user) {
+  if (!user?.id) return false;
+
+  const userId = user.id;
 
   const { error } = await supabase.from('return_requests').insert([
     {

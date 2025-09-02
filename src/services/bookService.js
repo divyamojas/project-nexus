@@ -2,6 +2,10 @@
 
 import supabase from './supabaseClient';
 
+/**
+ * Fetch the owner id of a book by its id.
+ * Use case: Determine book ownership for permission checks.
+ */
 export async function getBookById(book_id) {
   const { data: bookData, error: bookError } = await supabase
     .from('books')
@@ -12,8 +16,12 @@ export async function getBookById(book_id) {
   return { bookData, bookError };
 }
 
-export async function getMyBooks(userData, onlyId = false) {
-  if (!userData?.id) return [];
+/**
+ * Get all books owned by the provided user.
+ * Pass onlyId=true to return an array of book IDs only.
+ */
+export async function getMyBooks(user, onlyId = false) {
+  if (!user?.id) return [];
 
   const { data, error } = await supabase
     .from('books')
@@ -33,7 +41,7 @@ export async function getMyBooks(userData, onlyId = false) {
       )
     `,
     )
-    .eq('user_id', userData.id);
+    .eq('user_id', user.id);
 
   if (error) {
     console.error('getMyBooks error:', error);
@@ -53,6 +61,9 @@ export async function getMyBooks(userData, onlyId = false) {
   }));
 }
 
+/**
+ * Insert a new book instance referencing an existing catalog entry.
+ */
 export async function addBookInstance({ catalog_id, condition, user_id, archived }) {
   const { data, error } = await supabase
     .from('books')
@@ -66,9 +77,11 @@ export async function addBookInstance({ catalog_id, condition, user_id, archived
   return data?.[0] || null;
 }
 
+/**
+ * Permanently delete a book instance by id.
+ */
 export async function deleteBook(bookId) {
   const { error } = await supabase.from('books').delete().eq('id', bookId);
-  console.log('deleted', bookId);
   if (error) {
     console.error('deleteBook error:', error);
     return false;
@@ -76,6 +89,9 @@ export async function deleteBook(bookId) {
   return true;
 }
 
+/**
+ * Toggle archive flag for a book instance.
+ */
 export async function archiveBook(bookId, archive = true) {
   const { error } = await supabase.from('books').update({ archived: archive }).eq('id', bookId);
   if (error) {
@@ -85,10 +101,13 @@ export async function archiveBook(bookId, archive = true) {
   return true;
 }
 
-export async function getBooks({ includeArchived = true, userData } = {}) {
-  if (!userData?.id) return [];
+/**
+ * Get books visible to the current user; includes saved status.
+ */
+export async function getBooks({ includeArchived = true, user } = {}) {
+  if (!user?.id) return [];
 
-  const userId = userData.id;
+  const userId = user.id;
 
   let query = supabase.from('books').select(`
     id,
@@ -126,6 +145,9 @@ export async function getBooks({ includeArchived = true, userData } = {}) {
   });
 }
 
+/**
+ * Upload a book cover image for the user into storage and return public URL.
+ */
 export async function uploadBookCover({ user, file }) {
   try {
     const ext = file.name.split('.').pop();

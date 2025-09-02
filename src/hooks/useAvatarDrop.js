@@ -1,42 +1,22 @@
 // src/hooks/useAvatarDrop.js
 
-import { useState, useCallback } from 'react';
-import { useDropzone } from 'react-dropzone';
+import useImageDrop from './useImageDrop';
 
 const MAX_FILE_SIZE = 300 * 1024; // 300 KB
 
+/**
+ * Avatar picker with drag-and-drop, reusing generic image logic.
+ */
 export default function useAvatarDrop(initialUrl = '', username = '') {
-  const [avatarFile, setAvatarFile] = useState(null);
-  const [avatarUrl, setAvatarUrl] = useState(initialUrl);
-  const [error, setError] = useState('');
-
-  const onDrop = useCallback((acceptedFiles) => {
-    const file = acceptedFiles[0];
-    if (!file) return;
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-      setError('Please upload a JPG, PNG, or WebP image.');
-      return;
-    }
-    if (file.size > MAX_FILE_SIZE) {
-      setError('File is too large. Max size is 300 KB.');
-      return;
-    }
-    setAvatarFile(file);
-    setAvatarUrl(URL.createObjectURL(file));
-    setError('');
-  }, []);
-
-  const { getRootProps, getInputProps } = useDropzone({
-    onDrop,
-    accept: { 'image/*': [] },
-  });
+  const { file, previewUrl, error, setFile, setPreviewUrl, setError, getRootProps, getInputProps } =
+    useImageDrop({ maxSizeBytes: MAX_FILE_SIZE, initialUrl });
 
   return {
-    avatarFile,
-    avatarUrl,
+    avatarFile: file,
+    avatarUrl: previewUrl,
     error,
-    setAvatarFile,
-    setAvatarUrl,
+    setAvatarFile: setFile,
+    setAvatarUrl: setPreviewUrl,
     setError,
     getRootProps,
     getInputProps,

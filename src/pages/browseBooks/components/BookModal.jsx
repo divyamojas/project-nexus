@@ -28,8 +28,8 @@ import {
   HighlightOff as ClearIcon,
 } from '@mui/icons-material';
 
-import { useBookContext } from '../../../contexts/BookContext';
-import { useAuth } from '../../../contexts/AuthContext';
+import { useBookContext } from '../../../contexts/hooks/useBookContext';
+import { useAuth } from '../../../contexts/hooks/useAuth';
 import { requestBookReturn, toggleSaveBook, updateRequestStatus } from '../../../services';
 
 export default function BookModal({
@@ -56,13 +56,13 @@ export default function BookModal({
   const handleToggleSave = async () => {
     const shouldSave = !isSavedState;
     setIsSavedState(shouldSave);
-    await toggleSaveBook(book.id, shouldSave, catalog.id);
+    await toggleSaveBook(book.id, shouldSave, catalog.id, user);
     onActionComplete();
     onClose();
   };
 
   const handleRequestReturn = async () => {
-    await requestBookReturn(book.id);
+    await requestBookReturn(book.id, user);
     onActionComplete();
     onClose();
   };

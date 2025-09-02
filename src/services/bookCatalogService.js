@@ -2,6 +2,9 @@
 
 import supabase from './supabaseClient';
 
+/**
+ * Return a catalog entry id for an exact title/author match (if it exists).
+ */
 export const fetchCatalogBookEntry = async (title, author) => {
   try {
     const { data, error } = await supabase
@@ -20,6 +23,9 @@ export const fetchCatalogBookEntry = async (title, author) => {
   }
 };
 
+/**
+ * Lightweight catalog search by title for autocomplete assistance.
+ */
 export const searchBooksCatalogByTitle = async (title) => {
   if (!title?.trim()) return [];
 
@@ -38,6 +44,9 @@ export const searchBooksCatalogByTitle = async (title) => {
   }
 };
 
+/**
+ * Insert a new catalog entry when one does not already exist.
+ */
 export const addBookToCatalog = async ({ title, author, isbn, cover_url, created_by }) => {
   const payload = {
     title: title?.trim(),

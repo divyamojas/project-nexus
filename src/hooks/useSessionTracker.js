@@ -3,6 +3,9 @@
 import { useEffect } from 'react';
 import { getSession, onAuthStateChange } from '../services/authService';
 
+/**
+ * Track auth session and keep AuthContext's local user/loading in sync.
+ */
 export default function useSessionTracker(setUser, setLoading) {
   useEffect(() => {
     let isMounted = true;

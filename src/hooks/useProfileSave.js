@@ -3,6 +3,9 @@
 import { useState } from 'react';
 import { saveProfile } from '../services/profileService';
 
+/**
+ * Persist profile changes and surface errors/success state to the caller.
+ */
 export default function useProfileSave({
   user,
   username,
