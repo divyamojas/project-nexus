@@ -1,6 +1,7 @@
 // /src/services/bookRequestService.js
 
 import supabase from './supabaseClient';
+import { createTransferForAcceptedRequest } from './transferService';
 
 /**
  * Create a borrow request for a book by the current user.
@@ -27,12 +28,33 @@ export async function requestBorrowBook(book, message = '', user) {
  * Update the status of a request (accepted/rejected/cancelled).
  */
 export async function updateRequestStatus(requestId, status) {
+  // Fetch request to know the related book and users
+  const { data: req, error: reqErr } = await supabase
+    .from('book_requests')
+    .select('id, book_id, requested_by, requested_to, status')
+    .eq('id', requestId)
+    .single();
+  if (reqErr) throw reqErr;
+
+  // Update request status
   const { data, error } = await supabase
     .from('book_requests')
     .update({ status, updated_at: new Date().toISOString() })
-    .eq('id', requestId);
-
+    .eq('id', requestId)
+    .select('*');
   if (error) throw error;
+
+  // Side-effects on acceptance: schedule transfer and mark book as scheduled
+  if (status === 'accepted') {
+    try {
+      await supabase.from('books').update({ status: 'scheduled' }).eq('id', req.book_id);
+      await createTransferForAcceptedRequest(requestId);
+    } catch (e) {
+      // Log but do not throw to avoid breaking UI flow
+      console.error('Failed to trigger transfer on acceptance:', e);
+    }
+  }
+
   return data;
 }
 

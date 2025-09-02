@@ -35,10 +35,19 @@ export { getCurrentUserFirstName, getUserProfile } from './profileService';
 
 export { subscribeToBookChanges, unsubscribeFromBookChanges } from './realtimeService';
 
-export { requestBookReturn } from './returnRequestService';
+export { requestBookReturn, approveReturnRequest } from './returnRequestService';
 
 export { getSavedBooks, toggleSaveBook } from './savedBookService';
 
 export { getUserReviews } from './userReviewService';
 
-export { getTransfers } from './transferService';
+export {
+  getTransfers,
+  createTransferForAcceptedRequest,
+  updateTransfer,
+  completeTransfer,
+} from './transferService';
+
+export { createLoan, markLoanReturned, getActiveLoanForBook, getMyLoans } from './bookLoanService';
+
+export { addBookReview, getBookReviews, getBookRatingSummary } from './bookReviewService';
