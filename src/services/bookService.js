@@ -117,7 +117,9 @@ export async function getBooks({ includeArchived = true, user } = {}) {
     user_id,
     archived,
     catalog:catalog_id (id, title, author, cover_url),
-    saved_books (user_id)
+    saved_books (user_id),
+    book_loans!left (id, status, borrower_id, lender_id, loaned_at, due_date, returned_at),
+    return_requests!left (id, status, loan_id, requested_by, requested_at, resolved_at)
   `);
 
   if (!includeArchived) {
@@ -132,6 +134,15 @@ export async function getBooks({ includeArchived = true, user } = {}) {
       ? book.saved_books.some((entry) => entry.user_id === userId)
       : false;
 
+    // Determine active loan (if any) and derive borrowed_by
+    const activeLoan = Array.isArray(book.book_loans)
+      ? book.book_loans.find((l) => l.status === 'active')
+      : null;
+    const borrowedBy = activeLoan?.borrower_id || null;
+    const pendingReturn = Array.isArray(book.return_requests)
+      ? book.return_requests.find((r) => r.status === 'pending')
+      : null;
+
     return {
       id: book.id,
       user_id: book.user_id,
@@ -141,6 +152,8 @@ export async function getBooks({ includeArchived = true, user } = {}) {
       catalog: book.catalog,
       archived: book.archived,
       is_saved: isSaved,
+      borrowed_by: borrowedBy,
+      return_request_id: pendingReturn?.id || null,
     };
   });
 }
