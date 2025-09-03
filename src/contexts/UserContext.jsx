@@ -70,8 +70,8 @@ export const UserProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    if (user) refresh();
-  }, [user]);
+    if (user?.id) refresh();
+  }, [user?.id]);
 
   return (
     <userContext.Provider

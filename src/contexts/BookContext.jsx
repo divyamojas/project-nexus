@@ -1,6 +1,6 @@
 // src/contexts/BookContext.jsx
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { bookContext } from './bookContextObject';
 
 import { useUser } from './hooks/useUser';
@@ -11,6 +11,7 @@ import {
   getBooks,
   getSavedBooks,
   subscribeToBookChanges,
+  unsubscribeFromBookChanges,
   toggleSaveBook,
 } from '../services';
 import { requestBorrowBook } from '../services/bookRequestService';
@@ -76,7 +77,7 @@ export const BookProvider = ({ children }) => {
       });
   }, [books, filters, userId]);
 
-  const refreshBooks = async () => {
+  const refreshBooks = useCallback(async () => {
     setLoading(true);
     try {
       const data = await getBooks({ includeArchived: true, user });
@@ -88,52 +89,64 @@ export const BookProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id]);
 
-  const refreshSavedBooks = async () => {
+  const refreshSavedBooks = useCallback(async () => {
     try {
       const data = await getSavedBooks(user);
       setSavedBooks(data);
     } catch (err) {
       console.error('refreshSavedBooks error:', err);
     }
-  };
+  }, [user]);
 
-  const updateBookSaveStatus = (bookId, isSaved) => {
+  const updateBookSaveStatus = useCallback((bookId, isSaved) => {
     setBooks((prevBooks) =>
       prevBooks.map((book) => (book.id === bookId ? { ...book, is_saved: isSaved } : book)),
     );
-  };
+  }, []);
 
-  const toggleBookSaveStatus = async (book) => {
-    try {
-      const shouldSave = !book.is_saved;
-      await toggleSaveBook(book.id, shouldSave, book.catalog.id, user);
-      updateBookSaveStatus(book.id, shouldSave);
-    } catch (err) {
-      console.error('Failed to toggle save:', err);
-    }
-  };
+  const toggleBookSaveStatus = useCallback(
+    async (book) => {
+      try {
+        const shouldSave = !book.is_saved;
+        await toggleSaveBook(book.id, shouldSave, book.catalog.id, user);
+        updateBookSaveStatus(book.id, shouldSave);
+      } catch (err) {
+        console.error('Failed to toggle save:', err);
+      }
+    },
+    [updateBookSaveStatus, user],
+  );
 
-  const sendBookRequest = async (book, message = 'Hi! I would like to borrow this book.') => {
-    try {
-      await requestBorrowBook(book, message, user);
-      return true;
-    } catch (err) {
-      console.error('Failed to request book:', err);
-      return false;
-    }
-  };
+  const sendBookRequest = useCallback(
+    async (book, message = 'Hi! I would like to borrow this book.') => {
+      try {
+        await requestBorrowBook(book, message, user);
+        return true;
+      } catch (err) {
+        console.error('Failed to request book:', err);
+        return false;
+      }
+    },
+    [user],
+  );
 
-  const handleDeleteBook = async (book) => {
-    await deleteBook(book.id);
-    await refreshBooks();
-  };
+  const handleDeleteBook = useCallback(
+    async (book) => {
+      await deleteBook(book.id);
+      await refreshBooks();
+    },
+    [refreshBooks],
+  );
 
-  const handleArchiveBook = async (book) => {
-    await archiveBook(book.id, !book.archived);
-    await refreshBooks();
-  };
+  const handleArchiveBook = useCallback(
+    async (book) => {
+      await archiveBook(book.id, !book.archived);
+      await refreshBooks();
+    },
+    [refreshBooks],
+  );
 
   useEffect(() => {
     if (userId) {
@@ -145,9 +158,15 @@ export const BookProvider = ({ children }) => {
   useEffect(() => {
     const sub = subscribeToBookChanges(refreshBooks);
     return () => {
-      sub.unsubscribe();
+      try {
+        sub.unsubscribe?.();
+      } catch {}
+      // Also clear the module-level channel to allow re-subscription when needed
+      try {
+        unsubscribeFromBookChanges();
+      } catch {}
     };
-  }, []);
+  }, [refreshBooks]);
 
   return (
     <bookContext.Provider

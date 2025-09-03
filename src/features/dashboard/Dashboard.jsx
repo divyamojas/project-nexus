@@ -25,9 +25,11 @@ import { getRequestsForUser } from '../../utilities';
 import useDashboardHandlers from './hooks/useDashboardHandlers';
 
 export default function Dashboard() {
-  const { user } = useUser();
+  const { user, firstName: firstNameFromContext } = useUser();
 
-  const [userFirstName, setUserFirstName] = useState('Friend');
+  const [userFirstName, setUserFirstName] = useState(
+    () => firstNameFromContext || user?.first_name || 'Friend',
+  );
   const [requests, setRequests] = useState({ incoming: [], outgoing: [] });
   const [transfers, setTransfers] = useState([]);
   const [savedBooks, setSavedBooks] = useState([]);
@@ -69,14 +71,16 @@ export default function Dashboard() {
     }));
     setBorrowedBooks(borrowed);
     refreshBooks();
-  }, [user, refreshBooks]);
+  }, [user?.id, refreshBooks]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
   useEffect(() => {
-    setUserFirstName(user.first_name);
-  }, [user]);
+    if (firstNameFromContext || user?.first_name) {
+      setUserFirstName(firstNameFromContext || user.first_name);
+    }
+  }, [firstNameFromContext, user?.first_name]);
 
   const handleBookClick = (book, context = 'myBooks') => {
     setSelectedBook(book);
