@@ -3,9 +3,8 @@
 import { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
-import DelayedLoader from '@/commonComponents/DelayedLoader';
-import PrivateRoute from '@/commonComponents/PrivateRoute';
-import Layout from '@/commonComponents/Layout';
+import BusyFallback from '@/commonComponents/BusyFallback';
+import RouteSpinner from '@/commonComponents/RouteSpinner';
 import { UserProvider } from '@/contexts/UserContext';
 import { BookProvider } from '@/contexts/BookContext';
 import { useSession } from '@/hooks';
@@ -13,8 +12,9 @@ import { ThemeModeProvider } from '@/theme/ThemeModeProvider';
 import { SnackbarProvider } from '@/components/providers/SnackbarProvider';
 import ErrorBoundary from '@/components/providers/ErrorBoundary';
 import TopProgressBar from '@/commonComponents/TopProgressBar';
+import { RouteLoadProvider } from '@/components/providers/RouteLoadProvider';
 
-// Lazy loading pages
+// Lazy loading pages and heavy shells
 const Signup = lazy(() => import('@/features/auth/Signup'));
 const Login = lazy(() => import('@/features/auth/Login'));
 const ForgotPassword = lazy(() => import('@/features/auth/ForgotPassword'));
@@ -23,6 +23,8 @@ const BrowseBooks = lazy(() => import('@/features/books/BrowseBooks'));
 const Feedback = lazy(() => import('@/features/feedback/Feedback'));
 const NotFound = lazy(() => import('@/features/notFound/NotFound'));
 const ProfileSetup = lazy(() => import('@/features/profile/ProfileSetup'));
+const PrivateRoute = lazy(() => import('@/commonComponents/PrivateRoute'));
+const Layout = lazy(() => import('@/commonComponents/Layout'));
 
 const protectedRoutes = [
   { path: '/dashboard', element: <Dashboard /> },
@@ -85,14 +87,17 @@ export default function App() {
       <ThemeModeProvider>
         <SnackbarProvider>
           <ErrorBoundary>
-            <TopProgressBar delay={80} duration={500} />
-            <Suspense fallback={<DelayedLoader delay={400} />}>
-              <UserProvider>
-                <BookProvider>
-                  <RouteWrapper />
-                </BookProvider>
-              </UserProvider>
-            </Suspense>
+            <RouteLoadProvider>
+              <TopProgressBar delay={80} />
+              <RouteSpinner delay={350} />
+              <Suspense fallback={<BusyFallback delay={500} />}>
+                <UserProvider>
+                  <BookProvider>
+                    <RouteWrapper />
+                  </BookProvider>
+                </UserProvider>
+              </Suspense>
+            </RouteLoadProvider>
           </ErrorBoundary>
         </SnackbarProvider>
       </ThemeModeProvider>
