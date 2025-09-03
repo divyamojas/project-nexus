@@ -34,6 +34,7 @@ export default async function processSignup({
   if (signupError) {
     setError(signupError.message);
   } else {
-    navigate('/dashboard');
+    // After signup, prompt user to complete profile (set username)
+    navigate('/profile');
   }
 }

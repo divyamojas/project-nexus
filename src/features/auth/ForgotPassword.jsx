@@ -14,11 +14,13 @@ import {
   Link,
 } from '@mui/material';
 import { useAuth } from '../../contexts/hooks/useAuth';
+import { useUser } from '../../contexts/hooks/useUser';
 import { processResetPassword } from '../../utilities';
 
 export default function ForgotPassword() {
   const { resetPassword, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const { userProfile } = useUser();
 
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
@@ -27,9 +29,9 @@ export default function ForgotPassword() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/dashboard', { replace: true });
+      navigate(userProfile?.username ? '/dashboard' : '/profile', { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, userProfile?.username]);
 
   const handleResetPassword = async (e) => {
     e.preventDefault();

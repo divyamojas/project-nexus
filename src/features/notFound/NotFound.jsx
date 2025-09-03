@@ -5,17 +5,21 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Typography, CircularProgress, Fade } from '@mui/material';
 
 import { useSession } from '../../hooks';
+import { useUser } from '../../contexts/hooks/useUser';
 
 export default function NotFound() {
   const navigate = useNavigate();
   const { session } = useSession();
+  const { userProfile } = useUser();
+  const hasUsername = !!(userProfile && typeof userProfile === 'object' && userProfile.username);
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigate(session ? '/dashboard' : '/login', { replace: true });
+      if (!session) navigate('/login', { replace: true });
+      else navigate(hasUsername ? '/dashboard' : '/profile', { replace: true });
     }, 2000);
     return () => clearTimeout(timer);
-  }, [navigate, session]);
+  }, [navigate, session, hasUsername]);
 
   return (
     <Fade in timeout={500}>
@@ -32,7 +36,13 @@ export default function NotFound() {
           404 - Page Not Found
         </Typography>
         <Typography variant="body1" color="text.secondary" mb={4}>
-          Redirecting you {session ? 'to your dashboard' : 'to the login page'} in 2 seconds...
+          Redirecting you
+          {session
+            ? hasUsername
+              ? ' to your dashboard'
+              : ' to profile setup'
+            : ' to the login page'}{' '}
+          in 2 seconds...
         </Typography>
         <CircularProgress color="primary" size={48} thickness={4} />
       </Box>

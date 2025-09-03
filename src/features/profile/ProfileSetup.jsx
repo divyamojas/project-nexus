@@ -16,9 +16,11 @@ import {
 } from '@mui/material';
 import { useAvatarDrop, useProfileSave } from '../../hooks';
 import { useUser } from '../../contexts/hooks/useUser';
+import { useNavigate } from 'react-router-dom';
 
 export default function ProfileSetup() {
   const { user, userProfile } = useUser();
+  const navigate = useNavigate();
   const [username, setUsername] = useState(userProfile?.username || '');
   const [firstName, setFirstName] = useState(userProfile?.first_name || '');
   const [lastName, setLastName] = useState(userProfile?.last_name || '');
@@ -35,6 +37,8 @@ export default function ProfileSetup() {
     getInputProps,
   } = useAvatarDrop(userProfile?.avatar_url || '', username);
 
+  const isFirstTime = !Boolean(userProfile?.username);
+
   const { loading, error, success, handleSave } = useProfileSave({
     user,
     username,
@@ -43,7 +47,7 @@ export default function ProfileSetup() {
     bio,
     avatarFile,
     avatarUrl,
-    // onComplete,
+    onComplete: isFirstTime ? () => navigate('/dashboard', { replace: true }) : undefined,
     setAvatarError,
     setAvatarFile,
     setAvatarUrl,

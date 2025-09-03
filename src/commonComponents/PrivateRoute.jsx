@@ -9,10 +9,10 @@ import { useUser } from '@/contexts/hooks/useUser';
 
 export default function PrivateRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();
-  const { userProfile } = useUser();
+  const { userProfile, loading: userLoading } = useUser();
   const location = useLocation();
 
-  if (loading) {
+  if (loading || userLoading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
         <CircularProgress />

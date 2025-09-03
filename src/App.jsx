@@ -9,6 +9,7 @@ import Layout from '@/commonComponents/Layout';
 import { UserProvider } from '@/contexts/UserContext';
 import { BookProvider } from '@/contexts/BookContext';
 import { useSession } from '@/hooks';
+import { useUser } from '@/contexts/hooks/useUser';
 import { ThemeModeProvider } from '@/theme/ThemeModeProvider';
 import { SnackbarProvider } from '@/components/providers/SnackbarProvider';
 import ErrorBoundary from '@/components/providers/ErrorBoundary';
@@ -32,24 +33,56 @@ const protectedRoutes = [
 
 function RouteWrapper() {
   const { session, loading } = useSession();
+  const { userProfile, loading: userLoading } = useUser();
+
+  const hasUsername = !!(userProfile && typeof userProfile === 'object' && userProfile.username);
 
   // Show a loader only if session resolution takes longer than a short delay.
-  if (loading) return <DelayedLoader delay={250} />;
+  if (loading || (session && userLoading)) return <DelayedLoader delay={250} />;
 
   return (
     <Routes>
       {/* Root Route */}
       <Route
         path="/"
-        element={session ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />}
+        element={
+          session ? (
+            hasUsername ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <Navigate to="/profile" replace />
+            )
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
       />
 
       {/* Auth Routes */}
       <Route
         path="/signup"
-        element={!session ? <Signup /> : <Navigate to="/dashboard" replace />}
+        element={
+          !session ? (
+            <Signup />
+          ) : hasUsername ? (
+            <Navigate to="/dashboard" replace />
+          ) : (
+            <Navigate to="/profile" replace />
+          )
+        }
       />
-      <Route path="/login" element={!session ? <Login /> : <Navigate to="/dashboard" replace />} />
+      <Route
+        path="/login"
+        element={
+          !session ? (
+            <Login />
+          ) : hasUsername ? (
+            <Navigate to="/dashboard" replace />
+          ) : (
+            <Navigate to="/profile" replace />
+          )
+        }
+      />
       <Route path="/forgot-password" element={<ForgotPassword />} />
 
       {/* Protected Routes (mapped) */}
