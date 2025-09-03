@@ -26,6 +26,8 @@ import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import { alpha } from '@mui/material/styles';
+import SpaIcon from '@mui/icons-material/Spa';
+import { keyframes } from '@mui/system';
 import { useUser } from '@/contexts/hooks/useUser';
 
 export default function Layout({ children }) {
@@ -41,6 +43,19 @@ export default function Layout({ children }) {
   const isActive = useMemo(() => {
     return (path) => (location.pathname === path ? 'active' : '');
   }, [location.pathname]);
+
+  // Subtle text gradient sheen and leaf wiggle animations
+  const sheen = keyframes`
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+  `;
+  const leafWiggle = keyframes`
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(-10deg); }
+    50% { transform: rotate(8deg); }
+    75% { transform: rotate(-6deg); }
+    100% { transform: rotate(0deg); }
+  `;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -96,24 +111,56 @@ export default function Layout({ children }) {
         }}
       >
         <Toolbar sx={{ justifyContent: 'space-between' }}>
-          <Typography
-            variant="h6"
+          <Box
             component={Link}
             to={canNavigate ? '/dashboard' : '/profile'}
-            style={{ textDecoration: 'none', color: 'inherit' }}
             sx={{
-              fontWeight: 800,
-              letterSpacing: 0.3,
-              background: `linear-gradient(90deg, ${muiTheme.palette.primary.main}, ${muiTheme.palette.success.main})`,
-              WebkitBackgroundClip: 'text',
-              backgroundClip: 'text',
-              color: 'transparent',
-              transition: 'filter 200ms ease',
-              '&:hover': { filter: 'brightness(1.1)' },
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 1,
+              textDecoration: 'none',
+              color: 'inherit',
+              '&:hover .brand-leaf': { animation: `${leafWiggle} 600ms ease` },
             }}
           >
-            Leaflet
-          </Typography>
+            <Box
+              className="brand-leaf"
+              sx={{
+                width: 30,
+                height: 30,
+                borderRadius: '999px',
+                display: 'grid',
+                placeItems: 'center',
+                border: `2px solid ${alpha(muiTheme.palette.success.main, 0.7)}`,
+                boxShadow: `0 2px 8px ${alpha(muiTheme.palette.success.main, 0.25)}`,
+                backgroundColor: alpha(
+                  muiTheme.palette.mode === 'dark'
+                    ? muiTheme.palette.success.dark
+                    : muiTheme.palette.success.light,
+                  0.12,
+                ),
+                transition: 'transform 200ms ease',
+              }}
+            >
+              <SpaIcon fontSize="small" sx={{ color: 'success.main' }} />
+            </Box>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 800,
+                letterSpacing: 0.3,
+                background: `linear-gradient(90deg, ${muiTheme.palette.primary.main}, ${muiTheme.palette.success.main})`,
+                backgroundSize: '200% 100%',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                color: 'transparent',
+                animation: `${sheen} 6s ease-in-out infinite`,
+                textShadow: `0 1px 1px ${alpha(muiTheme.palette.background.default, 0.3)}`,
+              }}
+            >
+              Leaflet
+            </Typography>
+          </Box>
 
           <Box display={{ xs: 'none', sm: 'flex' }} gap={1} alignItems="center">
             <Tooltip title="Dashboard">
