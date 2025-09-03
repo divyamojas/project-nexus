@@ -123,7 +123,7 @@ export default function Dashboard() {
       <Container maxWidth="lg" sx={{ py: 5 }}>
         <Paper elevation={2} sx={{ p: 4, borderRadius: 4, bgcolor: 'background.paper' }}>
           <Typography variant="h4" fontWeight="medium" gutterBottom color="text.primary">
-            Hi {userFirstName || 'Friend'}, welcome to your dashboard 📘
+            Hi {userFirstName || 'Friend'}, welcome to your dashboard
           </Typography>
 
           <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>

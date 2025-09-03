@@ -48,7 +48,7 @@ export default function Signup() {
       <Card sx={{ bgcolor: 'background.paper', p: 3, borderRadius: 2, boxShadow: 2 }}>
         <CardContent>
           <Typography variant="h4" gutterBottom align="center" color="primary" fontWeight="bold">
-            Join Leaflet 🌿
+            Create your Leaflet account
           </Typography>
           <Typography variant="subtitle2" align="center" sx={{ mb: 1, color: 'success.main' }}>
             Create your cozy book sharing account

@@ -1,7 +1,7 @@
 // src/App.jsx
 
 import { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
 import DelayedLoader from '@/commonComponents/DelayedLoader';
 import PrivateRoute from '@/commonComponents/PrivateRoute';
@@ -9,10 +9,10 @@ import Layout from '@/commonComponents/Layout';
 import { UserProvider } from '@/contexts/UserContext';
 import { BookProvider } from '@/contexts/BookContext';
 import { useSession } from '@/hooks';
-import { useUser } from '@/contexts/hooks/useUser';
 import { ThemeModeProvider } from '@/theme/ThemeModeProvider';
 import { SnackbarProvider } from '@/components/providers/SnackbarProvider';
 import ErrorBoundary from '@/components/providers/ErrorBoundary';
+import TopProgressBar from '@/commonComponents/TopProgressBar';
 
 // Lazy loading pages
 const Signup = lazy(() => import('@/features/auth/Signup'));
@@ -33,56 +33,31 @@ const protectedRoutes = [
 
 function RouteWrapper() {
   const { session, loading } = useSession();
-  const { userProfile, loading: userLoading } = useUser();
+  const location = useLocation();
 
-  const hasUsername = !!(userProfile && typeof userProfile === 'object' && userProfile.username);
+  // Avoid flicker by not rendering routes until session resolves
+  if (loading) return null;
 
-  // Show a loader only if session resolution takes longer than a short delay.
-  if (loading || (session && userLoading)) return <DelayedLoader delay={250} />;
+  // If not authenticated, force redirect to login for any non-auth route
+  const AUTH_ROUTES = new Set(['/login', '/signup', '/forgot-password']);
+  if (!session && !AUTH_ROUTES.has(location.pathname)) {
+    return <Navigate to="/login" replace />;
+  }
 
   return (
     <Routes>
       {/* Root Route */}
       <Route
         path="/"
-        element={
-          session ? (
-            hasUsername ? (
-              <Navigate to="/dashboard" replace />
-            ) : (
-              <Navigate to="/profile" replace />
-            )
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
+        element={session ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />}
       />
 
       {/* Auth Routes */}
       <Route
         path="/signup"
-        element={
-          !session ? (
-            <Signup />
-          ) : hasUsername ? (
-            <Navigate to="/dashboard" replace />
-          ) : (
-            <Navigate to="/profile" replace />
-          )
-        }
+        element={!session ? <Signup /> : <Navigate to="/dashboard" replace />}
       />
-      <Route
-        path="/login"
-        element={
-          !session ? (
-            <Login />
-          ) : hasUsername ? (
-            <Navigate to="/dashboard" replace />
-          ) : (
-            <Navigate to="/profile" replace />
-          )
-        }
-      />
+      <Route path="/login" element={!session ? <Login /> : <Navigate to="/dashboard" replace />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
 
       {/* Protected Routes (mapped) */}
@@ -110,7 +85,8 @@ export default function App() {
       <ThemeModeProvider>
         <SnackbarProvider>
           <ErrorBoundary>
-            <Suspense fallback={<DelayedLoader delay={250} />}>
+            <TopProgressBar delay={80} duration={500} />
+            <Suspense fallback={<DelayedLoader delay={400} />}>
               <UserProvider>
                 <BookProvider>
                   <RouteWrapper />

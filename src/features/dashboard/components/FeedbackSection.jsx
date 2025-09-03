@@ -1,13 +1,17 @@
 // src/features/dashboard/components/FeedbackSection.jsx
 
-import { Box, Typography, Grid, Paper } from '@mui/material';
+import { Box, Typography, Grid, Paper, Stack } from '@mui/material';
+import RateReviewIcon from '@mui/icons-material/RateReview';
 
 export default function FeedbackSection({ feedbacks = [] }) {
   return (
     <Box mt={6}>
-      <Typography variant="h6" color="text.primary" sx={{ mb: 2 }}>
-        💬 My Feedbacks
-      </Typography>
+      <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
+        <RateReviewIcon color="secondary" fontSize="small" />
+        <Typography variant="h6" color="text.primary">
+          My Feedback
+        </Typography>
+      </Stack>
       {feedbacks.length === 0 ? (
         <Typography variant="body2" color="text.secondary">
           No feedbacks yet.

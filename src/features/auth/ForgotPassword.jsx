@@ -43,7 +43,7 @@ export default function ForgotPassword() {
       <Card sx={{ bgcolor: 'background.paper', p: 3, borderRadius: 2, boxShadow: 2 }}>
         <CardContent>
           <Typography variant="h4" gutterBottom align="center" color="primary" fontWeight="bold">
-            Forgot Password 🌿
+            Reset your password
           </Typography>
           <Typography variant="subtitle2" align="center" sx={{ mb: 1, color: 'success.main' }}>
             We&apos;ll send you a link to reset it

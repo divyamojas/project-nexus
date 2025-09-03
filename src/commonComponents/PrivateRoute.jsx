@@ -12,7 +12,7 @@ export default function PrivateRoute({ children }) {
   const { userProfile, loading: userLoading } = useUser();
   const location = useLocation();
 
-  if (loading || userLoading) {
+  if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
         <CircularProgress />
@@ -22,6 +22,14 @@ export default function PrivateRoute({ children }) {
 
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  if (userLoading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+        <CircularProgress />
+      </Box>
+    );
   }
 
   // Prevent error if userProfile is undefined/null

@@ -17,6 +17,8 @@ import {
   Switch,
   Divider,
 } from '@mui/material';
+import AutoStoriesIcon from '@mui/icons-material/AutoStories';
+import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import { useDebounce } from '../../hooks';
 import BookModal from './components/BookModal';
 import BookCard from './components/BookCard';
@@ -85,9 +87,12 @@ export default function BrowseBooks() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" fontWeight={600} mb={3}>
-        📚 Discover Books Shared by the Community
-      </Typography>
+      <Stack direction="row" spacing={1} alignItems="center" mb={3}>
+        <AutoStoriesIcon color="primary" />
+        <Typography variant="h4" fontWeight={600}>
+          Discover books shared by the community
+        </Typography>
+      </Stack>
 
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} mb={3} alignItems="flex-start">
         <TextField
@@ -136,9 +141,12 @@ export default function BrowseBooks() {
         <>
           {showOwnBooks && myBooks.length > 0 && (
             <>
-              <Typography variant="h6" fontWeight={600} gutterBottom>
-                🧾 My Books
-              </Typography>
+              <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                <LibraryBooksIcon color="action" />
+                <Typography variant="h6" fontWeight={600}>
+                  My books
+                </Typography>
+              </Stack>
               <Grid container spacing={2} mb={4}>
                 {myBooks.map((book) => (
                   <Grid item xs={12} sm={6} key={book.id}>
@@ -162,9 +170,12 @@ export default function BrowseBooks() {
             </>
           )}
 
-          <Typography variant="h6" fontWeight={600} gutterBottom>
-            📖 Available Books
-          </Typography>
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+            <AutoStoriesIcon color="action" />
+            <Typography variant="h6" fontWeight={600}>
+              Available books
+            </Typography>
+          </Stack>
           <Grid container spacing={2}>
             {otherBooks.map((book) => (
               <Grid item xs={12} sm={6} key={book.id}>

@@ -40,7 +40,7 @@ export default function Login() {
       <Card sx={{ bgcolor: 'background.paper', p: 3, borderRadius: 2, boxShadow: 2 }}>
         <CardContent>
           <Typography variant="h4" gutterBottom align="center" color="primary" fontWeight="bold">
-            Welcome Back 🌿
+            Welcome back
           </Typography>
           <Typography variant="subtitle2" align="center" sx={{ mb: 1, color: 'success.main' }}>
             Sign in to your Leaflet account
