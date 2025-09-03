@@ -133,7 +133,8 @@ export async function getIncomingRequestsForBooks(ownedBookIds) {
     )
     .in('book_id', ownedBookIds)
     .neq('status', 'cancelled')
-    .neq('status', 'rejected');
+    .neq('status', 'rejected')
+    .neq('status', 'accepted');
 
   if (error) {
     logError('getIncomingRequestsForBooks failed', error, { ownedBookIds });
@@ -193,7 +194,8 @@ export async function getOutgoingRequestsForUser(userId) {
     )
     .eq('requested_by', userId)
     .neq('status', 'cancelled')
-    .neq('status', 'rejected');
+    .neq('status', 'rejected')
+    .neq('status', 'accepted');
 
   if (error) {
     logError('getOutgoingRequestsForUser failed', error, { userId });
