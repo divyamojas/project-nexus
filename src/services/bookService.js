@@ -1,6 +1,7 @@
 // src/services/bookService.js
 
 import supabase from './supabaseClient';
+import { logError } from '../utilities/logger';
 
 /**
  * Fetch the owner id of a book by its id.
@@ -127,7 +128,10 @@ export async function getBooks({ includeArchived = true, user } = {}) {
   }
 
   const { data, error } = await query;
-  if (error) throw error;
+  if (error) {
+    logError('getBooks failed', error, { includeArchived, userId });
+    throw error;
+  }
 
   return data.map((book) => {
     const isSaved = Array.isArray(book.saved_books)

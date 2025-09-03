@@ -1,6 +1,7 @@
 // src/services/realtimeService.js
 
 import supabase from './supabaseClient';
+import { logError } from '../utilities/logger';
 
 let channel = null;
 
@@ -13,7 +14,11 @@ export function subscribeToBookChanges(onChange) {
   channel = supabase
     .channel('books-changes')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'books' }, (payload) => {
-      onChange?.(payload);
+      try {
+        onChange?.(payload);
+      } catch (e) {
+        logError('subscribeToBookChanges onChange handler failed', e, { payload });
+      }
     })
     .subscribe((_status) => {
       // Subscribed

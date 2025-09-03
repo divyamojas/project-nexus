@@ -2,6 +2,7 @@
 
 import supabase from './supabaseClient';
 import { createTransferForAcceptedRequest } from './transferService';
+import { logError } from '../utilities/logger';
 
 /**
  * Create a borrow request for a book by the current user.
@@ -20,7 +21,10 @@ export async function requestBorrowBook(book, message = '', user) {
       { book_id: book.id, requested_by: requester_id, requested_to, status: 'pending', message },
     ]);
 
-  if (error) throw error;
+  if (error) {
+    logError('requestBorrowBook failed', error, { bookId: book.id, requester_id, requested_to });
+    throw error;
+  }
   return data;
 }
 
@@ -34,7 +38,10 @@ export async function updateRequestStatus(requestId, status) {
     .select('id, book_id, requested_by, requested_to, status')
     .eq('id', requestId)
     .single();
-  if (reqErr) throw reqErr;
+  if (reqErr) {
+    logError('updateRequestStatus: fetch request failed', reqErr, { requestId });
+    throw reqErr;
+  }
 
   // Update request status
   const { data, error } = await supabase
@@ -42,7 +49,10 @@ export async function updateRequestStatus(requestId, status) {
     .update({ status, updated_at: new Date().toISOString() })
     .eq('id', requestId)
     .select('*');
-  if (error) throw error;
+  if (error) {
+    logError('updateRequestStatus: update failed', error, { requestId, status });
+    throw error;
+  }
 
   // Side-effects on acceptance: schedule transfer and mark book as scheduled
   if (status === 'accepted') {
@@ -83,7 +93,7 @@ export async function getRequestsForBook(book_id) {
     .eq('book_id', book_id);
 
   if (error) {
-    console.error('Error at getRequestsForBook:', error);
+    logError('getRequestsForBook failed', error, { book_id });
     throw error;
   }
 
@@ -125,7 +135,10 @@ export async function getIncomingRequestsForBooks(ownedBookIds) {
     .neq('status', 'cancelled')
     .neq('status', 'rejected');
 
-  if (error) throw error;
+  if (error) {
+    logError('getIncomingRequestsForBooks failed', error, { ownedBookIds });
+    throw error;
+  }
 
   const InReq = (data || []).map((entry) => ({
     id: entry.book.id,
@@ -182,7 +195,10 @@ export async function getOutgoingRequestsForUser(userId) {
     .neq('status', 'cancelled')
     .neq('status', 'rejected');
 
-  if (error) throw error;
+  if (error) {
+    logError('getOutgoingRequestsForUser failed', error, { userId });
+    throw error;
+  }
 
   const OutReq = (data || []).map((entry) => ({
     book_id: entry.book.id,

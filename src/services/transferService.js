@@ -2,6 +2,7 @@
 
 import supabase from './supabaseClient';
 import { createLoan } from './bookLoanService';
+import { logError } from '../utilities/logger';
 
 /**
  * Fetch transfers where the current user is either the sender or receiver.
@@ -40,7 +41,10 @@ export const getTransfers = async () => {
     .or(`from_user.eq.${userId},to_user.eq.${userId}`)
     .order('created_at', { ascending: false });
 
-  if (error) throw error;
+  if (error) {
+    logError('getTransfers failed', error, { userId });
+    throw error;
+  }
 
   // Normalize to book-like objects to reuse existing card UI
   return (data || []).map((t) => ({
@@ -70,7 +74,10 @@ export async function createTransferForAcceptedRequest(requestId) {
     .select('id, book_id, requested_by, requested_to, status')
     .eq('id', requestId)
     .single();
-  if (reqErr) throw reqErr;
+  if (reqErr) {
+    logError('createTransferForAcceptedRequest: fetch request failed', reqErr, { requestId });
+    throw reqErr;
+  }
   if (!req || req.status !== 'accepted')
     throw new Error('Request must be accepted to create transfer');
 
@@ -84,7 +91,13 @@ export async function createTransferForAcceptedRequest(requestId) {
   };
 
   const { data, error } = await supabase.from('transfers').insert([payload]).select('*').single();
-  if (error) throw error;
+  if (error) {
+    logError('createTransferForAcceptedRequest: insert transfer failed', error, {
+      requestId,
+      payload,
+    });
+    throw error;
+  }
   return data;
 }
 
@@ -100,7 +113,10 @@ export async function updateTransfer({ transfer_id, status, scheduled_at = null 
     .eq('id', transfer_id)
     .select('*')
     .single();
-  if (error) throw error;
+  if (error) {
+    logError('updateTransfer failed', error, { transfer_id, patch });
+    throw error;
+  }
   return data;
 }
 
@@ -113,7 +129,10 @@ export async function completeTransfer({ transfer_id }) {
     .select('id, book_id, from_user, to_user, status')
     .eq('id', transfer_id)
     .single();
-  if (trErr) throw trErr;
+  if (trErr) {
+    logError('completeTransfer: fetch transfer failed', trErr, { transfer_id });
+    throw trErr;
+  }
   if (!transfer) throw new Error('Transfer not found');
 
   // Mark transfer as transferred
@@ -121,7 +140,10 @@ export async function completeTransfer({ transfer_id }) {
     .from('transfers')
     .update({ status: 'transferred', completed_at: new Date().toISOString() })
     .eq('id', transfer_id);
-  if (updErr) throw updErr;
+  if (updErr) {
+    logError('completeTransfer: update transfer failed', updErr, { transfer_id });
+    throw updErr;
+  }
 
   // Create the loan
   await createLoan({

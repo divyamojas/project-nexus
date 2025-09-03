@@ -23,6 +23,7 @@ import {
 } from '../../services';
 import { getRequestsForUser } from '../../utilities';
 import useDashboardHandlers from './hooks/useDashboardHandlers';
+import { logError } from '@/utilities/logger';
 
 export default function Dashboard() {
   const { user, firstName: firstNameFromContext } = useUser();
@@ -44,33 +45,37 @@ export default function Dashboard() {
   const { categorizedBooks, handleDeleteBook, handleArchiveBook, refreshBooks } = useBookContext();
 
   const fetchData = useCallback(async () => {
-    const [req, trf, saved, rev, name, myLoans] = await Promise.all([
-      getRequestsForUser(user),
-      getTransfers(),
-      getSavedBooks(user),
-      getUserReviews(user),
-      getCurrentUserFirstName(user),
-      getMyLoans({ role: 'borrower' }),
-    ]);
-    setRequests(req);
-    setTransfers(trf);
-    setSavedBooks(saved);
-    setReviews(rev);
-    setUserFirstName(name);
-    // Normalize loans -> book-like
-    const borrowed = (myLoans || []).map((l) => ({
-      id: l.book?.id,
-      user_id: l.book?.user_id,
-      status: 'lent',
-      condition: l.book?.condition,
-      created_at: l.book?.created_at,
-      catalog: l.book?.books_catalog,
-      archived: false,
-      loan_id: l.id,
-      loan_due_date: l.due_date,
-    }));
-    setBorrowedBooks(borrowed);
-    refreshBooks();
+    try {
+      const [req, trf, saved, rev, name, myLoans] = await Promise.all([
+        getRequestsForUser(user),
+        getTransfers(),
+        getSavedBooks(user),
+        getUserReviews(user),
+        getCurrentUserFirstName(user),
+        getMyLoans({ role: 'borrower' }),
+      ]);
+      setRequests(req);
+      setTransfers(trf);
+      setSavedBooks(saved);
+      setReviews(rev);
+      setUserFirstName(name);
+      // Normalize loans -> book-like
+      const borrowed = (myLoans || []).map((l) => ({
+        id: l.book?.id,
+        user_id: l.book?.user_id,
+        status: 'lent',
+        condition: l.book?.condition,
+        created_at: l.book?.created_at,
+        catalog: l.book?.books_catalog,
+        archived: false,
+        loan_id: l.id,
+        loan_due_date: l.due_date,
+      }));
+      setBorrowedBooks(borrowed);
+      await refreshBooks();
+    } catch (e) {
+      logError('Dashboard.fetchData failed', e, { userId: user?.id });
+    }
   }, [user?.id, refreshBooks]);
 
   useEffect(() => {

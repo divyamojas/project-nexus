@@ -11,6 +11,7 @@ import { BookProvider } from '@/contexts/BookContext';
 import { useSession } from '@/hooks';
 import { ThemeModeProvider } from '@/theme/ThemeModeProvider';
 import { SnackbarProvider } from '@/components/providers/SnackbarProvider';
+import ErrorBoundary from '@/components/providers/ErrorBoundary';
 
 // Lazy loading pages
 const Signup = lazy(() => import('@/features/auth/Signup'));
@@ -75,13 +76,15 @@ export default function App() {
     <Router>
       <ThemeModeProvider>
         <SnackbarProvider>
-          <Suspense fallback={<DelayedLoader delay={250} />}>
-            <UserProvider>
-              <BookProvider>
-                <RouteWrapper />
-              </BookProvider>
-            </UserProvider>
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<DelayedLoader delay={250} />}>
+              <UserProvider>
+                <BookProvider>
+                  <RouteWrapper />
+                </BookProvider>
+              </UserProvider>
+            </Suspense>
+          </ErrorBoundary>
         </SnackbarProvider>
       </ThemeModeProvider>
     </Router>

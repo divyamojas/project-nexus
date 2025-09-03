@@ -1,6 +1,7 @@
 // src/services/bookLoanService.js
 
 import supabase from './supabaseClient';
+import { logError } from '../utilities/logger';
 
 /**
  * Create a loan for a given book between lender and borrower.
@@ -23,7 +24,10 @@ export async function createLoan({
   };
 
   const { data, error } = await supabase.from('book_loans').insert([payload]).select('*').single();
-  if (error) throw error;
+  if (error) {
+    logError('createLoan failed', error, { payload });
+    throw error;
+  }
   return data;
 }
 
@@ -37,7 +41,10 @@ export async function markLoanReturned(loan_id) {
     .eq('id', loan_id)
     .select('*')
     .single();
-  if (error) throw error;
+  if (error) {
+    logError('markLoanReturned failed', error, { loan_id });
+    throw error;
+  }
   return data;
 }
 
@@ -51,7 +58,10 @@ export async function getActiveLoanForBook(book_id) {
     .eq('book_id', book_id)
     .eq('status', 'active')
     .maybeSingle();
-  if (error) throw error;
+  if (error) {
+    logError('getActiveLoanForBook failed', error, { book_id });
+    throw error;
+  }
   return data || null;
 }
 
@@ -93,6 +103,9 @@ export async function getMyLoans({ role } = {}) {
     .or(filter)
     .order('loaned_at', { ascending: false });
 
-  if (error) throw error;
+  if (error) {
+    logError('getMyLoans failed', error, { role });
+    throw error;
+  }
   return data || [];
 }

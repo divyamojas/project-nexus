@@ -22,6 +22,7 @@ import BookModal from './components/BookModal';
 import BookCard from './components/BookCard';
 
 import { useAuth } from '../../contexts/hooks/useAuth';
+import { logError } from '@/utilities/logger';
 import { useBookContext } from '../../contexts/hooks/useBookContext';
 
 export default function BrowseBooks() {
@@ -63,11 +64,23 @@ export default function BrowseBooks() {
     setIsModalOpen(false);
   };
 
-  const handleToggleSave = (book) => toggleBookSaveStatus(book);
+  const handleToggleSave = async (book) => {
+    try {
+      await toggleBookSaveStatus(book);
+    } catch (e) {
+      logError('BrowseBooks.handleToggleSave failed', e, { bookId: book?.id });
+      alert('Failed to update saved state.');
+    }
+  };
 
   const handleRequestBook = async (book) => {
-    const success = await sendBookRequest(book);
-    if (success) alert('Borrow request sent!');
+    try {
+      const success = await sendBookRequest(book);
+      if (success) alert('Borrow request sent!');
+    } catch (e) {
+      logError('BrowseBooks.handleRequestBook failed', e, { bookId: book?.id });
+      alert('Failed to send borrow request.');
+    }
   };
 
   return (

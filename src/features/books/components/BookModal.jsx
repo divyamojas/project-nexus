@@ -38,6 +38,7 @@ import {
 } from '../../../services';
 import { approveReturnRequest } from '../../../services/returnRequestService';
 import ReviewsSection from './ReviewsSection';
+import { logError } from '@/utilities/logger';
 
 export default function BookModal({
   open,
@@ -63,63 +64,101 @@ export default function BookModal({
   const { title, author, cover_url } = catalog;
 
   const handleToggleSave = async () => {
-    const shouldSave = !isSavedState;
-    setIsSavedState(shouldSave);
-    await toggleSaveBook(book.id, shouldSave, catalog.id, user);
-    onActionComplete();
-    onClose();
+    try {
+      const shouldSave = !isSavedState;
+      setIsSavedState(shouldSave);
+      await toggleSaveBook(book.id, shouldSave, catalog.id, user);
+      onActionComplete();
+      onClose();
+    } catch (e) {
+      logError('BookModal.handleToggleSave failed', e, { bookId: book?.id });
+    }
   };
 
   const handleRequestReturn = async () => {
-    await requestBookReturn(book.id, user);
-    onActionComplete();
-    onClose();
+    try {
+      await requestBookReturn(book.id, user);
+      onActionComplete();
+      onClose();
+    } catch (e) {
+      logError('BookModal.handleRequestReturn failed', e, { bookId: book?.id });
+    }
   };
 
   const handleApproveReturn = async () => {
-    if (!book?.return_request_id) return;
-    await approveReturnRequest(book.return_request_id);
-    onActionComplete();
-    onClose();
+    try {
+      if (!book?.return_request_id) return;
+      await approveReturnRequest(book.return_request_id);
+      onActionComplete();
+      onClose();
+    } catch (e) {
+      logError('BookModal.handleApproveReturn failed', e, {
+        returnRequestId: book?.return_request_id,
+      });
+    }
   };
 
   const handleAcceptRequest = async () => {
-    await updateRequestStatus(book.request_id, 'accepted');
-    onActionComplete();
-    onClose();
+    try {
+      await updateRequestStatus(book.request_id, 'accepted');
+      onActionComplete();
+      onClose();
+    } catch (e) {
+      logError('BookModal.handleAcceptRequest failed', e, { requestId: book?.request_id });
+    }
   };
 
   const handleRejectRequest = async () => {
-    await updateRequestStatus(book.request_id, 'rejected');
-    onActionComplete();
-    onClose();
+    try {
+      await updateRequestStatus(book.request_id, 'rejected');
+      onActionComplete();
+      onClose();
+    } catch (e) {
+      logError('BookModal.handleRejectRequest failed', e, { requestId: book?.request_id });
+    }
   };
 
   const handleCancelRequest = async () => {
-    await updateRequestStatus(book.request_id, 'cancelled');
-    onActionComplete();
-    onClose();
+    try {
+      await updateRequestStatus(book.request_id, 'cancelled');
+      onActionComplete();
+      onClose();
+    } catch (e) {
+      logError('BookModal.handleCancelRequest failed', e, { requestId: book?.request_id });
+    }
   };
 
   const handleCompleteTransfer = async () => {
-    if (!book?.transfer_id) return;
-    await completeTransfer({ transfer_id: book.transfer_id });
-    onActionComplete();
-    onClose();
+    try {
+      if (!book?.transfer_id) return;
+      await completeTransfer({ transfer_id: book.transfer_id });
+      onActionComplete();
+      onClose();
+    } catch (e) {
+      logError('BookModal.handleCompleteTransfer failed', e, { transferId: book?.transfer_id });
+    }
   };
 
   const handleDelete = () => {
-    handleDeleteBook(book);
-    onActionComplete();
-    onClose();
+    try {
+      handleDeleteBook(book);
+      onActionComplete();
+      onClose();
+    } catch (e) {
+      logError('BookModal.handleDelete failed', e, { bookId: book?.id });
+    }
   };
   const handleArchive = () => {
-    handleArchiveBook(book);
-    onActionComplete();
-    if (book.archived) {
+    try {
+      handleArchiveBook(book);
       onActionComplete();
+      if (book.archived) {
+        onActionComplete();
+      }
+      onClose();
+    } catch (e) {
+      logError('BookModal.handleArchive failed', e, { bookId: book?.id });
     }
-    onClose();
   };
 
   const renderActions = () => {
