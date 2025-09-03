@@ -1,6 +1,6 @@
 // src/contexts/AuthContext.jsx
 
-import { useState, useMemo, useContext } from 'react';
+import { useState, useMemo } from 'react';
 import { authContext } from './authContextObject';
 
 import { ALLOWED_EMAIL_DOMAINS, DOMAIN_ERRORS } from '../constants/constants';

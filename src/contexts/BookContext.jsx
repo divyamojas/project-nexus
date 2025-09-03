@@ -1,6 +1,6 @@
 // /src/contexts/BookContext.jsx
 
-import { useState, useEffect, useMemo, useContext } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { bookContext } from './bookContextObject';
 
 import { useUser } from './hooks/useUser';
@@ -173,5 +173,3 @@ export const BookProvider = ({ children }) => {
     </bookContext.Provider>
   );
 };
-
-// Book form hook is now exported from src/contexts/hooks/useBookForm.js

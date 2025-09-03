@@ -173,7 +173,7 @@ export async function uploadBookCover({ user, file }) {
     }
     const { data } = supabase.storage.from('book-bucket').getPublicUrl(filePath);
     return { url: data?.publicUrl || '' };
-  } catch (err) {
+  } catch {
     return { error: 'Unexpected error during cover upload.' };
   }
 }

@@ -1,9 +1,8 @@
 // /src/App.jsx
 
 import { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
-import PageLoader from '@/commonComponents/PageLoader';
 import DelayedLoader from '@/commonComponents/DelayedLoader';
 import PrivateRoute from '@/commonComponents/PrivateRoute';
 import Layout from '@/commonComponents/Layout';

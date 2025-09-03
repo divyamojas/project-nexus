@@ -15,7 +15,7 @@ export function subscribeToBookChanges(onChange) {
     .on('postgres_changes', { event: '*', schema: 'public', table: 'books' }, (payload) => {
       onChange?.(payload);
     })
-    .subscribe((status) => {
+    .subscribe((_status) => {
       // Subscribed
     });
 

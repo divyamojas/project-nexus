@@ -1,22 +1,8 @@
 // ./src/components/BookCard.jsx
 
 import { useState, useEffect } from 'react';
-import {
-  Card,
-  CardContent,
-  Typography,
-  CardMedia,
-  Box,
-  Chip,
-  Stack,
-  IconButton,
-  Tooltip,
-  Grow,
-  Collapse,
-  Button,
-} from '@mui/material';
+import { Card, CardContent, Typography, Box, Grow, Collapse, Button } from '@mui/material';
 import { ACTION_CONFIGS } from '../../../constants/constants';
-import { useBookContext } from '../../../contexts/hooks/useBookContext';
 import { useAuth } from '../../../contexts/hooks/useAuth';
 import BookCardActions from './BookCardActions';
 import BookCover from './BookCover';
@@ -48,9 +34,6 @@ export default function BookCard({
   const { title, author, cover_url } = catalog;
   const condition = book.condition;
   const status = book.status || 'available';
-  const archived = book.archived;
-
-  const { sendBookRequest } = useBookContext();
   const { user } = useAuth();
 
   useEffect(() => {

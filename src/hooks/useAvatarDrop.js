@@ -7,7 +7,7 @@ const MAX_FILE_SIZE = 300 * 1024; // 300 KB
 /**
  * Avatar picker with drag-and-drop, reusing generic image logic.
  */
-export default function useAvatarDrop(initialUrl = '', username = '') {
+export default function useAvatarDrop(initialUrl = '', _username = '') {
   const { file, previewUrl, error, setFile, setPreviewUrl, setError, getRootProps, getInputProps } =
     useImageDrop({ maxSizeBytes: MAX_FILE_SIZE, initialUrl });
 

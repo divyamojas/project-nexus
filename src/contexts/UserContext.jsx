@@ -1,6 +1,6 @@
 // src/contexts/UserContext.jsx
 
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState } from 'react';
 import { userContext } from './userContextObject';
 
 import { useAuth } from './hooks/useAuth';
@@ -91,6 +91,3 @@ export const UserProvider = ({ children }) => {
     </userContext.Provider>
   );
 };
-
-// Moved to separate hook file to improve Fast Refresh boundaries
-// Hook moved to src/contexts/hooks/useUser.js
