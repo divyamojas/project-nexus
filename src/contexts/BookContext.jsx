@@ -1,4 +1,4 @@
-// /src/contexts/BookContext.jsx
+// src/contexts/BookContext.jsx
 
 import { useState, useEffect, useMemo } from 'react';
 import { bookContext } from './bookContextObject';

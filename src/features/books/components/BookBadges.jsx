@@ -1,4 +1,4 @@
-// src/pages/browseBooks/components/BookBadges.jsx
+// src/features/books/components/BookBadges.jsx
 import { Stack, Chip } from '@mui/material';
 import { STATUS_COLOR } from '../../../constants/constants';
 

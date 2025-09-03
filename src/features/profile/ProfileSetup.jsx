@@ -62,7 +62,7 @@ export default function ProfileSetup() {
     if (userProfile?.avatar_url) {
       setAvatarUrl(userProfile.avatar_url);
     }
-  }, [userProfile?.avatar_url]);
+  }, [userProfile?.avatar_url, setAvatarUrl]);
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pt: 6 }}>

@@ -1,4 +1,4 @@
-// src/pages/browseBooks/components/BookCover.jsx
+// src/features/books/components/BookCover.jsx
 import { Box, CardMedia, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 

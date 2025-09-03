@@ -1,4 +1,4 @@
-// src/pages/browseBooks/components/BookCardActions.jsx
+// src/features/books/components/BookCardActions.jsx
 import { IconButton, Tooltip } from '@mui/material';
 import { ACTION_STYLES } from '../../../constants/constants';
 

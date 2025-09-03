@@ -1,4 +1,4 @@
-// src/components/Common/PrivateRoute.jsx
+// src/commonComponents/PrivateRoute.jsx
 
 import { Navigate, useLocation } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';

@@ -1,4 +1,4 @@
-// File: ./services/index.js
+// src/services/index.js
 // Public export surface for all data-layer operations. UI and contexts should import from here.
 
 export { default as supabase } from './supabaseClient';

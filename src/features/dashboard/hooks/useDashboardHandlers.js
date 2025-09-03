@@ -17,7 +17,7 @@ export default function useDashboardHandlers({ user, refetch, archiveBook, delet
       showToast('Removed from Saved', { severity: 'info' });
       refetch();
     },
-    [user, refetch],
+    [user, refetch, showToast],
   );
 
   const onRequestReturn = useCallback(
@@ -26,7 +26,7 @@ export default function useDashboardHandlers({ user, refetch, archiveBook, delet
       showToast('Return requested', { severity: 'success' });
       refetch();
     },
-    [user, refetch],
+    [user, refetch, showToast],
   );
 
   const onAcceptRequest = useCallback(
@@ -35,7 +35,7 @@ export default function useDashboardHandlers({ user, refetch, archiveBook, delet
       showToast('Request accepted', { severity: 'success' });
       refetch();
     },
-    [refetch],
+    [refetch, showToast],
   );
 
   const onRejectRequest = useCallback(
@@ -44,7 +44,7 @@ export default function useDashboardHandlers({ user, refetch, archiveBook, delet
       showToast('Request rejected', { severity: 'warning' });
       refetch();
     },
-    [refetch],
+    [refetch, showToast],
   );
 
   const onCancelRequest = useCallback(
@@ -53,7 +53,7 @@ export default function useDashboardHandlers({ user, refetch, archiveBook, delet
       showToast('Request cancelled', { severity: 'info' });
       refetch();
     },
-    [refetch],
+    [refetch, showToast],
   );
 
   const onCompleteTransfer = useCallback(
@@ -63,7 +63,7 @@ export default function useDashboardHandlers({ user, refetch, archiveBook, delet
       showToast('Transfer completed', { severity: 'success' });
       refetch();
     },
-    [refetch],
+    [refetch, showToast],
   );
 
   const onApproveReturn = useCallback(
@@ -73,7 +73,7 @@ export default function useDashboardHandlers({ user, refetch, archiveBook, delet
       showToast('Return approved', { severity: 'success' });
       refetch();
     },
-    [refetch],
+    [refetch, showToast],
   );
 
   const onArchive = useCallback(
@@ -82,7 +82,7 @@ export default function useDashboardHandlers({ user, refetch, archiveBook, delet
       showToast(book.archived ? 'Unarchived' : 'Archived', { severity: 'info' });
       refetch();
     },
-    [archiveBook, refetch],
+    [archiveBook, refetch, showToast],
   );
 
   const onDelete = useCallback(
@@ -91,7 +91,7 @@ export default function useDashboardHandlers({ user, refetch, archiveBook, delet
       showToast('Book deleted', { severity: 'info' });
       refetch();
     },
-    [deleteBook, refetch],
+    [deleteBook, refetch, showToast],
   );
 
   return {

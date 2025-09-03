@@ -1,4 +1,4 @@
-// /src/features/notFound/NotFound.jsx
+// src/features/notFound/NotFound.jsx
 
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -31,7 +31,7 @@ export default function NotFound() {
         <Typography variant="h3" gutterBottom fontWeight={700}>
           404 - Page Not Found
         </Typography>
-        <Typography variant="body1" color="textSecondary" mb={4}>
+        <Typography variant="body1" color="text.secondary" mb={4}>
           Redirecting you {session ? 'to your dashboard' : 'to the login page'} in 2 seconds...
         </Typography>
         <CircularProgress color="primary" size={48} thickness={4} />

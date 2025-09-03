@@ -1,4 +1,4 @@
-// /src/hooks/useSession.js
+// src/hooks/useSession.js
 
 import { useEffect, useState } from 'react';
 import { getSession, onAuthStateChange } from '../services/authService';

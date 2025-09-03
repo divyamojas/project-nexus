@@ -1,4 +1,4 @@
-// src/components/Common/PageLoader.jsx
+// src/commonComponents/PageLoader.jsx
 
 import { useLocation } from 'react-router-dom';
 import { Container, Card, CircularProgress, Typography } from '@mui/material';

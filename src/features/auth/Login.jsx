@@ -1,4 +1,4 @@
-// src/pages/auth/Login.jsx
+// src/features/auth/Login.jsx
 
 import { useEffect, useState } from 'react';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';

@@ -1,4 +1,4 @@
-// src/components/dashboard/FeedbackSection.jsx
+// src/features/dashboard/components/FeedbackSection.jsx
 
 import { Box, Typography, Grid, Paper } from '@mui/material';
 

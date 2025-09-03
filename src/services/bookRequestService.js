@@ -1,4 +1,4 @@
-// /src/services/bookRequestService.js
+// src/services/bookRequestService.js
 
 import supabase from './supabaseClient';
 import { createTransferForAcceptedRequest } from './transferService';

@@ -1,4 +1,4 @@
-// /src/services/authService.js
+// src/services/authService.js
 
 import supabase from './supabaseClient';
 

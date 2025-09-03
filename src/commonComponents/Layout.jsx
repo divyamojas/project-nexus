@@ -1,4 +1,4 @@
-// src/layouts/Layout.jsx
+// src/commonComponents/Layout.jsx
 
 import { useEffect, useState } from 'react';
 import {

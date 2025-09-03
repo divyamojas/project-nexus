@@ -1,4 +1,4 @@
-// /src/hooks/useBookSubscription.js
+// src/hooks/useBookSubscription.js
 
 import { useEffect } from 'react';
 import { subscribeToBookChanges, unsubscribeFromBookChanges } from '../services/realtimeService';

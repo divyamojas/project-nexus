@@ -1,4 +1,4 @@
-// ./src/components/BookCard.jsx
+// src/features/books/components/BookCard.jsx
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, Typography, Box, Grow, Collapse, Button } from '@mui/material';

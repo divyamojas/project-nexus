@@ -1,4 +1,4 @@
-// /src/services/bookCatalogService.js
+// src/services/bookCatalogService.js
 
 import supabase from './supabaseClient';
 

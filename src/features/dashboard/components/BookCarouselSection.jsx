@@ -1,4 +1,4 @@
-// src/components/books/BookCarouselSection.jsx
+// src/features/dashboard/components/BookCarouselSection.jsx
 
 import { Box, Typography, Divider, Stack } from '@mui/material';
 import BookCard from '@/features/books/components/BookCard';

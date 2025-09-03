@@ -1,8 +1,7 @@
 // src/features/dashboard/Dashboard.jsx
 
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState, useCallback } from 'react';
 import { Container, Typography, Paper } from '@mui/material';
-import { ArchiveOutlined, CloseOutlined } from '@mui/icons-material';
 
 import BookCarouselSection from '@/features/dashboard/components/BookCarouselSection';
 import MyBooksSection from '@/features/dashboard/components/MyBooksSection';
@@ -42,7 +41,7 @@ export default function Dashboard() {
 
   const { categorizedBooks, handleDeleteBook, handleArchiveBook, refreshBooks } = useBookContext();
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     const [req, trf, saved, rev, name, myLoans] = await Promise.all([
       getRequestsForUser(user),
       getTransfers(),
@@ -70,11 +69,11 @@ export default function Dashboard() {
     }));
     setBorrowedBooks(borrowed);
     refreshBooks();
-  };
+  }, [user, refreshBooks]);
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
   useEffect(() => {
     setUserFirstName(user.first_name);
   }, [user]);
@@ -173,8 +172,6 @@ export default function Dashboard() {
             status={selectedBook.status}
             onArchive={() => handleArchiveBook(selectedBook)}
             onDelete={() => handleDeleteBook(selectedBook)}
-            archiveIcon={<ArchiveOutlined />}
-            deleteIcon={<CloseOutlined />}
             onActionComplete={fetchData}
           />
         )}

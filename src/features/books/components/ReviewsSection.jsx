@@ -1,4 +1,4 @@
-// src/pages/browseBooks/components/ReviewsSection.jsx
+// src/features/books/components/ReviewsSection.jsx
 import { useEffect, useState } from 'react';
 import { Avatar, Box, Button, Divider, Rating, Stack, TextField, Typography } from '@mui/material';
 import { addBookReview, getBookRatingSummary, getBookReviews } from '@/services';

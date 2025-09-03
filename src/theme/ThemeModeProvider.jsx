@@ -1,3 +1,5 @@
+// src/theme/ThemeModeProvider.jsx
+
 import React, { useEffect, useMemo, useState } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -142,7 +144,7 @@ export function ThemeModeProvider({ children }) {
         });
       },
     }),
-    [mode],
+    [mode, isAuthRoute],
   );
 
   const theme = useMemo(() => createTheme(getDesignTokens(mode)), [mode]);

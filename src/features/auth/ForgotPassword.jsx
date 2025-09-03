@@ -1,4 +1,4 @@
-// src/pages/auth/ForgotPassword.jsx
+// src/features/auth/ForgotPassword.jsx
 
 import { useState, useEffect } from 'react';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';

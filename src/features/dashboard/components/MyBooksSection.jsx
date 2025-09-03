@@ -1,4 +1,4 @@
-// src/components/dashboard/MyBooksSection.jsx
+// src/features/dashboard/components/MyBooksSection.jsx
 
 import { Box, Typography, Button, Collapse, Chip } from '@mui/material';
 import BookCarouselSection from './BookCarouselSection';

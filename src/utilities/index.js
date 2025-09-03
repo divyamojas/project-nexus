@@ -1,3 +1,5 @@
+// src/utilities/index.js
+
 export { default as validateAndSubmitBookForm } from './validateAndSubmitBookForm';
 export { default as addBookToCatalogAndStock } from './addBookToCatalogAndStock';
 export { default as getActiveBooksForBrowse } from './getActiveBooksForBrowse';

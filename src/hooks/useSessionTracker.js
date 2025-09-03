@@ -1,4 +1,4 @@
-// /src/hooks/useSessionTracker.js
+// src/hooks/useSessionTracker.js
 
 import { useEffect } from 'react';
 import { getSession, onAuthStateChange } from '../services/authService';

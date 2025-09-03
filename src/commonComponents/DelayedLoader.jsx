@@ -1,3 +1,5 @@
+// src/commonComponents/DelayedLoader.jsx
+
 import { useEffect, useState } from 'react';
 import PageLoader from './PageLoader';
 

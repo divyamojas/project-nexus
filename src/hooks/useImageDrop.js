@@ -37,11 +37,11 @@ export default function useImageDrop({
     [allowedTypes, maxSizeBytes],
   );
 
-  const reset = () => {
+  const reset = useCallback(() => {
     setFile(null);
     setPreviewUrl(initialUrl || '');
     setError('');
-  };
+  }, [initialUrl]);
 
   const { getRootProps, getInputProps } = useDropzone({ onDrop, accept: { 'image/*': [] } });
 

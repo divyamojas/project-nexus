@@ -1,4 +1,4 @@
-// /src/services/userReviewService.js
+// src/services/userReviewService.js
 
 import supabase from './supabaseClient';
 

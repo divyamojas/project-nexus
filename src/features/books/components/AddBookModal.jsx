@@ -1,4 +1,4 @@
-// ./src/components/AddBookModal.jsx
+// src/features/books/components/AddBookModal.jsx
 
 import React, { useEffect } from 'react';
 import {
@@ -54,8 +54,9 @@ export default function AddBookModal({ open, onClose, setShowAddModal }) {
       });
     } else if (!debouncedTitle) {
       setSearchResults([]);
+      setFormLoading(false);
     }
-  }, [debouncedTitle]);
+  }, [debouncedTitle, setFormLoading, setSearchResults]);
 
   const handleSelectMatch = (option) => {
     setFormData((prev) => ({
@@ -111,7 +112,7 @@ export default function AddBookModal({ open, onClose, setShowAddModal }) {
       resetForm();
       resetCover();
     }
-  }, [open]);
+  }, [open, resetForm, resetCover]);
 
   return (
     <Dialog
@@ -119,18 +120,20 @@ export default function AddBookModal({ open, onClose, setShowAddModal }) {
       onClose={onClose}
       fullWidth
       maxWidth="sm"
-      PaperProps={{
-        component: motion.div,
-        initial: { opacity: 0, scale: 0.96, y: 20 },
-        animate: { opacity: 1, scale: 1, y: 0 },
-        exit: { opacity: 0, scale: 0.95, y: 20 },
-        transition: { duration: 0.35, ease: 'easeInOut' },
-        sx: (theme) => ({
-          borderRadius: 4,
-          boxShadow: 6,
-          transform: 'perspective(1200px) translateZ(10px)',
-          background: `linear-gradient(180deg, ${theme.palette.background.paper}, ${theme.palette.background.default})`,
-        }),
+      slots={{ paper: motion.div }}
+      slotProps={{
+        paper: {
+          initial: { opacity: 0, scale: 0.96, y: 20 },
+          animate: { opacity: 1, scale: 1, y: 0 },
+          exit: { opacity: 0, scale: 0.95, y: 20 },
+          transition: { duration: 0.35, ease: 'easeInOut' },
+          sx: (theme) => ({
+            borderRadius: 4,
+            boxShadow: 6,
+            transform: 'perspective(1200px) translateZ(10px)',
+            background: `linear-gradient(180deg, ${theme.palette.background.paper}, ${theme.palette.background.default})`,
+          }),
+        },
       }}
     >
       <DialogTitle sx={{ fontWeight: 600, fontSize: '1.4rem', position: 'relative' }}>

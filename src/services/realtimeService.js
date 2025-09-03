@@ -1,4 +1,4 @@
-// /src/services/realtimeService.js
+// src/services/realtimeService.js
 
 import supabase from './supabaseClient';
 

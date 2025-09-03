@@ -1,4 +1,4 @@
-// ./src/components/BookModal.jsx
+// src/features/books/components/BookModal.jsx
 
 import { useEffect, useState } from 'react';
 import {
@@ -211,7 +211,7 @@ export default function BookModal({
       onClose={onClose}
       fullWidth
       maxWidth="sm"
-      PaperProps={{ sx: { borderRadius: 4, bgcolor: 'background.paper' } }}
+      slotProps={{ paper: { sx: { borderRadius: 4, bgcolor: 'background.paper' } } }}
     >
       <DialogTitle sx={{ fontWeight: 600, fontSize: '1.5rem' }} color="text.primary">
         {title || 'Untitled'}
