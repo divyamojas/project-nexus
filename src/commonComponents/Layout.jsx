@@ -1,11 +1,10 @@
 // src/commonComponents/Layout.jsx
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   AppBar,
   Toolbar,
   Typography,
-  Button,
   Container,
   Box,
   IconButton,
@@ -13,6 +12,8 @@ import {
   MenuItem,
   Tooltip,
   useTheme,
+  Avatar,
+  Fab,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
@@ -20,6 +21,12 @@ import Brightness7Icon from '@mui/icons-material/Brightness7';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { logout } from '@/services/authService';
 import { useColorMode } from '@/theme/useColorMode';
+import SpaceDashboardIcon from '@mui/icons-material/SpaceDashboard';
+import AutoStoriesIcon from '@mui/icons-material/AutoStories';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import RateReviewIcon from '@mui/icons-material/RateReview';
+import { alpha } from '@mui/material/styles';
+import { useUser } from '@/contexts/hooks/useUser';
 
 export default function Layout({ children }) {
   const [showNavbar, setShowNavbar] = useState(true);
@@ -28,6 +35,12 @@ export default function Layout({ children }) {
   const location = useLocation();
   const muiTheme = useTheme();
   const { toggleColorMode } = useColorMode();
+  const { userProfile } = useUser();
+  const canNavigate = !!(userProfile && userProfile.username);
+
+  const isActive = useMemo(() => {
+    return (path) => (location.pathname === path ? 'active' : '');
+  }, [location.pathname]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -42,6 +55,7 @@ export default function Layout({ children }) {
   }, [lastScrollY]);
 
   const [anchorEl, setAnchorEl] = useState(null);
+  const [profileAnchorEl, setProfileAnchorEl] = useState(null);
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -49,6 +63,14 @@ export default function Layout({ children }) {
 
   const handleMenuClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleProfileMenuOpen = (event) => {
+    setProfileAnchorEl(event.currentTarget);
+  };
+
+  const handleProfileMenuClose = () => {
+    setProfileAnchorEl(null);
   };
 
   const handleLogout = async () => {
@@ -60,44 +82,122 @@ export default function Layout({ children }) {
     <Box display="flex" flexDirection="column" minHeight="100vh">
       <AppBar
         position="fixed"
-        color="primary"
+        color="transparent"
         sx={{
+          backdropFilter: 'blur(10px)',
+          backgroundColor: (t) => alpha(t.palette.background.paper, 0.7),
           transition:
-            'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out, opacity 0.3s ease-in-out',
+            'transform 0.28s ease, box-shadow 0.28s ease, opacity 0.28s ease, background 0.3s ease',
           transform: showNavbar ? 'translateY(0)' : 'translateY(-100%)',
-          opacity: showNavbar ? 1 : 0.7,
+          opacity: showNavbar ? 1 : 0.9,
           boxShadow: showNavbar ? 3 : 0,
           zIndex: (theme) => theme.zIndex.drawer + 1,
+          borderBottom: `1px solid ${alpha(muiTheme.palette.divider, 0.4)}`,
         }}
       >
         <Toolbar sx={{ justifyContent: 'space-between' }}>
           <Typography
             variant="h6"
             component={Link}
-            to="/dashboard"
+            to={canNavigate ? '/dashboard' : '/profile'}
             style={{ textDecoration: 'none', color: 'inherit' }}
+            sx={{
+              fontWeight: 800,
+              letterSpacing: 0.3,
+              background: `linear-gradient(90deg, ${muiTheme.palette.primary.main}, ${muiTheme.palette.success.main})`,
+              WebkitBackgroundClip: 'text',
+              backgroundClip: 'text',
+              color: 'transparent',
+              transition: 'filter 200ms ease',
+              '&:hover': { filter: 'brightness(1.1)' },
+            }}
           >
             Leaflet
           </Typography>
 
-          <Box display={{ xs: 'none', sm: 'flex' }} gap={2} alignItems="center">
-            <Button color="inherit" component={Link} to="/profile">
-              Profile
-            </Button>
-            <Button color="inherit" component={Link} to="/dashboard">
-              Dashboard
-            </Button>
-            <Button color="inherit" component={Link} to="/browse">
-              Browse
-            </Button>
+          <Box display={{ xs: 'none', sm: 'flex' }} gap={1} alignItems="center">
+            <Tooltip title="Dashboard">
+              <span>
+                <IconButton
+                  color={isActive('/dashboard') ? 'primary' : 'inherit'}
+                  component={Link}
+                  to="/dashboard"
+                  disabled={!canNavigate}
+                  sx={{
+                    transition: 'transform 150ms ease',
+                    '&:hover': { transform: 'translateY(-2px)' },
+                  }}
+                >
+                  <SpaceDashboardIcon />
+                </IconButton>
+              </span>
+            </Tooltip>
+            <Tooltip title="Browse">
+              <span>
+                <IconButton
+                  color={isActive('/browse') ? 'primary' : 'inherit'}
+                  component={Link}
+                  to="/browse"
+                  disabled={!canNavigate}
+                  sx={{
+                    transition: 'transform 150ms ease',
+                    '&:hover': { transform: 'translateY(-2px)' },
+                  }}
+                >
+                  <AutoStoriesIcon />
+                </IconButton>
+              </span>
+            </Tooltip>
             <Tooltip title={muiTheme.palette.mode === 'dark' ? 'Light mode' : 'Dark mode'}>
-              <IconButton color="inherit" onClick={toggleColorMode} aria-label="Toggle color mode">
+              <IconButton
+                color="inherit"
+                onClick={toggleColorMode}
+                aria-label="Toggle color mode"
+                sx={{
+                  transition: 'transform 150ms ease',
+                  '&:hover': { transform: 'translateY(-2px)' },
+                }}
+              >
                 {muiTheme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
               </IconButton>
             </Tooltip>
-            <Button color="inherit" onClick={handleLogout}>
-              Logout
-            </Button>
+            <Box
+              sx={{
+                ml: 1.5,
+                pl: 1.5,
+                borderLeft: `1px solid ${alpha(muiTheme.palette.divider, 0.6)}`,
+              }}
+            >
+              <Tooltip title="Account">
+                <IconButton
+                  color="inherit"
+                  onClick={handleProfileMenuOpen}
+                  aria-haspopup="true"
+                  aria-controls={profileAnchorEl ? 'account-menu' : undefined}
+                  aria-expanded={Boolean(profileAnchorEl) || undefined}
+                  sx={{
+                    transition: 'transform 150ms ease',
+                    '&:hover': { transform: 'translateY(-2px)' },
+                  }}
+                >
+                  {userProfile?.avatar_url ? (
+                    <Avatar
+                      src={userProfile.avatar_url}
+                      alt="Profile"
+                      sx={{
+                        width: 28,
+                        height: 28,
+                        border: '2px solid',
+                        borderColor: alpha(muiTheme.palette.primary.main, 0.6),
+                        boxShadow: 2,
+                      }}
+                    />
+                  ) : (
+                    <AccountCircleIcon />
+                  )}
+                </IconButton>
+              </Tooltip>
+            </Box>
           </Box>
 
           <Box display={{ xs: 'block', sm: 'none' }}>
@@ -108,10 +208,20 @@ export default function Layout({ children }) {
               <MenuItem component={Link} to="/profile" onClick={handleMenuClose}>
                 Profile
               </MenuItem>
-              <MenuItem component={Link} to="/dashboard" onClick={handleMenuClose}>
+              <MenuItem
+                component={Link}
+                to="/dashboard"
+                onClick={handleMenuClose}
+                disabled={!canNavigate}
+              >
                 Dashboard
               </MenuItem>
-              <MenuItem component={Link} to="/browse" onClick={handleMenuClose}>
+              <MenuItem
+                component={Link}
+                to="/browse"
+                onClick={handleMenuClose}
+                disabled={!canNavigate}
+              >
                 Browse
               </MenuItem>
               <MenuItem
@@ -135,6 +245,33 @@ export default function Layout({ children }) {
         </Toolbar>
       </AppBar>
 
+      {/* Profile dropdown menu (desktop) */}
+      <Menu
+        id="account-menu"
+        anchorEl={profileAnchorEl}
+        open={Boolean(profileAnchorEl)}
+        onClose={handleProfileMenuClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <MenuItem
+          onClick={() => {
+            handleProfileMenuClose();
+            navigate('/profile');
+          }}
+        >
+          Profile
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleProfileMenuClose();
+            handleLogout();
+          }}
+        >
+          Logout
+        </MenuItem>
+      </Menu>
+
       {location.pathname !== '/feedback' && (
         <Box
           sx={{
@@ -144,9 +281,21 @@ export default function Layout({ children }) {
             zIndex: 1300,
           }}
         >
-          <Button variant="contained" color="secondary" onClick={() => navigate('/feedback')}>
-            Give Feedback
-          </Button>
+          <Tooltip title="Give Feedback">
+            <Fab
+              color="secondary"
+              aria-label="Feedback"
+              onClick={() => navigate('/feedback')}
+              sx={{
+                boxShadow: 6,
+                transform: 'translateZ(0)',
+                transition: 'transform 180ms ease',
+                '&:hover': { transform: 'translateY(-2px)' },
+              }}
+            >
+              <RateReviewIcon />
+            </Fab>
+          </Tooltip>
         </Box>
       )}
 
