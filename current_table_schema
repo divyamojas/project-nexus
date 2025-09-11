@@ -1,5 +1,3 @@
--- Combined schema file with all provided definitions. Nothing removed.
-
 create table public.book_loans (
   id uuid not null default extensions.uuid_generate_v4 (),
   book_id uuid not null,
@@ -27,7 +25,11 @@ create table public.book_loans (
   )
 ) TABLESPACE pg_default;
 
-create table public.book_requests (
+create unique INDEX IF not exists uniq_active_loan_per_book on public.book_loans using btree (book_id) TABLESPACE pg_default
+where
+  (status = 'active'::text);
+
+  create table public.book_requests (
   id uuid not null default extensions.uuid_generate_v4 (),
   book_id uuid null,
   requested_by uuid not null default auth.uid (),
@@ -63,7 +65,7 @@ create unique INDEX IF not exists unique_pending_request_constraint on public.bo
 where
   (status = 'pending'::text);
 
-create table public.book_reviews (
+  create table public.book_reviews (
   id uuid not null default extensions.uuid_generate_v4 (),
   book_id uuid null,
   reviewer_id uuid null,
@@ -81,6 +83,8 @@ create table public.book_reviews (
   )
 ) TABLESPACE pg_default;
 
+create unique INDEX IF not exists book_reviews_unique_user_book on public.book_reviews using btree (book_id, reviewer_id) TABLESPACE pg_default;
+
 create table public.books (
   id uuid not null default extensions.uuid_generate_v4 (),
   user_id uuid null,
@@ -91,7 +95,7 @@ create table public.books (
   created_at timestamp with time zone null default now(),
   archived boolean not null default false,
   constraint books_pkey primary key (id),
-  constraint unique_catalog_condition unique (catalog_id, condition),
+  constraint unique_catalog_condition_per_user unique (catalog_id, condition, user_id),
   constraint books_catalog_id_fkey foreign KEY (catalog_id) references books_catalog (id) on delete CASCADE,
   constraint books_user_id_fkey foreign KEY (user_id) references auth.users (id) on update CASCADE on delete CASCADE
 ) TABLESPACE pg_default;
@@ -106,6 +110,20 @@ create table public.books_catalog (
   created_by uuid null default auth.uid (),
   constraint books_catalog_pkey primary key (id),
   constraint books_catalog_isbn_key unique (isbn)
+) TABLESPACE pg_default;
+
+create table public.profiles (
+  id uuid not null default auth.uid (),
+  username text null,
+  avatar_url text null,
+  bio text null,
+  first_name text null,
+  last_name text null,
+  role text not null default 'user'::text,
+  created_at timestamp with time zone null default timezone ('utc'::text, now()),
+  constraint profiles_pkey primary key (id),
+  constraint profiles_username_key unique (username),
+  constraint profiles_id_fkey foreign KEY (id) references auth.users (id) on update CASCADE on delete CASCADE
 ) TABLESPACE pg_default;
 
 create table public.return_requests (
@@ -138,7 +156,7 @@ create unique INDEX IF not exists unique_active_return_request on public.return_
 where
   (status = 'pending'::text);
 
-create table public.saved_books (
+  create table public.saved_books (
   id uuid not null default extensions.uuid_generate_v4 (),
   user_id uuid not null,
   book_id uuid not null,
@@ -163,6 +181,7 @@ create table public.transfers (
   completed_at timestamp with time zone null,
   created_at timestamp with time zone null default now(),
   constraint transfers_pkey primary key (id),
+  constraint one_request_per_user_book unique (book_id, from_user, to_user),
   constraint transfers_book_id_fkey foreign KEY (book_id) references books (id) on delete CASCADE,
   constraint transfers_request_id_fkey foreign KEY (request_id) references book_requests (id) on delete set null,
   constraint transfers_status_check check (
