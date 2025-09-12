@@ -27,7 +27,6 @@
     "@mui/material": "^7.0.2",
     "@supabase/supabase-js": "^2.50.2",
     "framer-motion": "^12.9.2",
-    "prop-types": "^15.8.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-dropzone": "^14.3.8",

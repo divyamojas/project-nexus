@@ -18,7 +18,6 @@ import {
   InputAdornment,
   Tooltip,
   Fade,
-  Slide,
   LinearProgress,
 } from '@mui/material';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
@@ -113,24 +112,40 @@ export default function ProfileSetup() {
   const completeness = Math.round((filled / total) * 100);
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pt: 6 }}>
+    // Let Layout control page height; avoid extra vh/padding that causes overflow
+    <Box sx={{ bgcolor: 'background.default' }}>
       <Container maxWidth="md">
-        <Box display="flex" justifyContent="center">
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          sx={{
+            minHeight: { xs: 'calc(100dvh - 160px)', sm: 'calc(100dvh - 170px)' },
+          }}
+        >
           <Card
             sx={{
               width: '100%',
               maxWidth: 980,
-              borderRadius: 4,
+              borderRadius: 3,
               boxShadow: 3,
               overflow: 'hidden',
               border: (t) => `1px solid ${t.palette.divider}`,
+              background: (t) => {
+                const paperAlpha = t.palette.mode === 'dark' ? 0.9 : 0.94;
+                const baseAlpha = t.palette.mode === 'dark' ? 0.86 : 0.9;
+                return `linear-gradient(180deg, ${alpha(t.palette.background.paper, paperAlpha)}, ${alpha(
+                  t.palette.background.default,
+                  baseAlpha,
+                )})`;
+              },
               animation: `${fadeInUp} 420ms ease`,
             }}
           >
-            <CardContent sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
-              <Grid container spacing={4} alignItems="flex-start" justifyContent="center">
+            <CardContent sx={{ p: { xs: 2, sm: 2.5, md: 3 } }}>
+              <Grid container spacing={2} alignItems="flex-start" justifyContent="center">
                 {/* Avatar + Tips */}
-                <Grid item xs={12} md={4}>
+                <Grid item xs={12}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <Box
                       {...getRootProps()}
@@ -138,8 +153,8 @@ export default function ProfileSetup() {
                         position: 'relative',
                         cursor: 'pointer',
                         borderRadius: '50%',
-                        width: 112,
-                        height: 112,
+                        width: 88,
+                        height: 88,
                         border: (t) => `2px solid ${t.palette.divider}`,
                         boxShadow: (t) => `0 6px 16px ${alpha(t.palette.success.main, 0.15)}`,
                         overflow: 'hidden',
@@ -174,14 +189,14 @@ export default function ProfileSetup() {
                       </Tooltip>
                     </Box>
 
-                    <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 1.5 }}>
+                    <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 1 }}>
                       Drag & drop or click to upload
                     </Typography>
                     <Typography variant="caption" color="text.disabled">
                       JPG/PNG/WebP • up to 300 KB
                     </Typography>
 
-                    <Divider sx={{ width: '100%', my: 2 }} />
+                    <Divider sx={{ width: '100%', my: 1.25 }} />
                     <Typography variant="caption" color="text.disabled">
                       Tip: pick a recognizable username so friends can find you.
                     </Typography>
@@ -189,20 +204,20 @@ export default function ProfileSetup() {
                 </Grid>
 
                 {/* Form */}
-                <Grid item xs={12} md={8} sx={{ maxWidth: 620 }}>
+                <Grid item xs={12} sx={{ maxWidth: 600, mx: 'auto' }}>
                   <Fade in timeout={400}>
                     <Box>
                       <Typography variant="h5" fontWeight={700} gutterBottom>
                         {isFirstTime ? 'Welcome to Leaflet' : 'Your profile'}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                         {isFirstTime
                           ? 'Set up your profile so friends can find you.'
                           : 'Update your details anytime.'}
                       </Typography>
 
                       {/* Completeness */}
-                      <Box sx={{ mb: 2 }}>
+                      <Box sx={{ mb: 1.25 }}>
                         <Typography variant="caption" color="text.secondary">
                           Profile completeness: {completeness}%
                         </Typography>
@@ -215,7 +230,7 @@ export default function ProfileSetup() {
                       </Box>
 
                       <form onSubmit={handleSave}>
-                        <Stack spacing={2}>
+                        <Stack spacing={1.25}>
                           <TextField
                             label="Username"
                             value={username}
@@ -223,7 +238,6 @@ export default function ProfileSetup() {
                             required
                             fullWidth
                             placeholder="e.g. alex_reader"
-                            helperText={`Your public handle: leaflet.app/u/${username || 'username'}`}
                             InputProps={{
                               startAdornment: (
                                 <InputAdornment position="start">
@@ -275,7 +289,7 @@ export default function ProfileSetup() {
                             onChange={(e) => setBio(e.target.value)}
                             fullWidth
                             multiline
-                            minRows={3}
+                            minRows={2}
                             placeholder="A little about yourself..."
                             InputProps={{
                               startAdornment: (
@@ -296,7 +310,7 @@ export default function ProfileSetup() {
                               display: 'flex',
                               flexDirection: 'column',
                               alignItems: 'center',
-                              mt: 1,
+                              mt: 0.5,
                             }}
                           >
                             <Button
@@ -306,10 +320,28 @@ export default function ProfileSetup() {
                               size="large"
                               disabled={loading}
                               sx={{
-                                borderRadius: 2,
+                                borderRadius: 2.5,
                                 minWidth: 200,
-                                transition: 'transform 150ms ease, box-shadow 150ms ease',
-                                '&:hover': { transform: 'translateY(-1px)', boxShadow: 4 },
+                                px: 2,
+                                py: 0.9,
+                                backgroundImage: (t) =>
+                                  `linear-gradient(90deg, ${
+                                    t.palette.mode === 'dark'
+                                      ? t.palette.success.dark
+                                      : t.palette.success.main
+                                  }, ${
+                                    t.palette.mode === 'dark'
+                                      ? t.palette.primary.dark
+                                      : t.palette.primary.main
+                                  })`,
+                                boxShadow: 4,
+                                transition:
+                                  'transform 150ms ease, box-shadow 150ms ease, filter 120ms ease',
+                                '&:hover': {
+                                  transform: 'translateY(-1px)',
+                                  boxShadow: 6,
+                                  filter: 'brightness(1.04)',
+                                },
                               }}
                               onSubmit={handleSave}
                             >

@@ -39,6 +39,7 @@ export default function Layout({ children }) {
   const { toggleColorMode } = useColorMode();
   const { userProfile } = useUser();
   const canNavigate = !!(userProfile && userProfile.username);
+  const isProfile = location.pathname === '/profile';
 
   const isActive = useMemo(() => {
     return (path) => (location.pathname === path ? 'active' : '');
@@ -346,9 +347,20 @@ export default function Layout({ children }) {
         </Box>
       )}
 
-      <Container sx={{ flexGrow: 1, py: 4, mt: 8 }}>{children}</Container>
+      <Container sx={{ flexGrow: 1, py: isProfile ? { xs: 1, sm: 2 } : 4, mt: isProfile ? 7 : 8 }}>
+        {children}
+      </Container>
 
-      <Box component="footer" py={2} textAlign="center" bgcolor="grey.100" mt="auto">
+      <Box
+        component="footer"
+        mt="auto"
+        sx={{
+          py: isProfile ? 1.25 : 2,
+          textAlign: 'center',
+          bgcolor: (t) => t.palette.background.paper,
+          borderTop: (t) => `1px solid ${alpha(t.palette.divider, 0.6)}`,
+        }}
+      >
         {location.pathname !== '/feedback' && (
           <Typography variant="body2" color="text.secondary">
             <Link to="/feedback" style={{ color: 'inherit', textDecoration: 'underline' }}>
