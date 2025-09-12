@@ -30,7 +30,7 @@ import { useBookForm } from '@/contexts/hooks/useBookForm';
 import { useUser } from '@/contexts/hooks/useUser';
 import { useBookCoverUpload, useDebounce } from '@/hooks';
 
-export default function AddBookModal({ open, onClose, setShowAddModal }) {
+export default function AddBookModal({ open, onClose, setShowAddModal, onAdded }) {
   const { user } = useUser();
   const {
     formData,
@@ -93,7 +93,7 @@ export default function AddBookModal({ open, onClose, setShowAddModal }) {
       coverUrl = url;
     }
     // Now validate and submit form
-    validateAndSubmitBookForm(
+    const result = await validateAndSubmitBookForm(
       { ...formData, coverUrl },
       {
         setErrors,
@@ -101,10 +101,15 @@ export default function AddBookModal({ open, onClose, setShowAddModal }) {
         onSuccess: onClose,
         user,
       },
-    ).then(() => {
-      setShowAddModal(false);
-      resetCover();
-    });
+    );
+    await onAdded?.(result?.id);
+    try {
+      if (result?.id) {
+        window.dispatchEvent(new CustomEvent('books:added', { detail: { id: result.id } }));
+      }
+    } catch {}
+    setShowAddModal(false);
+    resetCover();
   };
 
   useEffect(() => {
@@ -150,135 +155,163 @@ export default function AddBookModal({ open, onClose, setShowAddModal }) {
       <Divider />
 
       <DialogContent dividers sx={{ pt: 2, bgcolor: 'background.paper' }}>
-        <Stack spacing={2.5}>
-          <Autocomplete
-            freeSolo
-            options={searchResults}
-            getOptionLabel={(option) => option.title || ''}
-            onInputChange={(e, value) => setFormData((prev) => ({ ...prev, title: value }))}
-            onChange={(e, value) => value && handleSelectMatch(value)}
-            loading={formLoading}
-            PopperComponent={(props) => (
-              <Popper
-                {...props}
-                placement="bottom-start"
-                modifiers={[{ name: 'offset', options: { offset: [0, 8] } }]}
-                style={{ zIndex: 1300 }}
-              >
-                <Paper
-                  elevation={3}
-                  sx={{
-                    borderRadius: 2,
-                    boxShadow: 3,
-                    maxHeight: 240,
-                    overflowY: 'auto',
-                    px: 1,
-                    py: 0.5,
-                    bgcolor: 'background.paper',
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSubmit();
+          }}
+        >
+          <Stack spacing={2.5}>
+            <Autocomplete
+              freeSolo
+              options={searchResults}
+              getOptionLabel={(option) => option.title || ''}
+              onInputChange={(e, value) => setFormData((prev) => ({ ...prev, title: value }))}
+              onChange={(e, value) => value && handleSelectMatch(value)}
+              loading={formLoading}
+              PopperComponent={(props) => (
+                <Popper
+                  {...props}
+                  placement="bottom-start"
+                  modifiers={[{ name: 'offset', options: { offset: [0, 8] } }]}
+                  style={{ zIndex: 1300 }}
+                >
+                  <Paper
+                    elevation={3}
+                    sx={{
+                      borderRadius: 2,
+                      boxShadow: 3,
+                      maxHeight: 240,
+                      overflowY: 'auto',
+                      px: 1,
+                      py: 0.5,
+                      bgcolor: 'background.paper',
+                    }}
+                  >
+                    {props.children}
+                  </Paper>
+                </Popper>
+              )}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  placeholder="e.g. The Alchemist"
+                  label="Title*"
+                  error={!!errors.title}
+                  helperText={errors.title}
+                  size="small"
+                  fullWidth
+                  variant="standard"
+                  InputProps={{
+                    ...params.InputProps,
+                    disableUnderline: true,
+                    sx: {
+                      bgcolor: 'action.hover',
+                      borderRadius: 2,
+                      px: 1.5,
+                      py: 0.5,
+                      boxShadow: 1,
+                    },
+                  }}
+                  slotProps={{ inputLabel: { shrink: true } }}
+                />
+              )}
+            />
+
+            {BOOK_FORM_FIELDS.filter((f) => f.stateKey !== 'coverUrl').map((field) => (
+              <React.Fragment key={field.stateKey}>
+                <TextField
+                  placeholder={field.placeholder}
+                  label={field.label}
+                  size="small"
+                  fullWidth
+                  variant="standard"
+                  multiline={field.multiline || false}
+                  rows={field.rows || 1}
+                  select={field.select || false}
+                  error={!!errors[field.stateKey]}
+                  helperText={errors[field.stateKey]}
+                  InputProps={{
+                    disableUnderline: true,
+                    sx: {
+                      bgcolor: 'action.hover',
+                      borderRadius: 2,
+                      px: 1.5,
+                      py: 0.5,
+                      boxShadow: 1,
+                    },
+                  }}
+                  slotProps={{ inputLabel: { shrink: true } }}
+                  value={formData[field.stateKey]}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setFormData((prev) => ({ ...prev, [field.stateKey]: value }));
                   }}
                 >
-                  {props.children}
-                </Paper>
-              </Popper>
-            )}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                placeholder="e.g. The Alchemist"
-                label="Title*"
-                error={!!errors.title}
-                helperText={errors.title}
-                size="small"
-                fullWidth
-                variant="standard"
-                InputProps={{
-                  ...params.InputProps,
-                  disableUnderline: true,
-                  sx: { bgcolor: 'action.hover', borderRadius: 2, px: 1.5, py: 0.5, boxShadow: 1 },
-                }}
-                slotProps={{ inputLabel: { shrink: true } }}
-              />
-            )}
-          />
+                  {field.select &&
+                    field.options?.map((opt) => (
+                      <MenuItem key={opt} value={opt}>
+                        {opt}
+                      </MenuItem>
+                    ))}
+                </TextField>
+              </React.Fragment>
+            ))}
 
-          {BOOK_FORM_FIELDS.filter((f) => f.stateKey !== 'coverUrl').map((field) => (
-            <React.Fragment key={field.stateKey}>
-              <TextField
-                placeholder={field.placeholder}
-                label={field.label}
-                size="small"
-                fullWidth
-                variant="standard"
-                multiline={field.multiline || false}
-                rows={field.rows || 1}
-                select={field.select || false}
-                error={!!errors[field.stateKey]}
-                helperText={errors[field.stateKey]}
-                InputProps={{
-                  disableUnderline: true,
-                  sx: { bgcolor: 'action.hover', borderRadius: 2, px: 1.5, py: 0.5, boxShadow: 1 },
-                }}
-                slotProps={{ inputLabel: { shrink: true } }}
-                value={formData[field.stateKey]}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setFormData((prev) => ({ ...prev, [field.stateKey]: value }));
-                }}
-              >
-                {field.select &&
-                  field.options?.map((opt) => (
-                    <MenuItem key={opt} value={opt}>
-                      {opt}
-                    </MenuItem>
-                  ))}
-              </TextField>
-            </React.Fragment>
-          ))}
-
-          {/* --- Cover Image Upload --- */}
-          <Box
-            {...getRootProps()}
-            sx={{
-              mt: 1,
-              p: 2,
-              border: (theme) => `2px dashed ${theme.palette.divider}`,
-              borderRadius: 2,
-              textAlign: 'center',
-              bgcolor: 'action.hover',
-              cursor: 'pointer',
-            }}
-          >
-            <input {...getInputProps()} />
-            {coverPreviewUrl ? (
-              <Box>
-                <Avatar
-                  variant="rounded"
-                  src={coverPreviewUrl}
-                  sx={{ width: 80, height: 120, mx: 'auto', mb: 1, borderRadius: 2, boxShadow: 1 }}
-                />
+            {/* --- Cover Image Upload --- */}
+            <Box
+              {...getRootProps()}
+              sx={{
+                mt: 1,
+                p: 2,
+                border: (theme) => `2px dashed ${theme.palette.divider}`,
+                borderRadius: 2,
+                textAlign: 'center',
+                bgcolor: 'action.hover',
+                cursor: 'pointer',
+              }}
+            >
+              <input {...getInputProps()} />
+              {coverPreviewUrl ? (
+                <Box>
+                  <Avatar
+                    variant="rounded"
+                    src={coverPreviewUrl}
+                    sx={{
+                      width: 80,
+                      height: 120,
+                      mx: 'auto',
+                      mb: 1,
+                      borderRadius: 2,
+                      boxShadow: 1,
+                    }}
+                  />
+                  <Typography variant="caption" color="text.secondary">
+                    Cover preview
+                  </Typography>
+                </Box>
+              ) : (
                 <Typography variant="caption" color="text.secondary">
-                  Cover preview
+                  Drag & drop or click to upload cover image (JPG/PNG/WebP, max 500 KB)
                 </Typography>
-              </Box>
-            ) : (
-              <Typography variant="caption" color="text.secondary">
-                Drag & drop or click to upload cover image (JPG/PNG/WebP, max 500 KB)
-              </Typography>
-            )}
-            {coverError && (
-              <Typography variant="caption" color="error">
-                {coverError}
-              </Typography>
-            )}
-          </Box>
-        </Stack>
+              )}
+              {coverError && (
+                <Typography variant="caption" color="error">
+                  {coverError}
+                </Typography>
+              )}
+            </Box>
+            {/* Hidden submit button ensures Enter key submits even if action button is outside form */}
+            <button type="submit" style={{ display: 'none' }} />
+          </Stack>
+        </form>
       </DialogContent>
 
       <DialogActions sx={{ px: 3, py: 2 }}>
         <Button onClick={onClose} variant="outlined" color="inherit">
           Cancel
         </Button>
-        <Button variant="contained" color="primary" onClick={handleSubmit}>
+        <Button variant="contained" color="primary" type="submit" onClick={handleSubmit}>
           Add Book
         </Button>
       </DialogActions>

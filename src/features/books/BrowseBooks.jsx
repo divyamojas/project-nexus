@@ -1,6 +1,6 @@
 // src/features/books/BrowseBooks.jsx
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import {
   Container,
   Typography,
@@ -17,6 +17,7 @@ import {
   Switch,
   Divider,
 } from '@mui/material';
+import RefreshIconButton from '@/commonComponents/RefreshIconButton';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import { useDebounce } from '../../hooks';
@@ -40,7 +41,22 @@ export default function BrowseBooks() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { user } = useAuth();
 
-  const { filteredBooks, setFilters, loading } = useBookContext();
+  const { filteredBooks, setFilters, loading, refreshBooks } = useBookContext();
+
+  const [refreshing, setRefreshing] = useState(false);
+  const refreshingRef = useRef(false);
+
+  const doRefresh = async () => {
+    if (refreshingRef.current) return;
+    refreshingRef.current = true;
+    setRefreshing(true);
+    try {
+      await refreshBooks();
+    } finally {
+      setRefreshing(false);
+      refreshingRef.current = false;
+    }
+  };
 
   // sync filters to context
   useEffect(() => {
@@ -52,6 +68,23 @@ export default function BrowseBooks() {
       includeOwn: true,
     });
   }, [debouncedSearch, sortBy, filter, user?.id, setFilters]);
+
+  // Auto-refresh every 10s when visible
+  useEffect(() => {
+    const tick = () => {
+      if (document.visibilityState === 'visible') doRefresh();
+    };
+    const id = setInterval(tick, 10000);
+    document.addEventListener('visibilitychange', tick);
+    // Local event after additions elsewhere
+    const onAdded = () => doRefresh();
+    window.addEventListener('books:added', onAdded);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener('visibilitychange', tick);
+      window.removeEventListener('books:added', onAdded);
+    };
+  }, [refreshBooks]);
 
   const myBooks = filteredBooks.filter((book) => book.user_id === user?.id);
   const otherBooks = filteredBooks.filter((book) => book.user_id !== user?.id);
@@ -69,6 +102,8 @@ export default function BrowseBooks() {
   const handleToggleSave = async (book) => {
     try {
       await toggleBookSaveStatus(book);
+      // ensure browse reflects new saved state
+      await doRefresh();
     } catch (e) {
       logError('BrowseBooks.handleToggleSave failed', e, { bookId: book?.id });
       alert('Failed to update saved state.');
@@ -78,20 +113,44 @@ export default function BrowseBooks() {
   const handleRequestBook = async (book) => {
     try {
       const success = await sendBookRequest(book);
-      if (success) alert('Borrow request sent!');
+      if (success) {
+        alert('Borrow request sent!');
+        await doRefresh();
+      }
     } catch (e) {
       logError('BrowseBooks.handleRequestBook failed', e, { bookId: book?.id });
       alert('Failed to send borrow request.');
     }
   };
 
+  const onArchiveWrapper = async (book) => {
+    try {
+      await handleArchiveBook(book);
+      await doRefresh();
+    } catch (e) {
+      logError('BrowseBooks.onArchive failed', e, { bookId: book?.id });
+    }
+  };
+
+  const onDeleteWrapper = async (book) => {
+    try {
+      await handleDeleteBook(book);
+      await doRefresh();
+    } catch (e) {
+      logError('BrowseBooks.onDelete failed', e, { bookId: book?.id });
+    }
+  };
+
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Stack direction="row" spacing={1} alignItems="center" mb={3}>
-        <AutoStoriesIcon color="primary" />
-        <Typography variant="h4" fontWeight={600}>
-          Discover books shared by the community
-        </Typography>
+      <Stack direction="row" spacing={1} alignItems="center" mb={3} justifyContent="space-between">
+        <Stack direction="row" spacing={1} alignItems="center">
+          <AutoStoriesIcon color="primary" />
+          <Typography variant="h4" fontWeight={600}>
+            Discover books shared by the community
+          </Typography>
+        </Stack>
+        <RefreshIconButton onClick={doRefresh} refreshing={refreshing} tooltip="Refresh" />
       </Stack>
 
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} mb={3} alignItems="flex-start">
@@ -158,8 +217,8 @@ export default function BrowseBooks() {
                           isSaved={false}
                           onClick={() => handleCardClick(book)}
                           context="myBooks"
-                          onArchive={handleArchiveBook}
-                          onDelete={handleDeleteBook}
+                          onArchive={onArchiveWrapper}
+                          onDelete={onDeleteWrapper}
                         />
                       </Box>
                     </Fade>

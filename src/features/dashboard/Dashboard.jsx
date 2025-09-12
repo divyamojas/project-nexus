@@ -1,7 +1,8 @@
 // src/features/dashboard/Dashboard.jsx
 
 import { lazy, Suspense, useEffect, useState, useCallback } from 'react';
-import { Container, Typography, Paper } from '@mui/material';
+import { Container, Typography, Paper, Box } from '@mui/material';
+import RefreshIconButton from '@/commonComponents/RefreshIconButton';
 
 import BookCarouselSection from '@/features/dashboard/components/BookCarouselSection';
 import MyBooksSection from '@/features/dashboard/components/MyBooksSection';
@@ -42,7 +43,45 @@ export default function Dashboard() {
   const [modalContext, setModalContext] = useState('');
   const [showArchived, setShowArchived] = useState(false);
 
-  const { categorizedBooks, handleDeleteBook, handleArchiveBook, refreshBooks } = useBookContext();
+  const {
+    categorizedBooks,
+    handleDeleteBook,
+    handleArchiveBook,
+    refreshBooks,
+    updateBookSaveStatus,
+    addBookById,
+  } = useBookContext();
+
+  const refreshRequests = useCallback(async () => {
+    const req = await getRequestsForUser(user);
+    setRequests(req);
+  }, [user?.id]);
+
+  const refreshTransfers = useCallback(async () => {
+    const trf = await getTransfers();
+    setTransfers(trf);
+  }, []);
+
+  const refreshSaved = useCallback(async () => {
+    const saved = await getSavedBooks(user);
+    setSavedBooks(saved);
+  }, [user?.id]);
+
+  const refreshBorrowed = useCallback(async () => {
+    const myLoans = await getMyLoans({ role: 'borrower' });
+    const borrowed = (myLoans || []).map((l) => ({
+      id: l.book?.id,
+      user_id: l.book?.user_id,
+      status: 'lent',
+      condition: l.book?.condition,
+      created_at: l.book?.created_at,
+      catalog: l.book?.books_catalog,
+      archived: false,
+      loan_id: l.id,
+      loan_due_date: l.due_date,
+    }));
+    setBorrowedBooks(borrowed);
+  }, []);
 
   const fetchData = useCallback(async () => {
     try {
@@ -78,6 +117,38 @@ export default function Dashboard() {
     }
   }, [user?.id, refreshBooks]);
 
+  // Global refresh button animation state
+  const [globalRefreshing, setGlobalRefreshing] = useState(false);
+  const handleGlobalRefresh = async () => {
+    setGlobalRefreshing(true);
+    try {
+      await fetchData();
+    } finally {
+      setGlobalRefreshing(false);
+    }
+  };
+
+  // Auto-refresh relevant sections (requests, transfers, borrowed)
+  const [incomingSignal, setIncomingSignal] = useState(0);
+  const [outgoingSignal, setOutgoingSignal] = useState(0);
+  const [transfersSignal, setTransfersSignal] = useState(0);
+  const [borrowedSignal, setBorrowedSignal] = useState(0);
+  useEffect(() => {
+    const tick = () => {
+      if (document.visibilityState !== 'visible') return;
+      setIncomingSignal((s) => s + 1);
+      setOutgoingSignal((s) => s + 1);
+      setTransfersSignal((s) => s + 1);
+      setBorrowedSignal((s) => s + 1);
+    };
+    const id = setInterval(tick, 10000);
+    document.addEventListener('visibilitychange', tick);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener('visibilitychange', tick);
+    };
+  }, []);
+
   useEffect(() => {
     fetchData();
   }, [fetchData]);
@@ -104,9 +175,17 @@ export default function Dashboard() {
     onDelete: handleDelete,
   } = useDashboardHandlers({
     user,
-    refetch: fetchData,
+    refreshers: {
+      refreshRequests,
+      refreshTransfers,
+      refreshSaved,
+      refreshBorrowed,
+      refreshBooks,
+    },
     archiveBook: handleArchiveBook,
     deleteBook: handleDeleteBook,
+    updateBookSaveStatus,
+    setSavedBooks,
   });
 
   const { lentBooks, archivedBooks, myActiveBooks } = categorizedBooks;
@@ -122,9 +201,17 @@ export default function Dashboard() {
     <Suspense fallback={<PageLoader />}>
       <Container maxWidth="lg" sx={{ py: 5 }}>
         <Paper elevation={2} sx={{ p: 4, borderRadius: 4, bgcolor: 'background.paper' }}>
-          <Typography variant="h4" fontWeight="medium" gutterBottom color="text.primary">
-            Hi {userFirstName || 'Friend'}, welcome to your dashboard
-          </Typography>
+          <Box display="flex" alignItems="center" justifyContent="space-between" mb={1}>
+            <Typography variant="h4" fontWeight="medium" color="text.primary">
+              Hi {userFirstName || 'Friend'}, welcome to your dashboard
+            </Typography>
+            <RefreshIconButton
+              onClick={handleGlobalRefresh}
+              refreshing={globalRefreshing}
+              tooltip="Refresh all"
+              size="medium"
+            />
+          </Box>
 
           <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
             You can view and manage your books here, check recent activity, and share something new
@@ -140,6 +227,7 @@ export default function Dashboard() {
             onBookClick={(book) => handleBookClick(book, 'myBooks')}
             onDelete={handleDeleteBook}
             onArchive={handleArchiveBook}
+            onRefresh={refreshBooks}
           />
 
           {bookSections.map(({ title, emoji, books, context }) => (
@@ -160,6 +248,28 @@ export default function Dashboard() {
               onReject={handleRejectRequest}
               onCancelRequest={handleCancelRequest}
               onCompleteTransfer={handleCompleteTransfer}
+              onRefresh={
+                context === 'saved'
+                  ? refreshSaved
+                  : context === 'incoming' || context === 'outgoing'
+                    ? refreshRequests
+                    : context === 'transfers'
+                      ? refreshTransfers
+                      : context === 'lentBorrowed'
+                        ? refreshBorrowed
+                        : refreshBooks
+              }
+              refreshSignal={
+                context === 'incoming'
+                  ? incomingSignal
+                  : context === 'outgoing'
+                    ? outgoingSignal
+                    : context === 'transfers'
+                      ? transfersSignal
+                      : context === 'lentBorrowed'
+                        ? borrowedSignal
+                        : undefined
+              }
             />
           ))}
 
@@ -170,6 +280,7 @@ export default function Dashboard() {
           open={showAddModal}
           onClose={() => setShowAddModal(false)}
           setShowAddModal={setShowAddModal}
+          onAdded={addBookById}
         />
 
         {selectedBook && (

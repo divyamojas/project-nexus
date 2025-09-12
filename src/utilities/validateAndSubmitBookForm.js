@@ -35,7 +35,7 @@ export default async function validateAndSubmitBookForm(
     .replace(/[^a-zA-Z0-9]/g, '')
     .toUpperCase();
 
-  const success = await addBookToCatalogAndStock({
+  const createdInstance = await addBookToCatalogAndStock({
     title: formattedTitle,
     author: formattedAuthor,
     isbn: formattedIsbn,
@@ -45,10 +45,10 @@ export default async function validateAndSubmitBookForm(
     user: user,
   });
 
-  if (success) {
+  if (createdInstance) {
     resetForm();
     if (onSuccess) onSuccess();
-    return true;
+    return createdInstance; // return created row (contains id)
   }
 
   return false;

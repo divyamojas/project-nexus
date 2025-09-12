@@ -13,6 +13,7 @@ import {
   subscribeToBookChanges,
   unsubscribeFromBookChanges,
   toggleSaveBook,
+  getBookWithRelations,
 } from '../services';
 import { requestBorrowBook } from '../services/bookRequestService';
 import { BookFormProvider } from './BookFormContext';
@@ -119,6 +120,26 @@ export const BookProvider = ({ children }) => {
     [updateBookSaveStatus, user],
   );
 
+  const addBookById = useCallback(
+    async (bookId) => {
+      try {
+        const newBook = await getBookWithRelations(bookId, user);
+        if (newBook) {
+          setBooks((prev) => {
+            const exists = prev.some((b) => b.id === newBook.id);
+            return exists ? prev : [newBook, ...prev];
+          });
+        } else {
+          await refreshBooks();
+        }
+      } catch (e) {
+        console.error('addBookById error:', e);
+        await refreshBooks();
+      }
+    },
+    [user?.id, refreshBooks],
+  );
+
   const sendBookRequest = useCallback(
     async (book, message = 'Hi! I would like to borrow this book.') => {
       try {
@@ -134,16 +155,28 @@ export const BookProvider = ({ children }) => {
 
   const handleDeleteBook = useCallback(
     async (book) => {
-      await deleteBook(book.id);
-      await refreshBooks();
+      const ok = await deleteBook(book.id);
+      if (ok) {
+        // Remove only the deleted book to avoid full refetch
+        setBooks((prev) => prev.filter((b) => b.id !== book.id));
+      } else {
+        await refreshBooks();
+      }
     },
     [refreshBooks],
   );
 
   const handleArchiveBook = useCallback(
     async (book) => {
-      await archiveBook(book.id, !book.archived);
-      await refreshBooks();
+      const ok = await archiveBook(book.id, !book.archived);
+      if (ok) {
+        // Toggle archived flag locally
+        setBooks((prev) =>
+          prev.map((b) => (b.id === book.id ? { ...b, archived: !b.archived } : b)),
+        );
+      } else {
+        await refreshBooks();
+      }
     },
     [refreshBooks],
   );
@@ -156,7 +189,24 @@ export const BookProvider = ({ children }) => {
   }, [userId]);
 
   useEffect(() => {
-    const sub = subscribeToBookChanges(refreshBooks);
+    const onRealtime = (payload) => {
+      const type = payload?.eventType || payload?.event || payload?.type;
+      const row = payload?.new || payload?.record;
+      if (type === 'INSERT' && row?.user_id === userId) {
+        addBookById(row.id);
+        return;
+      }
+      if (type === 'UPDATE') {
+        // For archive toggles etc., fetch single if it's mine, else do a light refresh
+        if (row?.user_id === userId) {
+          addBookById(row.id);
+          return;
+        }
+      }
+      // Fallback: refresh list
+      refreshBooks();
+    };
+    const sub = subscribeToBookChanges(onRealtime);
     return () => {
       try {
         sub.unsubscribe?.();
@@ -166,7 +216,17 @@ export const BookProvider = ({ children }) => {
         unsubscribeFromBookChanges();
       } catch {}
     };
-  }, [refreshBooks]);
+  }, [userId, addBookById, refreshBooks]);
+
+  // Listen for local app-wide events (optimistic UI updates)
+  useEffect(() => {
+    const onAdded = (e) => {
+      const id = e?.detail?.id;
+      if (id) addBookById(id);
+    };
+    window.addEventListener('books:added', onAdded);
+    return () => window.removeEventListener('books:added', onAdded);
+  }, [addBookById]);
 
   return (
     <bookContext.Provider
@@ -181,6 +241,7 @@ export const BookProvider = ({ children }) => {
         refreshSavedBooks,
         updateBookSaveStatus,
         toggleBookSaveStatus,
+        addBookById,
         sendBookRequest,
         handleDeleteBook,
         handleArchiveBook,

@@ -26,6 +26,7 @@ export {
   deleteBook,
   archiveBook,
   getBooks,
+  getBookWithRelations,
   uploadBookCover,
 } from './bookService';
 

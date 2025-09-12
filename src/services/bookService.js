@@ -68,14 +68,16 @@ export async function getMyBooks(user, onlyId = false) {
 export async function addBookInstance({ catalog_id, condition, user_id, archived }) {
   const { data, error } = await supabase
     .from('books')
-    .insert([{ catalog_id, condition, user_id, archived }]);
+    .insert([{ catalog_id, condition, user_id, archived }])
+    .select('id')
+    .single();
 
   if (error) {
     console.error('Error adding book instance:', error);
     return null;
   }
 
-  return data?.[0] || null;
+  return data || null;
 }
 
 /**
@@ -160,6 +162,59 @@ export async function getBooks({ includeArchived = true, user } = {}) {
       return_request_id: pendingReturn?.id || null,
     };
   });
+}
+
+/**
+ * Fetch a single book with the same shape as getBooks mapping.
+ */
+export async function getBookWithRelations(id, user) {
+  if (!id) return null;
+
+  const userId = user?.id;
+  const { data, error } = await supabase
+    .from('books')
+    .select(
+      `
+      id,
+      status,
+      condition,
+      created_at,
+      user_id,
+      archived,
+      catalog:catalog_id (id, title, author, cover_url),
+      saved_books (user_id),
+      book_loans!left (id, status, borrower_id, lender_id, loaned_at, due_date, returned_at),
+      return_requests!left (id, status, loan_id, requested_by, requested_at, resolved_at)
+    `,
+    )
+    .eq('id', id)
+    .single();
+
+  if (error) return null;
+
+  const isSaved = Array.isArray(data.saved_books)
+    ? data.saved_books.some((entry) => entry.user_id === userId)
+    : false;
+  const activeLoan = Array.isArray(data.book_loans)
+    ? data.book_loans.find((l) => l.status === 'active')
+    : null;
+  const borrowedBy = activeLoan?.borrower_id || null;
+  const pendingReturn = Array.isArray(data.return_requests)
+    ? data.return_requests.find((r) => r.status === 'pending')
+    : null;
+
+  return {
+    id: data.id,
+    user_id: data.user_id,
+    status: data.status,
+    condition: data.condition,
+    created_at: data.created_at,
+    catalog: data.catalog,
+    archived: data.archived,
+    is_saved: isSaved,
+    borrowed_by: borrowedBy,
+    return_request_id: pendingReturn?.id || null,
+  };
 }
 
 /**

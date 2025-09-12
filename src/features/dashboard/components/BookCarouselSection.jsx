@@ -1,6 +1,8 @@
 // src/features/dashboard/components/BookCarouselSection.jsx
 
+import React, { useEffect, useRef, useState } from 'react';
 import { Box, Typography, Divider, Stack } from '@mui/material';
+import RefreshIconButton from '@/commonComponents/RefreshIconButton';
 import BookCard from '@/features/books/components/BookCard';
 
 export default function BookCarouselSection({
@@ -18,7 +20,30 @@ export default function BookCarouselSection({
   onCompleteTransfer,
   context = '',
   editable = true,
+  onRefresh,
+  refreshSignal,
 }) {
+  const [refreshing, setRefreshing] = useState(false);
+  const handleRefresh = async () => {
+    if (!onRefresh) return;
+    setRefreshing(true);
+    try {
+      await onRefresh();
+    } finally {
+      setRefreshing(false);
+    }
+  };
+  // Auto-trigger refresh when parent changes the signal value
+  const didMount = useRef(false);
+  useEffect(() => {
+    if (refreshSignal === undefined) return;
+    if (!didMount.current) {
+      didMount.current = true;
+      return; // avoid double-load on initial render (parent already fetched)
+    }
+    handleRefresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshSignal]);
   return (
     <Box
       my={5}
@@ -27,9 +52,14 @@ export default function BookCarouselSection({
       borderRadius={3}
       sx={{ border: (t) => `1px solid ${t.palette.divider}`, boxShadow: 1 }}
     >
-      <Typography variant="h6" color="text.primary" sx={{ mb: 2 }}>
-        {emoji} {title}
-      </Typography>
+      <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+        <Typography variant="h6" color="text.primary">
+          {emoji} {title}
+        </Typography>
+        {onRefresh && (
+          <RefreshIconButton size="small" onClick={handleRefresh} refreshing={refreshing} />
+        )}
+      </Box>
       <Divider sx={{ mb: 2 }} />
 
       {books.length === 0 ? (

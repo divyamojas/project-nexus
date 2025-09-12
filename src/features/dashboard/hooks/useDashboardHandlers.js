@@ -10,20 +10,30 @@ import {
 import { useSnackbar } from '@/components/providers/SnackbarProvider';
 import { logError } from '@/utilities/logger';
 
-export default function useDashboardHandlers({ user, refetch, archiveBook, deleteBook }) {
+export default function useDashboardHandlers({
+  user,
+  refreshers,
+  archiveBook,
+  deleteBook,
+  updateBookSaveStatus,
+  setSavedBooks,
+}) {
   const { showToast } = useSnackbar();
   const onToggleSave = useCallback(
     async (book) => {
       try {
         await toggleSaveBook(book.id, false, null, user);
+        // Update only Saved section and the book's saved flag
+        setSavedBooks?.((prev) => prev.filter((b) => b.id !== book.id));
+        updateBookSaveStatus?.(book.id, false);
         showToast('Removed from Saved', { severity: 'info' });
-        refetch();
+        refreshers?.refreshSaved?.();
       } catch (e) {
         logError('DashboardHandlers.onToggleSave failed', e, { bookId: book?.id });
         showToast('Failed to update saved status', { severity: 'error' });
       }
     },
-    [user, refetch, showToast],
+    [user, showToast, setSavedBooks, updateBookSaveStatus, refreshers?.refreshSaved],
   );
 
   const onRequestReturn = useCallback(
@@ -31,13 +41,13 @@ export default function useDashboardHandlers({ user, refetch, archiveBook, delet
       try {
         await requestBookReturn(book.id, user);
         showToast('Return requested', { severity: 'success' });
-        refetch();
+        refreshers?.refreshBorrowed?.();
       } catch (e) {
         logError('DashboardHandlers.onRequestReturn failed', e, { bookId: book?.id });
         showToast('Failed to request return', { severity: 'error' });
       }
     },
-    [user, refetch, showToast],
+    [user, showToast, refreshers?.refreshBorrowed],
   );
 
   const onAcceptRequest = useCallback(
@@ -45,13 +55,14 @@ export default function useDashboardHandlers({ user, refetch, archiveBook, delet
       try {
         await updateRequestStatus(book.request_id, 'accepted');
         showToast('Request accepted', { severity: 'success' });
-        refetch();
+        refreshers?.refreshRequests?.();
+        refreshers?.refreshBooks?.();
       } catch (e) {
         logError('DashboardHandlers.onAcceptRequest failed', e, { requestId: book?.request_id });
         showToast('Failed to accept request', { severity: 'error' });
       }
     },
-    [refetch, showToast],
+    [showToast, refreshers?.refreshRequests, refreshers?.refreshBooks],
   );
 
   const onRejectRequest = useCallback(
@@ -59,13 +70,13 @@ export default function useDashboardHandlers({ user, refetch, archiveBook, delet
       try {
         await updateRequestStatus(book.request_id, 'rejected');
         showToast('Request rejected', { severity: 'warning' });
-        refetch();
+        refreshers?.refreshRequests?.();
       } catch (e) {
         logError('DashboardHandlers.onRejectRequest failed', e, { requestId: book?.request_id });
         showToast('Failed to reject request', { severity: 'error' });
       }
     },
-    [refetch, showToast],
+    [showToast, refreshers?.refreshRequests],
   );
 
   const onCancelRequest = useCallback(
@@ -73,13 +84,13 @@ export default function useDashboardHandlers({ user, refetch, archiveBook, delet
       try {
         await updateRequestStatus(book.request_id, 'cancelled');
         showToast('Request cancelled', { severity: 'info' });
-        refetch();
+        refreshers?.refreshRequests?.();
       } catch (e) {
         logError('DashboardHandlers.onCancelRequest failed', e, { requestId: book?.request_id });
         showToast('Failed to cancel request', { severity: 'error' });
       }
     },
-    [refetch, showToast],
+    [showToast, refreshers?.refreshRequests],
   );
 
   const onCompleteTransfer = useCallback(
@@ -88,7 +99,8 @@ export default function useDashboardHandlers({ user, refetch, archiveBook, delet
       try {
         await completeTransfer({ transfer_id: book.transfer_id });
         showToast('Transfer completed', { severity: 'success' });
-        refetch();
+        refreshers?.refreshTransfers?.();
+        refreshers?.refreshBooks?.();
       } catch (e) {
         logError('DashboardHandlers.onCompleteTransfer failed', e, {
           transferId: book?.transfer_id,
@@ -96,7 +108,7 @@ export default function useDashboardHandlers({ user, refetch, archiveBook, delet
         showToast('Failed to complete transfer', { severity: 'error' });
       }
     },
-    [refetch, showToast],
+    [showToast, refreshers?.refreshTransfers, refreshers?.refreshBooks],
   );
 
   const onApproveReturn = useCallback(
@@ -105,7 +117,9 @@ export default function useDashboardHandlers({ user, refetch, archiveBook, delet
       try {
         await approveReturnRequest(book.return_request_id);
         showToast('Return approved', { severity: 'success' });
-        refetch();
+        refreshers?.refreshRequests?.();
+        refreshers?.refreshBorrowed?.();
+        refreshers?.refreshBooks?.();
       } catch (e) {
         logError('DashboardHandlers.onApproveReturn failed', e, {
           returnRequestId: book?.return_request_id,
@@ -113,7 +127,7 @@ export default function useDashboardHandlers({ user, refetch, archiveBook, delet
         showToast('Failed to approve return', { severity: 'error' });
       }
     },
-    [refetch, showToast],
+    [showToast, refreshers?.refreshRequests, refreshers?.refreshBorrowed, refreshers?.refreshBooks],
   );
 
   const onArchive = useCallback(
@@ -121,13 +135,13 @@ export default function useDashboardHandlers({ user, refetch, archiveBook, delet
       try {
         await archiveBook(book);
         showToast(book.archived ? 'Unarchived' : 'Archived', { severity: 'info' });
-        refetch();
+        // BookContext mutates local book list; sections recompute without full page refresh
       } catch (e) {
         logError('DashboardHandlers.onArchive failed', e, { bookId: book?.id });
         showToast('Failed to update archive status', { severity: 'error' });
       }
     },
-    [archiveBook, refetch, showToast],
+    [archiveBook, showToast],
   );
 
   const onDelete = useCallback(
@@ -135,13 +149,13 @@ export default function useDashboardHandlers({ user, refetch, archiveBook, delet
       try {
         await deleteBook(book);
         showToast('Book deleted', { severity: 'info' });
-        refetch();
+        // BookContext mutates local book list; sections recompute without full page refresh
       } catch (e) {
         logError('DashboardHandlers.onDelete failed', e, { bookId: book?.id });
         showToast('Failed to delete book', { severity: 'error' });
       }
     },
-    [deleteBook, refetch, showToast],
+    [deleteBook, showToast],
   );
 
   return {
