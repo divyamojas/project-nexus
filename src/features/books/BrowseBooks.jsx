@@ -16,8 +16,10 @@ import {
   FormControlLabel,
   Switch,
   Divider,
+  Skeleton,
 } from '@mui/material';
 import RefreshIconButton from '@/commonComponents/RefreshIconButton';
+import { alpha } from '@mui/material/styles';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import { useDebounce } from '../../hooks';
@@ -43,6 +45,7 @@ export default function BrowseBooks() {
   const { user } = useAuth();
 
   const { filteredBooks, setFilters, loading, refreshBooks } = useBookContext();
+  const [initialLoaded, setInitialLoaded] = useState(false);
 
   const [refreshing, setRefreshing] = useState(false);
   const refreshingRef = useRef(false);
@@ -86,6 +89,11 @@ export default function BrowseBooks() {
       window.removeEventListener('books:added', onAdded);
     };
   }, [refreshBooks]);
+
+  // Mark initial load complete to prevent skeleton flashing on auto refreshes
+  useEffect(() => {
+    if (!initialLoaded && !loading) setInitialLoaded(true);
+  }, [loading, initialLoaded]);
 
   const myBooks = filteredBooks.filter((book) => book.user_id === user?.id);
   const otherBooks = filteredBooks.filter((book) => book.user_id !== user?.id);
@@ -145,66 +153,178 @@ export default function BrowseBooks() {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Stack direction="row" spacing={1} alignItems="center" mb={3} justifyContent="space-between">
-        <Stack direction="row" spacing={1} alignItems="center">
-          <AutoStoriesIcon color="primary" />
-          <Typography variant="h4" fontWeight={600}>
-            Discover books shared by the community
-          </Typography>
-        </Stack>
-        <RefreshIconButton onClick={doRefresh} refreshing={refreshing} tooltip="Refresh" />
-      </Stack>
-
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} mb={3} alignItems="flex-start">
-        <TextField
-          fullWidth
-          label="Search by title or author"
-          variant="outlined"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-
-        <FormControl sx={{ minWidth: 160 }}>
-          <InputLabel>Sort By</InputLabel>
-          <Select value={sortBy} onChange={(e) => setSortBy(e.target.value)} label="Sort By">
-            <MenuItem value="date_added">Date Added</MenuItem>
-            <MenuItem value="name">Title (A-Z)</MenuItem>
-          </Select>
-        </FormControl>
-
-        <FormControl sx={{ minWidth: 160 }}>
-          <InputLabel>Status</InputLabel>
-          <Select value={filter} onChange={(e) => setFilter(e.target.value)} label="Status">
-            <MenuItem value="all">All</MenuItem>
-            <MenuItem value="available">Available</MenuItem>
-            <MenuItem value="lent_out">Lent Out</MenuItem>
-            <MenuItem value="unavailable">Not Available</MenuItem>
-          </Select>
-        </FormControl>
-
-        <FormControlLabel
-          control={
-            <Switch
-              checked={showOwnBooks}
-              onChange={(e) => setShowOwnBooks(e.target.checked)}
-              color="primary"
+        {!initialLoaded && loading ? (
+          <Stack direction="row" spacing={1.5} alignItems="center">
+            <Skeleton
+              variant="circular"
+              width={32}
+              height={32}
+              animation="wave"
+              sx={{
+                bgcolor: (t) =>
+                  alpha(t.palette.text.primary, t.palette.mode === 'dark' ? 0.18 : 0.1),
+              }}
             />
-          }
-          label="Show My Books"
-        />
+            <Skeleton
+              variant="rounded"
+              width={260}
+              height={28}
+              animation="wave"
+              sx={{
+                borderRadius: 1.5,
+                bgcolor: (t) =>
+                  alpha(t.palette.text.primary, t.palette.mode === 'dark' ? 0.16 : 0.09),
+              }}
+            />
+          </Stack>
+        ) : (
+          <Stack direction="row" spacing={1} alignItems="center">
+            <AutoStoriesIcon color="primary" />
+            <Typography variant="h4" fontWeight={600}>
+              Discover books shared by the community
+            </Typography>
+          </Stack>
+        )}
+        {!initialLoaded && loading ? (
+          <Skeleton
+            variant="circular"
+            width={36}
+            height={36}
+            animation="wave"
+            sx={{
+              bgcolor: (t) => alpha(t.palette.text.primary, t.palette.mode === 'dark' ? 0.18 : 0.1),
+            }}
+          />
+        ) : (
+          <RefreshIconButton onClick={doRefresh} refreshing={refreshing} tooltip="Refresh" />
+        )}
       </Stack>
 
-      {loading ? (
-        <Grid container spacing={2} mb={4}>
-          {[...Array(6)].map((_, i) => (
-            <Grid item xs={12} sm={6} md={4} key={i}>
-              <Fade in timeout={300}>
-                <Box>
-                  <BookCardSkeleton width={240} height={360} />
-                </Box>
-              </Fade>
-            </Grid>
-          ))}
-        </Grid>
+      {!initialLoaded && loading ? (
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} mb={3} alignItems="flex-start">
+          <Skeleton
+            variant="rounded"
+            height={56}
+            animation="wave"
+            sx={{
+              flexGrow: 1,
+              borderRadius: 2,
+              bgcolor: (t) =>
+                alpha(t.palette.text.primary, t.palette.mode === 'dark' ? 0.14 : 0.08),
+            }}
+          />
+          <Skeleton
+            variant="rounded"
+            width={160}
+            height={56}
+            animation="wave"
+            sx={{
+              borderRadius: 2,
+              bgcolor: (t) =>
+                alpha(t.palette.text.primary, t.palette.mode === 'dark' ? 0.14 : 0.08),
+            }}
+          />
+          <Skeleton
+            variant="rounded"
+            width={160}
+            height={56}
+            animation="wave"
+            sx={{
+              borderRadius: 2,
+              bgcolor: (t) =>
+                alpha(t.palette.text.primary, t.palette.mode === 'dark' ? 0.14 : 0.08),
+            }}
+          />
+          <Skeleton
+            variant="rounded"
+            width={140}
+            height={40}
+            animation="wave"
+            sx={{
+              borderRadius: 2,
+              bgcolor: (t) =>
+                alpha(t.palette.text.primary, t.palette.mode === 'dark' ? 0.14 : 0.08),
+            }}
+          />
+        </Stack>
+      ) : (
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} mb={3} alignItems="flex-start">
+          <TextField
+            fullWidth
+            label="Search by title or author"
+            variant="outlined"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+
+          <FormControl sx={{ minWidth: 160 }}>
+            <InputLabel>Sort By</InputLabel>
+            <Select value={sortBy} onChange={(e) => setSortBy(e.target.value)} label="Sort By">
+              <MenuItem value="date_added">Date Added</MenuItem>
+              <MenuItem value="name">Title (A-Z)</MenuItem>
+            </Select>
+          </FormControl>
+
+          <FormControl sx={{ minWidth: 160 }}>
+            <InputLabel>Status</InputLabel>
+            <Select value={filter} onChange={(e) => setFilter(e.target.value)} label="Status">
+              <MenuItem value="all">All</MenuItem>
+              <MenuItem value="available">Available</MenuItem>
+              <MenuItem value="lent_out">Lent Out</MenuItem>
+              <MenuItem value="unavailable">Not Available</MenuItem>
+            </Select>
+          </FormControl>
+
+          <FormControlLabel
+            control={
+              <Switch
+                checked={showOwnBooks}
+                onChange={(e) => setShowOwnBooks(e.target.checked)}
+                color="primary"
+              />
+            }
+            label="Show My Books"
+          />
+        </Stack>
+      )}
+
+      {!initialLoaded && loading ? (
+        <>
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+            <Skeleton
+              variant="circular"
+              width={24}
+              height={24}
+              animation="wave"
+              sx={{
+                bgcolor: (t) =>
+                  alpha(t.palette.text.primary, t.palette.mode === 'dark' ? 0.18 : 0.1),
+              }}
+            />
+            <Skeleton
+              variant="rounded"
+              width={180}
+              height={22}
+              animation="wave"
+              sx={{
+                borderRadius: 1.5,
+                bgcolor: (t) =>
+                  alpha(t.palette.text.primary, t.palette.mode === 'dark' ? 0.16 : 0.09),
+              }}
+            />
+          </Stack>
+          <Grid container spacing={2} mb={4}>
+            {[...Array(6)].map((_, i) => (
+              <Grid item xs={12} sm={6} md={4} key={i}>
+                <Fade in timeout={300}>
+                  <Box>
+                    <BookCardSkeleton width={240} height={360} />
+                  </Box>
+                </Fade>
+              </Grid>
+            ))}
+          </Grid>
+        </>
       ) : filteredBooks.length === 0 ? (
         <Typography>No books match your search or filter.</Typography>
       ) : (
