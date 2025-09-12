@@ -15,6 +15,7 @@ export default function MyBooksSection({
   onDelete,
   onArchive,
   onRefresh,
+  loading = false,
 }) {
   const [refreshing, setRefreshing] = useState(false);
   const triggerRefresh = async () => {
@@ -54,6 +55,7 @@ export default function MyBooksSection({
         context="myBooks"
         editable={true}
         onRefresh={triggerRefresh}
+        loading={loading}
       />
 
       <Box mt={2} mb={2}>
@@ -80,6 +82,7 @@ export default function MyBooksSection({
           context="archived"
           editable={true}
           onRefresh={triggerRefresh}
+          loading={loading}
         />
       </Collapse>
     </>

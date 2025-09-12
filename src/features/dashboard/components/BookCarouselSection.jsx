@@ -1,9 +1,10 @@
 // src/features/dashboard/components/BookCarouselSection.jsx
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, lazy, Suspense } from 'react';
 import { Box, Typography, Divider, Stack } from '@mui/material';
 import RefreshIconButton from '@/commonComponents/RefreshIconButton';
-import BookCard from '@/features/books/components/BookCard';
+const BookCard = lazy(() => import('@/features/books/components/BookCard'));
+import BookCardSkeleton from '@/features/books/components/BookCardSkeleton';
 
 export default function BookCarouselSection({
   title,
@@ -22,6 +23,7 @@ export default function BookCarouselSection({
   editable = true,
   onRefresh,
   refreshSignal,
+  loading = false,
 }) {
   const [refreshing, setRefreshing] = useState(false);
   const handleRefresh = async () => {
@@ -62,7 +64,15 @@ export default function BookCarouselSection({
       </Box>
       <Divider sx={{ mb: 2 }} />
 
-      {books.length === 0 ? (
+      {loading ? (
+        <Stack direction="row" spacing={2} sx={{ overflowX: 'hidden', pb: 1 }}>
+          {[...Array(4)].map((_, i) => (
+            <Box key={i} flexShrink={0}>
+              <BookCardSkeleton />
+            </Box>
+          ))}
+        </Stack>
+      ) : books.length === 0 ? (
         <Typography variant="body2" color="text.secondary">
           No books available.
         </Typography>
@@ -70,20 +80,22 @@ export default function BookCarouselSection({
         <Stack direction="row" spacing={2} sx={{ overflowX: 'auto', pb: 1 }}>
           {books.map((book) => (
             <Box key={book.id || JSON.stringify(book)} flexShrink={0}>
-              <BookCard
-                book={book}
-                onClick={() => onBookClick(book)}
-                onDelete={onDelete}
-                onArchive={onArchive}
-                onToggleSave={onToggleSave}
-                onAccept={onAccept}
-                onReject={onReject}
-                onCancelRequest={onCancelRequest}
-                onRequestReturn={onRequestReturn}
-                onCompleteTransfer={onCompleteTransfer}
-                context={context}
-                editable={editable}
-              />
+              <Suspense fallback={<BookCardSkeleton />}>
+                <BookCard
+                  book={book}
+                  onClick={() => onBookClick(book)}
+                  onDelete={onDelete}
+                  onArchive={onArchive}
+                  onToggleSave={onToggleSave}
+                  onAccept={onAccept}
+                  onReject={onReject}
+                  onCancelRequest={onCancelRequest}
+                  onRequestReturn={onRequestReturn}
+                  onCompleteTransfer={onCompleteTransfer}
+                  context={context}
+                  editable={editable}
+                />
+              </Suspense>
             </Box>
           ))}
         </Stack>

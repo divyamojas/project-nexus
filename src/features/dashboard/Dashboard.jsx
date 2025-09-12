@@ -35,8 +35,12 @@ export default function Dashboard() {
   const [requests, setRequests] = useState({ incoming: [], outgoing: [] });
   const [transfers, setTransfers] = useState([]);
   const [savedBooks, setSavedBooks] = useState([]);
+  const [savedLoading, setSavedLoading] = useState(true);
   const [reviews, setReviews] = useState({ given: [], received: [] });
   const [borrowedBooks, setBorrowedBooks] = useState([]);
+  const [borrowedLoading, setBorrowedLoading] = useState(true);
+  const [requestsLoading, setRequestsLoading] = useState(true);
+  const [transfersLoading, setTransfersLoading] = useState(true);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedBook, setSelectedBook] = useState(null);
@@ -50,24 +54,34 @@ export default function Dashboard() {
     refreshBooks,
     updateBookSaveStatus,
     addBookById,
+    loading,
   } = useBookContext();
 
+  const [initialLoaded, setInitialLoaded] = useState(false);
+
   const refreshRequests = useCallback(async () => {
+    setRequestsLoading(true);
     const req = await getRequestsForUser(user);
     setRequests(req);
+    setRequestsLoading(false);
   }, [user?.id]);
 
   const refreshTransfers = useCallback(async () => {
+    setTransfersLoading(true);
     const trf = await getTransfers();
     setTransfers(trf);
+    setTransfersLoading(false);
   }, []);
 
   const refreshSaved = useCallback(async () => {
+    setSavedLoading(true);
     const saved = await getSavedBooks(user);
     setSavedBooks(saved);
+    setSavedLoading(false);
   }, [user?.id]);
 
   const refreshBorrowed = useCallback(async () => {
+    setBorrowedLoading(true);
     const myLoans = await getMyLoans({ role: 'borrower' });
     const borrowed = (myLoans || []).map((l) => ({
       id: l.book?.id,
@@ -81,6 +95,7 @@ export default function Dashboard() {
       loan_due_date: l.due_date,
     }));
     setBorrowedBooks(borrowed);
+    setBorrowedLoading(false);
   }, []);
 
   const fetchData = useCallback(async () => {
@@ -111,9 +126,14 @@ export default function Dashboard() {
         loan_due_date: l.due_date,
       }));
       setBorrowedBooks(borrowed);
-      await refreshBooks();
+      setRequestsLoading(false);
+      setTransfersLoading(false);
+      setSavedLoading(false);
+      setBorrowedLoading(false);
     } catch (e) {
       logError('Dashboard.fetchData failed', e, { userId: user?.id });
+    } finally {
+      setInitialLoaded(true);
     }
   }, [user?.id, refreshBooks]);
 
@@ -128,12 +148,13 @@ export default function Dashboard() {
     }
   };
 
-  // Auto-refresh relevant sections (requests, transfers, borrowed)
+  // Auto-refresh relevant sections (requests, transfers, borrowed) after initial load
   const [incomingSignal, setIncomingSignal] = useState(0);
   const [outgoingSignal, setOutgoingSignal] = useState(0);
   const [transfersSignal, setTransfersSignal] = useState(0);
   const [borrowedSignal, setBorrowedSignal] = useState(0);
   useEffect(() => {
+    if (!initialLoaded) return;
     const tick = () => {
       if (document.visibilityState !== 'visible') return;
       setIncomingSignal((s) => s + 1);
@@ -147,11 +168,16 @@ export default function Dashboard() {
       clearInterval(id);
       document.removeEventListener('visibilitychange', tick);
     };
-  }, []);
+  }, [initialLoaded]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+  useEffect(() => {
+    if (!initialLoaded && loading === false) {
+      setInitialLoaded(true);
+    }
+  }, [loading, initialLoaded]);
   useEffect(() => {
     if (firstNameFromContext || user?.first_name) {
       setUserFirstName(firstNameFromContext || user.first_name);
@@ -228,6 +254,7 @@ export default function Dashboard() {
             onDelete={handleDeleteBook}
             onArchive={handleArchiveBook}
             onRefresh={refreshBooks}
+            loading={!initialLoaded ? loading : false}
           />
 
           {bookSections.map(({ title, emoji, books, context }) => (
@@ -258,6 +285,19 @@ export default function Dashboard() {
                       : context === 'lentBorrowed'
                         ? refreshBorrowed
                         : refreshBooks
+              }
+              loading={
+                !initialLoaded
+                  ? context === 'saved'
+                    ? savedLoading
+                    : context === 'incoming' || context === 'outgoing'
+                      ? requestsLoading
+                      : context === 'transfers'
+                        ? transfersLoading
+                        : context === 'lentBorrowed'
+                          ? borrowedLoading
+                          : loading
+                  : false
               }
               refreshSignal={
                 context === 'incoming'

@@ -1,6 +1,6 @@
 // src/features/books/BrowseBooks.jsx
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, lazy, Suspense } from 'react';
 import {
   Container,
   Typography,
@@ -21,8 +21,9 @@ import RefreshIconButton from '@/commonComponents/RefreshIconButton';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import { useDebounce } from '../../hooks';
-import BookModal from './components/BookModal';
-import BookCard from './components/BookCard';
+const BookModal = lazy(() => import('./components/BookModal'));
+const BookCard = lazy(() => import('./components/BookCard'));
+import BookCardSkeleton from './components/BookCardSkeleton';
 
 import { useAuth } from '../../contexts/hooks/useAuth';
 import { logError } from '@/utilities/logger';
@@ -193,7 +194,17 @@ export default function BrowseBooks() {
       </Stack>
 
       {loading ? (
-        <Typography>Loading books...</Typography>
+        <Grid container spacing={2} mb={4}>
+          {[...Array(6)].map((_, i) => (
+            <Grid item xs={12} sm={6} md={4} key={i}>
+              <Fade in timeout={300}>
+                <Box>
+                  <BookCardSkeleton width={240} height={360} />
+                </Box>
+              </Fade>
+            </Grid>
+          ))}
+        </Grid>
       ) : filteredBooks.length === 0 ? (
         <Typography>No books match your search or filter.</Typography>
       ) : (
@@ -211,15 +222,17 @@ export default function BrowseBooks() {
                   <Grid item xs={12} sm={6} key={book.id}>
                     <Fade in timeout={400}>
                       <Box>
-                        <BookCard
-                          book={book}
-                          editable={true}
-                          isSaved={false}
-                          onClick={() => handleCardClick(book)}
-                          context="myBooks"
-                          onArchive={onArchiveWrapper}
-                          onDelete={onDeleteWrapper}
-                        />
+                        <Suspense fallback={<BookCardSkeleton width={240} height={360} />}>
+                          <BookCard
+                            book={book}
+                            editable={true}
+                            isSaved={false}
+                            onClick={() => handleCardClick(book)}
+                            context="myBooks"
+                            onArchive={onArchiveWrapper}
+                            onDelete={onDeleteWrapper}
+                          />
+                        </Suspense>
                       </Box>
                     </Fade>
                   </Grid>
@@ -240,15 +253,17 @@ export default function BrowseBooks() {
               <Grid item xs={12} sm={6} key={book.id}>
                 <Fade in timeout={400}>
                   <Box>
-                    <BookCard
-                      book={book}
-                      editable={true}
-                      isSaved={book.is_saved}
-                      onClick={() => handleCardClick(book)}
-                      context="browse"
-                      onToggleSave={handleToggleSave}
-                      onRequest={handleRequestBook}
-                    />
+                    <Suspense fallback={<BookCardSkeleton width={240} height={360} />}>
+                      <BookCard
+                        book={book}
+                        editable={true}
+                        isSaved={book.is_saved}
+                        onClick={() => handleCardClick(book)}
+                        context="browse"
+                        onToggleSave={handleToggleSave}
+                        onRequest={handleRequestBook}
+                      />
+                    </Suspense>
                   </Box>
                 </Fade>
               </Grid>
@@ -258,7 +273,9 @@ export default function BrowseBooks() {
       )}
 
       {selectedBook && (
-        <BookModal open={isModalOpen} onClose={closeModal} book={selectedBook} context="browse" />
+        <Suspense fallback={null}>
+          <BookModal open={isModalOpen} onClose={closeModal} book={selectedBook} context="browse" />
+        </Suspense>
       )}
     </Container>
   );
