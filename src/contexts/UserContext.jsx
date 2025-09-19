@@ -1,6 +1,6 @@
 // src/contexts/UserContext.jsx
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { userContext } from './userContextObject';
 
 import { useAuth } from './hooks/useAuth';
@@ -25,53 +25,60 @@ export const UserProvider = ({ children }) => {
   const [transfers, setTransfers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchUserProfile = async () => {
+  const fetchUserProfile = useCallback(async () => {
     const name = await getCurrentUserFirstName(user);
     setFirstName(name || '');
-  };
+  }, [user]);
 
-  const fetchCompleteUserProfile = async () => {
+  const fetchCompleteUserProfile = useCallback(async () => {
     const profile = await getUserProfile(user);
 
     setUserProfile(profile || []);
-  };
+  }, [user]);
 
-  const fetchUserReviews = async () => {
+  const fetchUserReviews = useCallback(async () => {
     const reviews = await getUserReviews(user);
     setUserReviews(reviews);
-  };
+  }, [user]);
 
-  const fetchMyBooks = async () => {
+  const fetchMyBooks = useCallback(async () => {
     const books = await getMyBooks(user);
     setMyBooks(books);
-  };
+  }, [user]);
 
-  const fetchRequests = async (user) => {
+  const fetchRequests = useCallback(async () => {
     const reqs = await getRequestsForBooksOfUsers(user);
     setRequests(reqs);
-  };
+  }, [user]);
 
-  const fetchTransfers = async () => {
+  const fetchTransfers = useCallback(async () => {
     const txns = await getTransfers();
     setTransfers(txns);
-  };
+  }, []);
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     setLoading(true);
     await Promise.all([
       fetchUserProfile(),
       fetchUserReviews(),
       fetchMyBooks(),
-      fetchRequests(user),
+      fetchRequests(),
       fetchTransfers(),
       fetchCompleteUserProfile(),
     ]);
     setLoading(false);
-  };
+  }, [
+    fetchUserProfile,
+    fetchUserReviews,
+    fetchMyBooks,
+    fetchRequests,
+    fetchTransfers,
+    fetchCompleteUserProfile,
+  ]);
 
   useEffect(() => {
     if (user?.id) refresh();
-  }, [user?.id]);
+  }, [user?.id, refresh]);
 
   return (
     <userContext.Provider

@@ -1,9 +1,9 @@
 // src/features/dashboard/Dashboard.jsx
 
-import { lazy, Suspense, useEffect, useState, useCallback } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Container, Typography, Paper, Box, Stack, CircularProgress } from '@mui/material';
 import { alpha } from '@mui/material/styles';
-import RefreshIconButton from '@/commonComponents/RefreshIconButton';
+import RefreshIconButton from '@/components/common/RefreshIconButton';
 
 import BookCarouselSection from '@/features/dashboard/components/BookCarouselSection';
 import MyBooksSection from '@/features/dashboard/components/MyBooksSection';
@@ -15,33 +15,12 @@ const BookModal = lazy(() => import('@/features/books/components/BookModal'));
 import { DASHBOARD_SECTIONS } from '../../constants/constants';
 import { useUser } from '../../contexts/hooks/useUser';
 import { useBookContext } from '../../contexts/hooks/useBookContext';
-import PageLoader from '../../commonComponents/PageLoader';
-import {
-  getCurrentUserFirstName,
-  getSavedBooks,
-  getTransfers,
-  getUserReviews,
-  getMyLoans,
-} from '../../services';
-import { getRequestsForUser } from '../../utilities';
+import PageLoader from '@/components/common/PageLoader';
 import useDashboardHandlers from './hooks/useDashboardHandlers';
-import { logError } from '@/utilities/logger';
+import useDashboardData from './hooks/useDashboardData';
 
 export default function Dashboard() {
   const { user, firstName: firstNameFromContext } = useUser();
-
-  const [userFirstName, setUserFirstName] = useState(
-    () => firstNameFromContext || user?.first_name || 'Friend',
-  );
-  const [requests, setRequests] = useState({ incoming: [], outgoing: [] });
-  const [transfers, setTransfers] = useState([]);
-  const [savedBooks, setSavedBooks] = useState([]);
-  const [savedLoading, setSavedLoading] = useState(true);
-  const [reviews, setReviews] = useState({ given: [], received: [] });
-  const [borrowedBooks, setBorrowedBooks] = useState([]);
-  const [borrowedLoading, setBorrowedLoading] = useState(true);
-  const [requestsLoading, setRequestsLoading] = useState(true);
-  const [transfersLoading, setTransfersLoading] = useState(true);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedBook, setSelectedBook] = useState(null);
@@ -64,133 +43,37 @@ export default function Dashboard() {
     sendBookRequest,
     loading,
   } = useBookContext();
-
-  const [initialLoaded, setInitialLoaded] = useState(false);
-
-  const refreshRequests = useCallback(async () => {
-    setRequestsLoading(true);
-    const req = await getRequestsForUser(user);
-    setRequests(req);
-    setRequestsLoading(false);
-  }, [user?.id]);
-
-  const refreshTransfers = useCallback(async () => {
-    setTransfersLoading(true);
-    const trf = await getTransfers();
-    setTransfers(trf);
-    setTransfersLoading(false);
-  }, []);
-
-  const refreshSaved = useCallback(async () => {
-    setSavedLoading(true);
-    const saved = await getSavedBooks(user);
-    setSavedBooks(saved);
-    setSavedLoading(false);
-  }, [user?.id]);
-
-  const refreshBorrowed = useCallback(async () => {
-    setBorrowedLoading(true);
-    const myLoans = await getMyLoans({ role: 'borrower' });
-    const borrowed = (myLoans || []).map((l) => ({
-      id: l.book?.id,
-      user_id: l.book?.user_id,
-      status: 'lent',
-      condition: l.book?.condition,
-      created_at: l.book?.created_at,
-      catalog: l.book?.books_catalog,
-      archived: false,
-      loan_id: l.id,
-      loan_due_date: l.due_date,
-    }));
-    setBorrowedBooks(borrowed);
-    setBorrowedLoading(false);
-  }, []);
-
-  const fetchData = useCallback(async () => {
-    try {
-      const [req, trf, saved, rev, name, myLoans] = await Promise.all([
-        getRequestsForUser(user),
-        getTransfers(),
-        getSavedBooks(user),
-        getUserReviews(user),
-        getCurrentUserFirstName(user),
-        getMyLoans({ role: 'borrower' }),
-      ]);
-      setRequests(req);
-      setTransfers(trf);
-      setSavedBooks(saved);
-      setReviews(rev);
-      setUserFirstName(name);
-      // Normalize loans -> book-like
-      const borrowed = (myLoans || []).map((l) => ({
-        id: l.book?.id,
-        user_id: l.book?.user_id,
-        status: 'lent',
-        condition: l.book?.condition,
-        created_at: l.book?.created_at,
-        catalog: l.book?.books_catalog,
-        archived: false,
-        loan_id: l.id,
-        loan_due_date: l.due_date,
-      }));
-      setBorrowedBooks(borrowed);
-      setRequestsLoading(false);
-      setTransfersLoading(false);
-      setSavedLoading(false);
-      setBorrowedLoading(false);
-    } catch (e) {
-      logError('Dashboard.fetchData failed', e, { userId: user?.id });
-    } finally {
-      setInitialLoaded(true);
-    }
-  }, [user?.id, refreshBooks]);
-
-  // Global refresh button animation state
-  const [globalRefreshing, setGlobalRefreshing] = useState(false);
-  const handleGlobalRefresh = async () => {
-    setGlobalRefreshing(true);
-    try {
-      await fetchData();
-    } finally {
-      setGlobalRefreshing(false);
-    }
-  };
-
-  // Auto-refresh relevant sections (requests, transfers, borrowed) after initial load
-  const [incomingSignal, setIncomingSignal] = useState(0);
-  const [outgoingSignal, setOutgoingSignal] = useState(0);
-  const [transfersSignal, setTransfersSignal] = useState(0);
-  const [borrowedSignal, setBorrowedSignal] = useState(0);
-  useEffect(() => {
-    if (!initialLoaded) return;
-    const tick = () => {
-      if (document.visibilityState !== 'visible') return;
-      setIncomingSignal((s) => s + 1);
-      setOutgoingSignal((s) => s + 1);
-      setTransfersSignal((s) => s + 1);
-      setBorrowedSignal((s) => s + 1);
-    };
-    const id = setInterval(tick, 10000);
-    document.addEventListener('visibilitychange', tick);
-    return () => {
-      clearInterval(id);
-      document.removeEventListener('visibilitychange', tick);
-    };
-  }, [initialLoaded]);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-  useEffect(() => {
-    if (!initialLoaded && loading === false) {
-      setInitialLoaded(true);
-    }
-  }, [loading, initialLoaded]);
-  useEffect(() => {
-    if (firstNameFromContext || user?.first_name) {
-      setUserFirstName(firstNameFromContext || user.first_name);
-    }
-  }, [firstNameFromContext, user?.first_name]);
+  // Consolidated dashboard queries and polling; keeps component lean.
+  const {
+    userFirstName,
+    requests,
+    transfers,
+    savedBooks,
+    savedLoading,
+    reviews,
+    borrowedBooks,
+    borrowedLoading,
+    requestsLoading,
+    transfersLoading,
+    refreshRequests,
+    refreshTransfers,
+    refreshSaved,
+    refreshBorrowed,
+    initialLoaded,
+    globalRefreshing,
+    handleGlobalRefresh,
+    incomingSignal,
+    outgoingSignal,
+    transfersSignal,
+    borrowedSignal,
+    setSavedBooks,
+    refreshAll,
+  } = useDashboardData({
+    user,
+    firstNameFromContext,
+    refreshBooks,
+    bookLoading: loading,
+  });
 
   const handleBookClick = (book, context = 'myBooks') => {
     setSelectedBook(book);
@@ -350,7 +233,7 @@ export default function Dashboard() {
               status={selectedBook.status}
               onArchive={() => handleArchiveBook(selectedBook)}
               onDelete={() => handleDeleteBook(selectedBook)}
-              onActionComplete={fetchData}
+              onActionComplete={refreshAll}
             />
           </Suspense>
         )}

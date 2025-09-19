@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState, lazy, Suspense } from 'react';
 import { Box, Typography, Divider, Stack } from '@mui/material';
-import RefreshIconButton from '@/commonComponents/RefreshIconButton';
+import RefreshIconButton from '@/components/common/RefreshIconButton';
 const BookCard = lazy(() => import('@/features/books/components/BookCard'));
 import BookCardSkeleton from '@/features/books/components/BookCardSkeleton';
 

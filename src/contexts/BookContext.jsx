@@ -90,7 +90,7 @@ export const BookProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [user?.id]);
+  }, [user]);
 
   const refreshSavedBooks = useCallback(async () => {
     try {
@@ -113,11 +113,22 @@ export const BookProvider = ({ children }) => {
         const shouldSave = !book.is_saved;
         await toggleSaveBook(book.id, shouldSave, book.catalog.id, user);
         updateBookSaveStatus(book.id, shouldSave);
+        // Keep savedBooks list in sync so callers do not need an extra refetch.
+        setSavedBooks((prev) => {
+          if (shouldSave) {
+            const exists = prev.some((item) => item.id === book.id);
+            if (exists) {
+              return prev.map((item) => (item.id === book.id ? { ...item, is_saved: true } : item));
+            }
+            return [{ ...book, is_saved: true }, ...prev];
+          }
+          return prev.filter((item) => item.id !== book.id);
+        });
       } catch (err) {
         console.error('Failed to toggle save:', err);
       }
     },
-    [updateBookSaveStatus, user],
+    [updateBookSaveStatus, user, setSavedBooks],
   );
 
   const addBookById = useCallback(
@@ -137,7 +148,7 @@ export const BookProvider = ({ children }) => {
         await refreshBooks();
       }
     },
-    [user?.id, refreshBooks],
+    [user, refreshBooks],
   );
 
   const sendBookRequest = useCallback(
@@ -215,7 +226,7 @@ export const BookProvider = ({ children }) => {
       refreshBooks();
       refreshSavedBooks();
     }
-  }, [userId]);
+  }, [userId, refreshBooks, refreshSavedBooks]);
 
   useEffect(() => {
     const onRealtime = (payload) => {

@@ -1,65 +1,132 @@
 .
+├── README.md
+├── apps
+│   └── frontend
+├── current_table_schema
 ├── eslint.config.js
 ├── index.html
 ├── package-lock.json
 ├── package.json
 ├── public
-│   ├── favicon.png
-│   └── leaflet-preview.png
-├── README.md
+│   ├── favicon.png
+│   └── leaflet-preview.png
 ├── src
-│   ├── api
-│   ├── App.jsx
-│   ├── assets
-│   │   └── images
-│   │       └── leaflet-logo-full.png
-│   ├── components
-│   │   └── Common
-│   │       ├── Layout.jsx
-│   │       ├── PageLoader.jsx
-│   │       └── PrivateRoute.jsx
-│   ├── constants
-│   │   └── constants.jsx
-│   ├── contexts
-│   │   ├── AuthContext.jsx
-│   │   ├── BookContext.jsx
-│   │   └── UserContext.jsx
-│   ├── features
-│   │   ├── auth
-│   │   │   ├── ForgotPassword.jsx
-│   │   │   ├── Login.jsx
-│   │   │   └── Signup.jsx
-│   │   ├── books
-│   │   │   ├── BrowseBooks.jsx
-│   │   │   └── components
-│   │   │       ├── AddBookModal.jsx
-│   │   │       ├── BookCard.jsx
-│   │   │       └── BookModal.jsx
-│   │   ├── dashboard
-│   │   │   ├── components
-│   │   │   │   ├── BookCarouselSection.jsx
-│   │   │   │   ├── FeedbackSection.jsx
-│   │   │   │   └── MyBooksSection.jsx
-│   │   │   └── Dashboard.jsx
-│   │   ├── feedback
-│   │   │   └── Feedback.jsx
-│   │   └── pageNotFound
-│   │       └── NotFound.jsx
-│   ├── hooks
-│   │   ├── useDebounce.js
-│   │   ├── useSession.js
-│   │   └── useSessionTracker.jsx
-│   ├── main.jsx
-│   ├── services
-│   │   ├── authService.js
-│   │   ├── bookService.js
-│   │   ├── feedbackService.js
-│   │   ├── supabaseClient.js
-│   │   └── userService.js
-│   └── theme
-│       └── theme.js
-├── structure.txt
+│   ├── App.jsx
+│   ├── assets
+│   │   └── images
+│   │       └── leaflet-logo-full.png
+│   ├── components
+│   │   ├── common
+│   │   │   ├── BusyFallback.jsx
+│   │   │   ├── DelayedLoader.jsx
+│   │   │   ├── Layout.jsx
+│   │   │   ├── PageLoader.jsx
+│   │   │   ├── PrivateRoute.jsx
+│   │   │   ├── RefreshIconButton.jsx
+│   │   │   ├── RouteSpinner.jsx
+│   │   │   └── TopProgressBar.jsx
+│   │   └── providers
+│   │       ├── ErrorBoundary.jsx
+│   │       ├── RouteLoadProvider.jsx
+│   │       └── SnackbarProvider.jsx
+│   ├── constants
+│   │   ├── actionConfigs.js
+│   │   ├── actionStyles.js
+│   │   ├── bookForm.js
+│   │   ├── constants.jsx
+│   │   ├── dashboard.js
+│   │   └── quotes.js
+│   ├── contexts
+│   │   ├── AuthContext.jsx
+│   │   ├── BookContext.jsx
+│   │   ├── BookFormContext.jsx
+│   │   ├── UserContext.jsx
+│   │   ├── authContextObject.js
+│   │   ├── bookContextObject.js
+│   │   ├── bookFormContextObject.js
+│   │   ├── hooks
+│   │   │   ├── useAuth.js
+│   │   │   ├── useBookContext.js
+│   │   │   ├── useBookForm.js
+│   │   │   └── useUser.js
+│   │   └── userContextObject.js
+│   ├── features
+│   │   ├── auth
+│   │   │   ├── ForgotPassword.jsx
+│   │   │   ├── Login.jsx
+│   │   │   └── Signup.jsx
+│   │   ├── books
+│   │   │   ├── BrowseBooks.jsx
+│   │   │   └── components
+│   │   │       ├── AddBookModal.jsx
+│   │   │       ├── BookBadges.jsx
+│   │   │       ├── BookCard.jsx
+│   │   │       ├── BookCardActions.jsx
+│   │   │       ├── BookCardSkeleton.jsx
+│   │   │       ├── BookCover.jsx
+│   │   │       ├── BookModal.jsx
+│   │   │       └── ReviewsSection.jsx
+│   │   ├── dashboard
+│   │   │   ├── Dashboard.jsx
+│   │   │   ├── components
+│   │   │   │   ├── BookCarouselSection.jsx
+│   │   │   │   ├── FeedbackSection.jsx
+│   │   │   │   └── MyBooksSection.jsx
+│   │   │   └── hooks
+│   │   │       ├── useDashboardData.js
+│   │   │       └── useDashboardHandlers.js
+│   │   ├── feedback
+│   │   │   └── Feedback.jsx
+│   │   ├── notFound
+│   │   │   └── NotFound.jsx
+│   │   └── profile
+│   │       └── ProfileSetup.jsx
+│   ├── hooks
+│   │   ├── index.js
+│   │   ├── useAvatarDrop.js
+│   │   ├── useBookCoverUpload.js
+│   │   ├── useBookSubscription.js
+│   │   ├── useDebounce.js
+│   │   ├── useImageDrop.js
+│   │   ├── useProfileSave.js
+│   │   ├── useSession.js
+│   │   └── useSessionTracker.js
+│   ├── main.jsx
+│   ├── services
+│   │   ├── authService.js
+│   │   ├── bookCatalogService.js
+│   │   ├── bookLoanService.js
+│   │   ├── bookRequestService.js
+│   │   ├── bookReviewService.js
+│   │   ├── bookService.js
+│   │   ├── feedbackService.js
+│   │   ├── index.js
+│   │   ├── profileService.js
+│   │   ├── realtimeService.js
+│   │   ├── returnRequestService.js
+│   │   ├── savedBookService.js
+│   │   ├── supabaseClient.js
+│   │   ├── transferService.js
+│   │   └── userReviewService.js
+│   ├── setupGlobalErrorHandlers.js
+│   ├── theme
+│   │   ├── ThemeModeProvider.jsx
+│   │   ├── colorModeContext.js
+│   │   ├── modalStyles.js
+│   │   ├── theme.js
+│   │   ├── tokens.js
+│   │   └── useColorMode.js
+│   └── utilities
+│       ├── addBookToCatalogAndStock.js
+│       ├── formatDisplayName.js
+│       ├── getActiveBooksForBrowse.js
+│       ├── getRequestsForBooksOfOwners.js
+│       ├── getRequestsForUser.js
+│       ├── index.js
+│       ├── logger.js
+│       ├── processLogin.js
+│       ├── processResetPassword.js
+│       ├── processSignup.js
+│       └── validateAndSubmitBookForm.js
 ├── vercel.json
 └── vite.config.js
-
-21 directories, 42 files

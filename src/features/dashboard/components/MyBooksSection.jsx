@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Box, Typography, Button, Collapse, Chip } from '@mui/material';
-import RefreshIconButton from '@/commonComponents/RefreshIconButton';
+import RefreshIconButton from '@/components/common/RefreshIconButton';
 import BookCarouselSection from './BookCarouselSection';
 
 export default function MyBooksSection({

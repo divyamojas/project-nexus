@@ -20,7 +20,7 @@ import { useAuth } from '../../contexts/hooks/useAuth';
 import { processSignup } from '../../utilities';
 
 export default function Signup() {
-  const { signup, isAuthenticated } = useAuth();
+  const { signup } = useAuth();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');

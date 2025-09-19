@@ -21,7 +21,9 @@ export class ErrorBoundary extends React.Component {
   handleReload = () => {
     try {
       window.location.reload();
-    } catch (_) {}
+    } catch {
+      /* ignored */
+    }
   };
 
   render() {

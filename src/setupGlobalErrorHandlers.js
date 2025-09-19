@@ -13,12 +13,16 @@ export default function setupGlobalErrorHandlers() {
     try {
       const { message, filename, lineno, colno, error } = event;
       logError('Uncaught error', error || message, { filename, lineno, colno });
-    } catch (_) {}
+    } catch {
+      /* logging should never throw, but swallow just in case */
+    }
   });
 
   window.addEventListener('unhandledrejection', (event) => {
     try {
       logError('Unhandled promise rejection', event.reason, {});
-    } catch (_) {}
+    } catch {
+      /* ignored */
+    }
   });
 }

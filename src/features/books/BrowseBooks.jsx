@@ -1,6 +1,6 @@
 // src/features/books/BrowseBooks.jsx
 
-import { useEffect, useState, useRef, lazy, Suspense } from 'react';
+import { useEffect, useState, useRef, lazy, Suspense, useCallback } from 'react';
 import {
   Container,
   Typography,
@@ -18,7 +18,7 @@ import {
   Divider,
   Skeleton,
 } from '@mui/material';
-import RefreshIconButton from '@/commonComponents/RefreshIconButton';
+import RefreshIconButton from '@/components/common/RefreshIconButton';
 import { alpha } from '@mui/material/styles';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
@@ -53,7 +53,7 @@ export default function BrowseBooks() {
   const [refreshing, setRefreshing] = useState(false);
   const refreshingRef = useRef(false);
 
-  const doRefresh = async () => {
+  const doRefresh = useCallback(async () => {
     if (refreshingRef.current) return;
     refreshingRef.current = true;
     setRefreshing(true);
@@ -63,7 +63,7 @@ export default function BrowseBooks() {
       setRefreshing(false);
       refreshingRef.current = false;
     }
-  };
+  }, [refreshBooks]);
 
   // sync filters to context
   useEffect(() => {
@@ -91,7 +91,7 @@ export default function BrowseBooks() {
       document.removeEventListener('visibilitychange', tick);
       window.removeEventListener('books:added', onAdded);
     };
-  }, [refreshBooks]);
+  }, [doRefresh]);
 
   // Mark initial load complete to prevent skeleton flashing on auto refreshes
   useEffect(() => {
@@ -114,8 +114,6 @@ export default function BrowseBooks() {
   const handleToggleSave = async (book) => {
     try {
       await toggleBookSaveStatus(book);
-      // ensure browse reflects new saved state
-      await doRefresh();
     } catch (e) {
       logError('BrowseBooks.handleToggleSave failed', e, { bookId: book?.id });
       showToast('Failed to update saved state', { severity: 'error' });

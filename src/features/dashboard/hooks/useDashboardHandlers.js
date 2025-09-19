@@ -20,6 +20,8 @@ export default function useDashboardHandlers({
   sendBookRequest,
 }) {
   const { showToast } = useSnackbar();
+  const { refreshSaved, refreshRequests, refreshTransfers, refreshBorrowed, refreshBooks } =
+    refreshers || {};
   const onToggleSave = useCallback(
     async (book) => {
       try {
@@ -28,13 +30,13 @@ export default function useDashboardHandlers({
         setSavedBooks?.((prev) => prev.filter((b) => b.id !== book.id));
         updateBookSaveStatus?.(book.id, false);
         showToast('Removed from Saved', { severity: 'info' });
-        refreshers?.refreshSaved?.();
+        refreshSaved?.();
       } catch (e) {
         logError('DashboardHandlers.onToggleSave failed', e, { bookId: book?.id });
         showToast('Failed to update saved status', { severity: 'error' });
       }
     },
-    [user, showToast, setSavedBooks, updateBookSaveStatus, refreshers?.refreshSaved],
+    [user, showToast, setSavedBooks, updateBookSaveStatus, refreshSaved],
   );
 
   const onRequestReturn = useCallback(
@@ -42,13 +44,13 @@ export default function useDashboardHandlers({
       try {
         await requestBookReturn(book.id, user);
         showToast('Return requested', { severity: 'success' });
-        refreshers?.refreshBorrowed?.();
+        refreshBorrowed?.();
       } catch (e) {
         logError('DashboardHandlers.onRequestReturn failed', e, { bookId: book?.id });
         showToast('Failed to request return', { severity: 'error' });
       }
     },
-    [user, showToast, refreshers?.refreshBorrowed],
+    [user, showToast, refreshBorrowed],
   );
 
   const onAcceptRequest = useCallback(
@@ -56,14 +58,14 @@ export default function useDashboardHandlers({
       try {
         await updateRequestStatus(book.request_id, 'accepted');
         showToast('Request accepted', { severity: 'success' });
-        refreshers?.refreshRequests?.();
-        refreshers?.refreshBooks?.();
+        refreshRequests?.();
+        refreshBooks?.();
       } catch (e) {
         logError('DashboardHandlers.onAcceptRequest failed', e, { requestId: book?.request_id });
         showToast('Failed to accept request', { severity: 'error' });
       }
     },
-    [showToast, refreshers?.refreshRequests, refreshers?.refreshBooks],
+    [showToast, refreshRequests, refreshBooks],
   );
 
   const onRejectRequest = useCallback(
@@ -71,13 +73,13 @@ export default function useDashboardHandlers({
       try {
         await updateRequestStatus(book.request_id, 'rejected');
         showToast('Request rejected', { severity: 'warning' });
-        refreshers?.refreshRequests?.();
+        refreshRequests?.();
       } catch (e) {
         logError('DashboardHandlers.onRejectRequest failed', e, { requestId: book?.request_id });
         showToast('Failed to reject request', { severity: 'error' });
       }
     },
-    [showToast, refreshers?.refreshRequests],
+    [showToast, refreshRequests],
   );
 
   const onCancelRequest = useCallback(
@@ -85,13 +87,13 @@ export default function useDashboardHandlers({
       try {
         await updateRequestStatus(book.request_id, 'cancelled');
         showToast('Request cancelled', { severity: 'info' });
-        refreshers?.refreshRequests?.();
+        refreshRequests?.();
       } catch (e) {
         logError('DashboardHandlers.onCancelRequest failed', e, { requestId: book?.request_id });
         showToast('Failed to cancel request', { severity: 'error' });
       }
     },
-    [showToast, refreshers?.refreshRequests],
+    [showToast, refreshRequests],
   );
 
   const onRequestBook = useCallback(
@@ -117,8 +119,8 @@ export default function useDashboardHandlers({
               : b,
           ),
         );
-        refreshers?.refreshRequests?.();
-        refreshers?.refreshSaved?.();
+        refreshRequests?.();
+        refreshSaved?.();
       } catch (e) {
         logError('DashboardHandlers.onRequestBook failed', e, {
           bookId: book?.id || book?.book_id,
@@ -126,13 +128,7 @@ export default function useDashboardHandlers({
         showToast('Failed to send request', { severity: 'error' });
       }
     },
-    [
-      sendBookRequest,
-      showToast,
-      refreshers?.refreshRequests,
-      refreshers?.refreshSaved,
-      setSavedBooks,
-    ],
+    [sendBookRequest, showToast, refreshRequests, refreshSaved, setSavedBooks],
   );
 
   const onCompleteTransfer = useCallback(
@@ -141,8 +137,8 @@ export default function useDashboardHandlers({
       try {
         await completeTransfer({ transfer_id: book.transfer_id });
         showToast('Transfer completed', { severity: 'success' });
-        refreshers?.refreshTransfers?.();
-        refreshers?.refreshBooks?.();
+        refreshTransfers?.();
+        refreshBooks?.();
       } catch (e) {
         logError('DashboardHandlers.onCompleteTransfer failed', e, {
           transferId: book?.transfer_id,
@@ -150,7 +146,7 @@ export default function useDashboardHandlers({
         showToast('Failed to complete transfer', { severity: 'error' });
       }
     },
-    [showToast, refreshers?.refreshTransfers, refreshers?.refreshBooks],
+    [showToast, refreshTransfers, refreshBooks],
   );
 
   const onApproveReturn = useCallback(
@@ -159,9 +155,9 @@ export default function useDashboardHandlers({
       try {
         await approveReturnRequest(book.return_request_id);
         showToast('Return approved', { severity: 'success' });
-        refreshers?.refreshRequests?.();
-        refreshers?.refreshBorrowed?.();
-        refreshers?.refreshBooks?.();
+        refreshRequests?.();
+        refreshBorrowed?.();
+        refreshBooks?.();
       } catch (e) {
         logError('DashboardHandlers.onApproveReturn failed', e, {
           returnRequestId: book?.return_request_id,
@@ -169,7 +165,7 @@ export default function useDashboardHandlers({
         showToast('Failed to approve return', { severity: 'error' });
       }
     },
-    [showToast, refreshers?.refreshRequests, refreshers?.refreshBorrowed, refreshers?.refreshBooks],
+    [showToast, refreshRequests, refreshBorrowed, refreshBooks],
   );
 
   const onArchive = useCallback(
