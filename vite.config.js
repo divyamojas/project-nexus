@@ -19,4 +19,12 @@ export default defineConfig({
     sourcemap: false,
     chunkSizeWarningLimit: 700,
   },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: './src/test/setupTests.js',
+    coverage: {
+      reporter: ['text', 'html'],
+    },
+  },
 });

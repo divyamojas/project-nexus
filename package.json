@@ -9,7 +9,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "prepare": "husky install",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "lint-staged": {
     "**/*.{js,jsx}": [
@@ -34,8 +36,13 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.25.1",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/jest": "^29.5.12",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
+    "@types/testing-library__jest-dom": "^6.0.0",
     "@vitejs/plugin-react": "^4.4.1",
     "eslint": "^9.25.1",
     "eslint-plugin-react": "^7.37.5",
@@ -43,9 +50,11 @@
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^16.0.0",
     "husky": "^9.1.7",
+    "jsdom": "^27.0.0",
     "lint-staged": "^15.5.1",
     "prettier": "^3.5.3",
-    "vite": "^6.3.1"
+    "vite": "^6.3.1",
+    "vitest": "^2.1.5"
   },
   "engines": {
     "node": ">=18"
