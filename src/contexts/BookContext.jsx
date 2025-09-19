@@ -79,6 +79,11 @@ export const BookProvider = ({ children }) => {
   }, [books, filters, userId]);
 
   const refreshBooks = useCallback(async () => {
+    if (!user?.id) {
+      setBooks([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       const data = await getBooks({ includeArchived: true, user });
@@ -93,6 +98,10 @@ export const BookProvider = ({ children }) => {
   }, [user]);
 
   const refreshSavedBooks = useCallback(async () => {
+    if (!user?.id) {
+      setSavedBooks([]);
+      return;
+    }
     try {
       const data = await getSavedBooks(user);
       setSavedBooks(data);
@@ -109,6 +118,7 @@ export const BookProvider = ({ children }) => {
 
   const toggleBookSaveStatus = useCallback(
     async (book) => {
+      if (!user?.id || !book?.id || !book?.catalog?.id) return;
       try {
         const shouldSave = !book.is_saved;
         await toggleSaveBook(book.id, shouldSave, book.catalog.id, user);
@@ -153,7 +163,8 @@ export const BookProvider = ({ children }) => {
 
   const sendBookRequest = useCallback(
     async (book, message = 'Hi! I would like to borrow this book.') => {
-      if (!book?.id) return null;
+      if (!book?.id || !user?.id) return null;
+      if (book.user_id && book.user_id.toLowerCase() === user.id.toLowerCase()) return null;
       try {
         const response = await requestBorrowBook(book, message, user);
         const requestRecord = Array.isArray(response) ? response[0] : response;
@@ -195,6 +206,7 @@ export const BookProvider = ({ children }) => {
 
   const handleDeleteBook = useCallback(
     async (book) => {
+      if (!userId || book?.user_id?.toLowerCase() !== userId.toLowerCase()) return;
       const ok = await deleteBook(book.id);
       if (ok) {
         // Remove only the deleted book to avoid full refetch
@@ -203,11 +215,12 @@ export const BookProvider = ({ children }) => {
         await refreshBooks();
       }
     },
-    [refreshBooks],
+    [refreshBooks, userId],
   );
 
   const handleArchiveBook = useCallback(
     async (book) => {
+      if (!userId || book?.user_id?.toLowerCase() !== userId.toLowerCase()) return;
       const ok = await archiveBook(book.id, !book.archived);
       if (ok) {
         // Toggle archived flag locally
@@ -218,7 +231,7 @@ export const BookProvider = ({ children }) => {
         await refreshBooks();
       }
     },
-    [refreshBooks],
+    [refreshBooks, userId],
   );
 
   useEffect(() => {

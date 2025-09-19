@@ -35,6 +35,11 @@ export default function useDashboardData({
   const [initialLoaded, setInitialLoaded] = useState(false);
 
   const refreshRequests = useCallback(async () => {
+    if (!user?.id) {
+      setRequests({ incoming: [], outgoing: [] });
+      setRequestsLoading(false);
+      return;
+    }
     setRequestsLoading(true);
     try {
       const req = await getRequestsForUser(user);
@@ -55,6 +60,11 @@ export default function useDashboardData({
   }, []);
 
   const refreshSaved = useCallback(async () => {
+    if (!user?.id) {
+      setSavedBooks([]);
+      setSavedLoading(false);
+      return;
+    }
     setSavedLoading(true);
     try {
       const saved = await getSavedBooks(user);
@@ -86,6 +96,10 @@ export default function useDashboardData({
   }, []);
 
   const fetchData = useCallback(async () => {
+    if (!user?.id) {
+      setInitialLoaded(true);
+      return;
+    }
     try {
       const [req, trf, saved, rev, name, myLoans] = await Promise.all([
         getRequestsForUser(user),
