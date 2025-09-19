@@ -1,7 +1,8 @@
 // src/features/dashboard/Dashboard.jsx
 
 import { lazy, Suspense, useEffect, useState, useCallback } from 'react';
-import { Container, Typography, Paper, Box } from '@mui/material';
+import { Container, Typography, Paper, Box, Stack, CircularProgress } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import RefreshIconButton from '@/commonComponents/RefreshIconButton';
 
 import BookCarouselSection from '@/features/dashboard/components/BookCarouselSection';
@@ -47,6 +48,12 @@ export default function Dashboard() {
   const [modalContext, setModalContext] = useState('');
   const [showArchived, setShowArchived] = useState(false);
 
+  useEffect(() => {
+    // Warm up modal chunks so opening later doesn't suspend the whole dashboard
+    void import('@/features/books/components/BookModal');
+    void import('@/features/books/components/AddBookModal');
+  }, []);
+
   const {
     categorizedBooks,
     handleDeleteBook,
@@ -54,6 +61,7 @@ export default function Dashboard() {
     refreshBooks,
     updateBookSaveStatus,
     addBookById,
+    sendBookRequest,
     loading,
   } = useBookContext();
 
@@ -188,7 +196,6 @@ export default function Dashboard() {
     setSelectedBook(book);
     setModalContext(context);
   };
-  const handleCloseModal = () => setSelectedBook(null);
   const {
     onToggleSave: handleToggleSave,
     onRequestReturn: handleRequestReturn,
@@ -199,6 +206,7 @@ export default function Dashboard() {
     onApproveReturn: handleApproveReturn,
     onArchive: handleArchive,
     onDelete: handleDelete,
+    onRequestBook: handleRequestBook,
   } = useDashboardHandlers({
     user,
     refreshers: {
@@ -212,7 +220,12 @@ export default function Dashboard() {
     deleteBook: handleDeleteBook,
     updateBookSaveStatus,
     setSavedBooks,
+    sendBookRequest,
   });
+
+  const handleModalClose = () => {
+    setSelectedBook(null);
+  };
 
   const { lentBooks, archivedBooks, myActiveBooks } = categorizedBooks;
   const bookSections = DASHBOARD_SECTIONS({
@@ -272,6 +285,7 @@ export default function Dashboard() {
               onDelete={handleDelete}
               onArchive={handleArchive}
               onToggleSave={handleToggleSave}
+              onRequest={handleRequestBook}
               onRequestReturn={handleRequestReturn}
               onApproveReturn={handleApproveReturn}
               onAccept={handleAcceptRequest}
@@ -327,18 +341,72 @@ export default function Dashboard() {
         />
 
         {selectedBook && (
-          <BookModal
-            open={!!selectedBook}
-            onClose={handleCloseModal}
-            book={selectedBook}
-            context={modalContext}
-            status={selectedBook.status}
-            onArchive={() => handleArchiveBook(selectedBook)}
-            onDelete={() => handleDeleteBook(selectedBook)}
-            onActionComplete={fetchData}
-          />
+          <Suspense fallback={<ModalOverlay />}>
+            <BookModal
+              open={!!selectedBook}
+              onClose={handleModalClose}
+              book={selectedBook}
+              context={modalContext}
+              status={selectedBook.status}
+              onArchive={() => handleArchiveBook(selectedBook)}
+              onDelete={() => handleDeleteBook(selectedBook)}
+              onActionComplete={fetchData}
+            />
+          </Suspense>
         )}
       </Container>
     </Suspense>
   );
 }
+const ModalOverlay = () => (
+  <Box
+    sx={{
+      position: 'fixed',
+      inset: 0,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      pointerEvents: 'none',
+      zIndex: (theme) => theme.zIndex.modal + 1,
+      background: (theme) => `
+        linear-gradient(135deg, ${alpha(theme.palette.background.default, theme.palette.mode === 'dark' ? 0.75 : 0.5)}, ${alpha(theme.palette.background.default, theme.palette.mode === 'dark' ? 0.6 : 0.35)}),
+        radial-gradient(circle at 20% 20%, ${alpha(theme.palette.primary.main, 0.12)} 0%, transparent 45%),
+        radial-gradient(circle at 80% 80%, ${alpha(theme.palette.secondary.main, 0.14)} 0%, transparent 50%)
+      `,
+      backdropFilter: 'blur(6px)',
+    }}
+  >
+    <Stack
+      spacing={1.5}
+      alignItems="center"
+      sx={{
+        color: (theme) =>
+          theme.palette.mode === 'dark' ? theme.palette.grey[100] : theme.palette.text.primary,
+      }}
+    >
+      <Box
+        sx={(theme) => ({
+          width: 56,
+          height: 56,
+          borderRadius: '50%',
+          backgroundColor: theme.palette.background.paper,
+          boxShadow: '0 18px 40px rgba(15, 23, 42, 0.18)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          animation: 'modal-pulse 1.4s ease-in-out infinite',
+          '@keyframes modal-pulse': {
+            '0%': { transform: 'scale(0.94)', opacity: 0.65 },
+            '50%': { transform: 'scale(1)', opacity: 1 },
+            '100%': { transform: 'scale(0.94)', opacity: 0.65 },
+          },
+        })}
+      >
+        <CircularProgress size={24} thickness={4} color="inherit" />
+      </Box>
+      <Typography variant="body2" sx={{ color: 'inherit', letterSpacing: 0.3 }}>
+        Loading book details…
+      </Typography>
+    </Stack>
+  </Box>
+);

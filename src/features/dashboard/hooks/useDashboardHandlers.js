@@ -17,6 +17,7 @@ export default function useDashboardHandlers({
   deleteBook,
   updateBookSaveStatus,
   setSavedBooks,
+  sendBookRequest,
 }) {
   const { showToast } = useSnackbar();
   const onToggleSave = useCallback(
@@ -93,6 +94,47 @@ export default function useDashboardHandlers({
     [showToast, refreshers?.refreshRequests],
   );
 
+  const onRequestBook = useCallback(
+    async (book) => {
+      if (!sendBookRequest) return;
+      try {
+        const response = await sendBookRequest(book);
+        const requestRecord = Array.isArray(response) ? response[0] : response;
+        if (!requestRecord) {
+          showToast('Failed to send request', { severity: 'error' });
+          return;
+        }
+        showToast('Request sent', { severity: 'success' });
+        setSavedBooks?.((prev) =>
+          prev.map((b) =>
+            b.id === book.id
+              ? {
+                  ...b,
+                  request_status: requestRecord.status,
+                  requested_by: requestRecord.requested_by,
+                  request_id: requestRecord.id,
+                }
+              : b,
+          ),
+        );
+        refreshers?.refreshRequests?.();
+        refreshers?.refreshSaved?.();
+      } catch (e) {
+        logError('DashboardHandlers.onRequestBook failed', e, {
+          bookId: book?.id || book?.book_id,
+        });
+        showToast('Failed to send request', { severity: 'error' });
+      }
+    },
+    [
+      sendBookRequest,
+      showToast,
+      refreshers?.refreshRequests,
+      refreshers?.refreshSaved,
+      setSavedBooks,
+    ],
+  );
+
   const onCompleteTransfer = useCallback(
     async (book) => {
       if (!book?.transfer_id) return;
@@ -159,6 +201,7 @@ export default function useDashboardHandlers({
   );
 
   return {
+    onRequestBook,
     onToggleSave,
     onRequestReturn,
     onAcceptRequest,

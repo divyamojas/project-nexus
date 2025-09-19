@@ -407,6 +407,7 @@ export default function BookModal({
   };
 
   const isRequestPending = book.request_status === 'pending' && book.requested_by === user?.id;
+  const bodyMinHeight = { xs: 420, sm: 380 };
 
   return (
     <Dialog
@@ -414,6 +415,7 @@ export default function BookModal({
       onClose={onClose}
       fullWidth
       maxWidth="sm"
+      keepMounted
       slots={{ paper: motion.div }}
       slotProps={{
         paper: {
@@ -423,9 +425,15 @@ export default function BookModal({
             borderRadius: 18,
             boxShadow: `0 18px 44px ${alpha(t.palette.common.black, 0.18)}`,
             border: `1px solid ${alpha(t.palette.divider, 0.4)}`,
+            minHeight: { xs: 'auto', sm: 520 },
+            height: { sm: 520 },
+            maxHeight: { xs: 'calc(100% - 48px)', sm: 520 },
+            display: 'flex',
+            flexDirection: 'column',
           }),
         },
       }}
+      TransitionProps={{ timeout: { enter: 260, exit: 200 } }}
     >
       <DialogTitle
         sx={(t) => ({
@@ -461,13 +469,22 @@ export default function BookModal({
         sx={(t) => ({
           ...getModalContentSx(t),
           p: 0,
+          minHeight: bodyMinHeight,
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
           backgroundColor: alpha(
             t.palette.background.paper,
             t.palette.mode === 'dark' ? 0.92 : 0.98,
           ),
         })}
       >
-        <Stack direction={{ xs: 'column', sm: 'row' }} alignItems="stretch" spacing={0}>
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          alignItems="stretch"
+          spacing={0}
+          sx={{ height: '100%' }}
+        >
           <Box
             sx={(t) => ({
               width: { xs: '100%', sm: 240 },
@@ -476,6 +493,8 @@ export default function BookModal({
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
+              minHeight: bodyMinHeight,
+              height: '100%',
               backgroundColor: alpha(
                 t.palette.background.paper,
                 t.palette.mode === 'dark' ? 0.88 : 0.94,
@@ -505,13 +524,17 @@ export default function BookModal({
             sx={(t) => ({
               flex: 1,
               p: { xs: 2.5, sm: 3.5 },
+              minHeight: bodyMinHeight,
+              height: '100%',
               backgroundColor: alpha(
                 t.palette.background.paper,
                 t.palette.mode === 'dark' ? 0.96 : 1,
               ),
+              display: 'flex',
+              flexDirection: 'column',
             })}
           >
-            <Stack spacing={2.5}>
+            <Stack spacing={2.5} flex={1}>
               <Box>
                 <Typography variant="overline" color="text.secondary">
                   Details
@@ -549,12 +572,7 @@ export default function BookModal({
                 </Stack>
               </Box>
 
-              <Divider sx={(t) => ({ borderColor: alpha(t.palette.divider, 0.24) })} />
-
-              <Box>
-                <Typography variant="overline" color="text.secondary">
-                  Reviews
-                </Typography>
+              <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <ReviewsSection bookId={book.id} ownerId={book.user_id} user={user} />
               </Box>
             </Stack>
@@ -569,6 +587,7 @@ export default function BookModal({
           boxShadow: 'none',
           py: 2.25,
           px: { xs: 2, sm: 3 },
+          minHeight: 88,
         })}
       >
         <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>

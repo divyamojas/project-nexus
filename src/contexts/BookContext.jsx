@@ -142,15 +142,44 @@ export const BookProvider = ({ children }) => {
 
   const sendBookRequest = useCallback(
     async (book, message = 'Hi! I would like to borrow this book.') => {
+      if (!book?.id) return null;
       try {
-        await requestBorrowBook(book, message, user);
-        return true;
+        const response = await requestBorrowBook(book, message, user);
+        const requestRecord = Array.isArray(response) ? response[0] : response;
+        if (requestRecord) {
+          setBooks((prev) =>
+            prev.map((b) =>
+              b.id === book.id
+                ? {
+                    ...b,
+                    request_status: requestRecord.status,
+                    requested_by: requestRecord.requested_by,
+                    requested_to: requestRecord.requested_to,
+                    request_id: requestRecord.id,
+                  }
+                : b,
+            ),
+          );
+          setSavedBooks((prev) =>
+            prev.map((b) =>
+              b.id === book.id
+                ? {
+                    ...b,
+                    request_status: requestRecord.status,
+                    requested_by: requestRecord.requested_by,
+                    request_id: requestRecord.id,
+                  }
+                : b,
+            ),
+          );
+        }
+        return requestRecord || true;
       } catch (err) {
         console.error('Failed to request book:', err);
-        return false;
+        return null;
       }
     },
-    [user],
+    [user, setBooks, setSavedBooks],
   );
 
   const handleDeleteBook = useCallback(

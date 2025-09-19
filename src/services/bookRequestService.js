@@ -19,7 +19,8 @@ export async function requestBorrowBook(book, message = '', user) {
     .from('book_requests')
     .insert([
       { book_id: book.id, requested_by: requester_id, requested_to, status: 'pending', message },
-    ]);
+    ])
+    .select('id, book_id, status, requested_by, requested_to');
 
   if (error) {
     logError('requestBorrowBook failed', error, { bookId: book.id, requester_id, requested_to });
@@ -202,19 +203,23 @@ export async function getOutgoingRequestsForUser(userId) {
     throw error;
   }
 
-  const OutReq = (data || []).map((entry) => ({
-    book_id: entry.book.id,
-    user_id: entry.book.user_id,
-    status: entry.book.status,
-    condition: entry.book.condition,
-    created_at: entry.book.created_at,
-    catalog: entry.book.books_catalog,
-    archived: entry.book.archived,
-    request_status: entry.status,
-    requested_by: entry.requested_by,
-    requested_to: entry.requested_to,
-    request_id: entry.id,
-  }));
+  const OutReq = (data || []).map((entry) => {
+    const book = entry.book || {};
+    return {
+      id: book.id,
+      book_id: book.id,
+      user_id: book.user_id,
+      status: book.status,
+      condition: book.condition,
+      created_at: book.created_at,
+      catalog: book.books_catalog,
+      archived: book.archived,
+      request_status: entry.status,
+      requested_by: entry.requested_by,
+      requested_to: entry.requested_to,
+      request_id: entry.id,
+    };
+  });
 
   return { OutReq, error };
 }

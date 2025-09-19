@@ -14,6 +14,7 @@ export default function BookCarouselSection({
   onDelete,
   onArchive,
   onToggleSave,
+  onRequest,
   onAccept,
   onReject,
   onCancelRequest,
@@ -87,6 +88,7 @@ export default function BookCarouselSection({
                   onDelete={onDelete}
                   onArchive={onArchive}
                   onToggleSave={onToggleSave}
+                  onRequest={onRequest}
                   onAccept={onAccept}
                   onReject={onReject}
                   onCancelRequest={onCancelRequest}
