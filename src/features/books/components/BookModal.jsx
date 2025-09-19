@@ -15,17 +15,20 @@ import {
   Chip,
   Button,
 } from '@mui/material';
+import { motion } from 'framer-motion';
+import { alpha } from '@mui/material/styles';
 import {
   Close as CloseIcon,
   Inventory2Outlined as ArchiveIcon,
   Unarchive as UnarchiveIcon,
-  CloseOutlined as DeleteIcon,
+  Delete as DeleteIcon,
   Bookmark as BookmarkIcon,
   BookmarkBorder as BookmarkBorderIcon,
   Replay as ReplayIcon,
   CancelOutlined as CancelIcon,
   CheckCircleOutline as CheckIcon,
   HighlightOff as ClearIcon,
+  MenuBookRounded as BookIcon,
 } from '@mui/icons-material';
 
 import { useBookContext } from '../../../contexts/hooks/useBookContext';
@@ -39,6 +42,13 @@ import {
 import { approveReturnRequest } from '../../../services/returnRequestService';
 import ReviewsSection from './ReviewsSection';
 import { logError } from '@/utilities/logger';
+import {
+  modalPaperMotion,
+  getModalPaperSx,
+  getModalTitleSx,
+  getModalContentSx,
+  getModalActionsSx,
+} from '@/theme/modalStyles';
 
 export default function BookModal({
   open,
@@ -62,6 +72,96 @@ export default function BookModal({
   if (!book) return null;
   const { catalog = {} } = book;
   const { title, author, cover_url } = catalog;
+
+  const getSoftAccentColor = (t) =>
+    t.palette.mode === 'dark' ? t.palette.primary.light : t.palette.primary.main;
+
+  const getSoftIconButtonSx = (t) => {
+    const accent = getSoftAccentColor(t);
+    return {
+      borderRadius: 14,
+      backgroundColor: alpha(accent, t.palette.mode === 'dark' ? 0.22 : 0.18),
+      color: t.palette.mode === 'dark' ? accent : t.palette.primary.dark,
+      border: `1px solid ${alpha(accent, 0.35)}`,
+      boxShadow: `0 6px 18px ${alpha(accent, 0.18)}`,
+      transition: 'all 0.18s ease',
+      '&:hover': {
+        backgroundColor: alpha(accent, t.palette.mode === 'dark' ? 0.28 : 0.24),
+        boxShadow: `0 10px 26px ${alpha(accent, 0.22)}`,
+      },
+      '&:active': {
+        transform: 'scale(0.97)',
+      },
+      '&.Mui-disabled': {
+        color: alpha(accent, 0.35),
+        backgroundColor: alpha(accent, 0.1),
+        borderColor: alpha(accent, 0.14),
+        boxShadow: 'none',
+      },
+    };
+  };
+
+  const softPrimaryButtonSx = (t) => {
+    const accent = getSoftAccentColor(t);
+    return {
+      borderRadius: 999,
+      paddingInline: 2.6,
+      fontWeight: 600,
+      backgroundColor: alpha(accent, t.palette.mode === 'dark' ? 0.35 : 0.25),
+      color:
+        t.palette.mode === 'dark'
+          ? t.palette.grey[50]
+          : t.palette.primary[900] || t.palette.getContrastText(accent),
+      boxShadow: `0 8px 18px ${alpha(accent, 0.18)}`,
+      border: `1px solid ${alpha(accent, 0.32)}`,
+      '&:hover': {
+        backgroundColor: alpha(accent, t.palette.mode === 'dark' ? 0.42 : 0.32),
+        boxShadow: `0 10px 24px ${alpha(accent, 0.24)}`,
+      },
+      '&:active': {
+        backgroundColor: alpha(accent, t.palette.mode === 'dark' ? 0.48 : 0.36),
+      },
+    };
+  };
+
+  const softOutlineButtonSx = (t) => ({
+    borderRadius: 999,
+    paddingInline: 2.2,
+    fontWeight: 600,
+    borderColor: alpha(getSoftAccentColor(t), 0.32),
+    color: t.palette.mode === 'dark' ? getSoftAccentColor(t) : t.palette.primary.dark,
+    '&:hover': {
+      borderColor: alpha(getSoftAccentColor(t), 0.5),
+      backgroundColor: alpha(getSoftAccentColor(t), t.palette.mode === 'dark' ? 0.24 : 0.16),
+    },
+  });
+
+  const softChipSx = (colorKey) => (t) => ({
+    backgroundColor: alpha(t.palette[colorKey].main, t.palette.mode === 'dark' ? 0.22 : 0.16),
+    borderRadius: 12,
+    borderColor: alpha(t.palette[colorKey].main, 0.2),
+    color: t.palette.mode === 'dark' ? t.palette[colorKey].light : t.palette[colorKey].dark,
+    fontWeight: 500,
+    '& .MuiChip-label': {
+      px: 1.2,
+    },
+  });
+
+  const coverFrameSx = (hasCover) => (t) => ({
+    width: { xs: 160, sm: 200 },
+    height: { xs: 220, sm: 260 },
+    borderRadius: 3,
+    overflow: 'hidden',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: alpha(t.palette.background.paper, t.palette.mode === 'dark' ? 0.82 : 0.92),
+    border: hasCover
+      ? `1px solid ${alpha(t.palette.divider, 0.2)}`
+      : `1px dashed ${alpha(t.palette.divider, 0.4)}`,
+    boxShadow: hasCover ? 4 : 'none',
+    color: hasCover ? 'inherit' : alpha(getSoftAccentColor(t), 0.6),
+  });
 
   const handleToggleSave = async () => {
     try {
@@ -169,7 +269,14 @@ export default function BookModal({
       case 'browse':
         return (
           <Tooltip title={isSavedState ? 'Unsave' : 'Save'}>
-            <IconButton onClick={handleToggleSave}>
+            <IconButton
+              component={motion.button}
+              whileHover={{ scale: 1.06 }}
+              whileTap={{ scale: 0.95 }}
+              size="small"
+              onClick={handleToggleSave}
+              sx={getSoftIconButtonSx}
+            >
               {isSavedState ? <BookmarkIcon /> : <BookmarkBorderIcon />}
             </IconButton>
           </Tooltip>
@@ -177,23 +284,44 @@ export default function BookModal({
       case 'myBooks':
       case 'archived':
         return (
-          <>
+          <Stack direction="row" spacing={1}>
             <Tooltip title={book.archived ? 'Unarchive' : 'Archive'}>
-              <IconButton onClick={handleArchive}>
+              <IconButton
+                component={motion.button}
+                whileHover={{ scale: 1.06 }}
+                whileTap={{ scale: 0.95 }}
+                size="small"
+                onClick={handleArchive}
+                sx={getSoftIconButtonSx}
+              >
                 {book.archived ? <UnarchiveIcon /> : <ArchiveIcon />}
               </IconButton>
             </Tooltip>
             <Tooltip title="Delete">
-              <IconButton onClick={handleDelete}>
+              <IconButton
+                component={motion.button}
+                whileHover={{ scale: 1.06 }}
+                whileTap={{ scale: 0.95 }}
+                size="small"
+                onClick={handleDelete}
+                sx={getSoftIconButtonSx}
+              >
                 <DeleteIcon />
               </IconButton>
             </Tooltip>
-          </>
+          </Stack>
         );
       case 'lentBorrowed':
         return (
           <Tooltip title="Request Book Return">
-            <IconButton onClick={handleRequestReturn}>
+            <IconButton
+              component={motion.button}
+              whileHover={{ scale: 1.06 }}
+              whileTap={{ scale: 0.95 }}
+              size="small"
+              onClick={handleRequestReturn}
+              sx={getSoftIconButtonSx}
+            >
               <ReplayIcon />
             </IconButton>
           </Tooltip>
@@ -201,30 +329,59 @@ export default function BookModal({
       case 'lentOwned':
         return (
           <Tooltip title="Approve Return">
-            <IconButton onClick={handleApproveReturn} disabled={!book?.return_request_id}>
+            <IconButton
+              component={motion.button}
+              whileHover={{ scale: 1.06 }}
+              whileTap={{ scale: 0.95 }}
+              size="small"
+              onClick={handleApproveReturn}
+              disabled={!book?.return_request_id}
+              sx={getSoftIconButtonSx}
+            >
               <CheckIcon />
             </IconButton>
           </Tooltip>
         );
       case 'incoming':
         return (
-          <>
+          <Stack direction="row" spacing={1}>
             <Tooltip title="Accept Request">
-              <IconButton onClick={handleAcceptRequest}>
+              <IconButton
+                component={motion.button}
+                whileHover={{ scale: 1.06 }}
+                whileTap={{ scale: 0.95 }}
+                size="small"
+                onClick={handleAcceptRequest}
+                sx={getSoftIconButtonSx}
+              >
                 <CheckIcon />
               </IconButton>
             </Tooltip>
             <Tooltip title="Reject Request">
-              <IconButton onClick={handleRejectRequest}>
+              <IconButton
+                component={motion.button}
+                whileHover={{ scale: 1.06 }}
+                whileTap={{ scale: 0.95 }}
+                size="small"
+                onClick={handleRejectRequest}
+                sx={getSoftIconButtonSx}
+              >
                 <ClearIcon />
               </IconButton>
             </Tooltip>
-          </>
+          </Stack>
         );
       case 'outgoing':
         return (
           <Tooltip title="Cancel Request">
-            <IconButton onClick={handleCancelRequest}>
+            <IconButton
+              component={motion.button}
+              whileHover={{ scale: 1.06 }}
+              whileTap={{ scale: 0.95 }}
+              size="small"
+              onClick={handleCancelRequest}
+              sx={getSoftIconButtonSx}
+            >
               <CancelIcon />
             </IconButton>
           </Tooltip>
@@ -232,7 +389,14 @@ export default function BookModal({
       case 'transfers':
         return (
           <Tooltip title="Complete Transfer">
-            <IconButton onClick={handleCompleteTransfer}>
+            <IconButton
+              component={motion.button}
+              whileHover={{ scale: 1.06 }}
+              whileTap={{ scale: 0.95 }}
+              size="small"
+              onClick={handleCompleteTransfer}
+              sx={getSoftIconButtonSx}
+            >
               <CheckIcon />
             </IconButton>
           </Tooltip>
@@ -250,65 +414,194 @@ export default function BookModal({
       onClose={onClose}
       fullWidth
       maxWidth="sm"
-      slotProps={{ paper: { sx: { borderRadius: 4, bgcolor: 'background.paper' } } }}
+      slots={{ paper: motion.div }}
+      slotProps={{
+        paper: {
+          ...modalPaperMotion,
+          sx: (t) => ({
+            ...getModalPaperSx(t),
+            borderRadius: 18,
+            boxShadow: `0 18px 44px ${alpha(t.palette.common.black, 0.18)}`,
+            border: `1px solid ${alpha(t.palette.divider, 0.4)}`,
+          }),
+        },
+      }}
     >
-      <DialogTitle sx={{ fontWeight: 600, fontSize: '1.5rem' }} color="text.primary">
+      <DialogTitle
+        sx={(t) => ({
+          ...getModalTitleSx(t),
+          borderBottom: `1px solid ${alpha(t.palette.divider, 0.4)}`,
+          pb: 2,
+          gap: 0.5,
+        })}
+        color="text.primary"
+      >
         {title || 'Untitled'}
         <IconButton
           aria-label="close"
           onClick={onClose}
-          sx={{ position: 'absolute', right: 12, top: 12 }}
+          sx={(t) => ({
+            position: 'absolute',
+            right: 16,
+            top: 16,
+            ...getSoftIconButtonSx(t),
+            width: 36,
+            height: 36,
+          })}
         >
           <CloseIcon />
         </IconButton>
+        <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 0.5 }}>
+          {author || 'Unknown Author'}
+        </Typography>
       </DialogTitle>
-      <DialogContent dividers sx={{ p: 3 }}>
-        <Stack spacing={2} alignItems="center">
-          {cover_url && (
-            <Box
-              component="img"
-              src={cover_url}
-              alt={title}
-              sx={{
-                width: '60%',
-                maxHeight: 300,
-                objectFit: 'cover',
-                borderRadius: 3,
-                boxShadow: 2,
-              }}
-            />
-          )}
-          <Typography variant="subtitle1" fontWeight={500} color="text.secondary">
-            {author || 'Unknown Author'}
-          </Typography>
-          <Divider sx={{ width: '100%' }} />
-          <Stack direction="row" spacing={2}>
-            <Chip label={`Status: ${book.status}`} variant="outlined" color="primary" />
-            <Chip label={`Condition: ${book.condition}`} variant="outlined" color="secondary" />
-          </Stack>
-          <ReviewsSection bookId={book.id} ownerId={book.user_id} user={user} />
+
+      <DialogContent
+        dividers
+        sx={(t) => ({
+          ...getModalContentSx(t),
+          p: 0,
+          backgroundColor: alpha(
+            t.palette.background.paper,
+            t.palette.mode === 'dark' ? 0.92 : 0.98,
+          ),
+        })}
+      >
+        <Stack direction={{ xs: 'column', sm: 'row' }} alignItems="stretch" spacing={0}>
+          <Box
+            sx={(t) => ({
+              width: { xs: '100%', sm: 240 },
+              borderRight: { sm: `1px solid ${alpha(t.palette.divider, 0.2)}` },
+              p: { xs: 2.5, sm: 3 },
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: alpha(
+                t.palette.background.paper,
+                t.palette.mode === 'dark' ? 0.88 : 0.94,
+              ),
+            })}
+          >
+            <Stack alignItems="center" spacing={1.5} sx={{ textAlign: 'center' }}>
+              <Box sx={coverFrameSx(Boolean(cover_url))}>
+                {cover_url ? (
+                  <Box
+                    component="img"
+                    src={cover_url}
+                    alt={title}
+                    sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                ) : (
+                  <BookIcon fontSize="large" />
+                )}
+              </Box>
+              <Typography variant={cover_url ? 'caption' : 'body2'} color="text.secondary">
+                {cover_url ? 'Book cover' : 'No cover provided'}
+              </Typography>
+            </Stack>
+          </Box>
+
+          <Box
+            sx={(t) => ({
+              flex: 1,
+              p: { xs: 2.5, sm: 3.5 },
+              backgroundColor: alpha(
+                t.palette.background.paper,
+                t.palette.mode === 'dark' ? 0.96 : 1,
+              ),
+            })}
+          >
+            <Stack spacing={2.5}>
+              <Box>
+                <Typography variant="overline" color="text.secondary">
+                  Details
+                </Typography>
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  alignItems="center"
+                  flexWrap="wrap"
+                  sx={{ mt: 1, gap: 1 }}
+                >
+                  <Chip
+                    size="small"
+                    label={`Status: ${book.status}`}
+                    color="primary"
+                    variant="outlined"
+                    sx={softChipSx('primary')}
+                  />
+                  <Chip
+                    size="small"
+                    label={`Condition: ${book.condition}`}
+                    color="secondary"
+                    variant="outlined"
+                    sx={softChipSx('secondary')}
+                  />
+                  {isRequestPending && (
+                    <Chip
+                      size="small"
+                      label="Borrow request pending"
+                      color="warning"
+                      variant="filled"
+                      sx={softChipSx('warning')}
+                    />
+                  )}
+                </Stack>
+              </Box>
+
+              <Divider sx={(t) => ({ borderColor: alpha(t.palette.divider, 0.24) })} />
+
+              <Box>
+                <Typography variant="overline" color="text.secondary">
+                  Reviews
+                </Typography>
+                <ReviewsSection bookId={book.id} ownerId={book.user_id} user={user} />
+              </Box>
+            </Stack>
+          </Box>
         </Stack>
       </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 2, justifyContent: 'space-between' }}>
-        <Typography variant="body2" color="text.secondary">
-          Choose an action:
+
+      <DialogActions
+        sx={(t) => ({
+          ...getModalActionsSx(t),
+          borderTop: `1px solid ${alpha(t.palette.divider, 0.4)}`,
+          boxShadow: 'none',
+          py: 2.25,
+          px: { xs: 2, sm: 3 },
+        })}
+      >
+        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
+          Actions
         </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
           {book.status === 'available' &&
             user?.id &&
             book.user_id !== user.id &&
             (isRequestPending ? (
-              <Button variant="outlined" size="small" onClick={handleCancelRequest}>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={handleCancelRequest}
+                component={motion.button}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+                sx={softOutlineButtonSx}
+              >
                 Withdraw Request
               </Button>
             ) : (
               <Button
                 variant="contained"
                 size="small"
+                component={motion.button}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => {
                   sendBookRequest(book);
                   onClose();
                 }}
+                sx={softPrimaryButtonSx}
               >
                 Request Book
               </Button>

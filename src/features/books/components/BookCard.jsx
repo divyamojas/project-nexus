@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, Typography, Box, Grow, Collapse, Button } from '@mui/material';
+import { motion } from 'framer-motion';
+import { keyframes } from '@mui/system';
 import { ACTION_CONFIGS } from '../../../constants/constants';
 import { useAuth } from '../../../contexts/hooks/useAuth';
 import BookCardActions from './BookCardActions';
@@ -35,6 +37,15 @@ export default function BookCard({
   const condition = book.condition;
   const status = book.status || 'available';
   const { user } = useAuth();
+  const pulse = keyframes`
+    0% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.6; }
+  `;
+  const isRequestPending = book.request_status === 'pending' && book.requested_by === user?.id;
+  const isIncomingPending =
+    book.request_status === 'pending' &&
+    (book.requested_to === user?.id || book.user_id === user?.id);
 
   useEffect(() => {
     setIsSavedState(context === 'saved' ? true : (isSavedProp ?? book?.is_saved ?? false));
@@ -65,7 +76,11 @@ export default function BookCard({
     }
     return true;
   });
-  const isRequestPending = book.request_status === 'pending' && book.requested_by === user?.id;
+
+  // Slightly compact cards on dashboard contexts to fit more per row.
+  const isDashboard = context !== 'browse';
+  const cardWidth = isDashboard ? 220 : 240;
+  const cardHeight = isDashboard ? 330 : 360;
 
   return (
     <Collapse in={showCard} timeout={300} unmountOnExit>
@@ -78,13 +93,20 @@ export default function BookCard({
       >
         <Grow in timeout={300}>
           <Card
+            component={motion.div}
+            whileHover={{
+              y: -3,
+              rotate: isDashboard ? -0.25 : 0,
+              transition: { type: 'spring', stiffness: 260, damping: 16 },
+            }}
+            whileTap={{ scale: 0.985 }}
             onClick={onClick}
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
             sx={{
               cursor: 'pointer',
-              width: 240,
-              height: 360,
+              width: cardWidth,
+              height: cardHeight,
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
@@ -98,29 +120,64 @@ export default function BookCard({
             }}
             elevation={0}
           >
-            {editable && hovered && (
+            {(isRequestPending || isIncomingPending) && (
               <Box
                 sx={{
                   position: 'absolute',
                   top: 8,
-                  right: 8,
-                  zIndex: 2,
+                  left: 8,
                   display: 'flex',
-                  gap: 1,
+                  alignItems: 'center',
+                  gap: 0.75,
+                  bgcolor: isRequestPending ? 'warning.light' : 'info.light',
+                  color: 'common.black',
+                  px: 1,
+                  py: 0.25,
+                  borderRadius: 2,
+                  boxShadow: 2,
                 }}
               >
-                <BookCardActions
-                  actions={actions}
-                  book={book}
-                  isSavedState={isSavedState}
-                  onAction={(handler) => handlers[handler]?.(book)}
+                <Box
+                  sx={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: '50%',
+                    bgcolor: 'warning.contrastText',
+                    animation: `${pulse} 1.2s ease-in-out infinite`,
+                  }}
                 />
+                <Typography variant="caption" fontWeight={700}>
+                  {isRequestPending ? 'Request sent' : 'Incoming request'}
+                </Typography>
               </Box>
+            )}
+            {editable && (
+              <Grow in={hovered} timeout={180} unmountOnExit>
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 8,
+                    right: 8,
+                    zIndex: 2,
+                    display: 'flex',
+                    gap: 1,
+                  }}
+                >
+                  <BookCardActions
+                    actions={actions}
+                    book={book}
+                    isSavedState={isSavedState}
+                    onAction={(handler) => handlers[handler]?.(book)}
+                  />
+                </Box>
+              </Grow>
             )}
 
             <BookCover title={title} cover_url={cover_url} />
 
-            <CardContent sx={{ px: 2, py: 1.5, flexGrow: 1 }}>
+            <CardContent
+              sx={{ px: isDashboard ? 1.5 : 2, py: isDashboard ? 1.25 : 1.5, flexGrow: 1 }}
+            >
               <Typography variant="subtitle1" fontWeight={600} gutterBottom noWrap>
                 {title || 'Untitled'}
               </Typography>
@@ -132,9 +189,12 @@ export default function BookCard({
 
             {/* Request/Withdraw Button */}
             {status === 'available' && user?.id && book.user_id !== user.id && (
-              <Box px={2} pb={2}>
+              <Box px={isDashboard ? 1.5 : 2} pb={isDashboard ? 1.5 : 2}>
                 {isRequestPending ? (
                   <Button
+                    component={motion.button}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.98 }}
                     variant="outlined"
                     size="small"
                     fullWidth
@@ -147,9 +207,17 @@ export default function BookCard({
                   </Button>
                 ) : (
                   <Button
+                    component={motion.button}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.98 }}
                     variant="contained"
                     size="small"
                     fullWidth
+                    sx={{
+                      backgroundImage: (t) =>
+                        `linear-gradient(90deg, ${t.palette.success.main}, ${t.palette.primary.main})`,
+                      color: 'common.white',
+                    }}
                     onClick={(e) => {
                       e.stopPropagation();
                       onRequest(book);

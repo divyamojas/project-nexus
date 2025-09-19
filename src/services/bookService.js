@@ -121,6 +121,7 @@ export async function getBooks({ includeArchived = true, user } = {}) {
     archived,
     catalog:catalog_id (id, title, author, cover_url),
     saved_books (user_id),
+    book_requests!left (id, status, requested_by, requested_to),
     book_loans!left (id, status, borrower_id, lender_id, loaned_at, due_date, returned_at),
     return_requests!left (id, status, loan_id, requested_by, requested_at, resolved_at)
   `);
@@ -149,6 +150,11 @@ export async function getBooks({ includeArchived = true, user } = {}) {
       ? book.return_requests.find((r) => r.status === 'pending')
       : null;
 
+    // Determine if current user has a pending borrow request for this book
+    const outgoingReq = Array.isArray(book.book_requests)
+      ? book.book_requests.find((r) => r.status === 'pending' && r.requested_by === userId)
+      : null;
+
     return {
       id: book.id,
       user_id: book.user_id,
@@ -160,6 +166,9 @@ export async function getBooks({ includeArchived = true, user } = {}) {
       is_saved: isSaved,
       borrowed_by: borrowedBy,
       return_request_id: pendingReturn?.id || null,
+      request_status: outgoingReq?.status || null,
+      requested_by: outgoingReq?.requested_by || null,
+      request_id: outgoingReq?.id || null,
     };
   });
 }

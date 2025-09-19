@@ -28,8 +28,10 @@ const BookCard = lazy(() => import('./components/BookCard'));
 import BookCardSkeleton from './components/BookCardSkeleton';
 
 import { useAuth } from '../../contexts/hooks/useAuth';
+import { useSnackbar } from '@/components/providers/SnackbarProvider';
 import { logError } from '@/utilities/logger';
 import { useBookContext } from '../../contexts/hooks/useBookContext';
+import { updateRequestStatus } from '../../services';
 
 export default function BrowseBooks() {
   const { toggleBookSaveStatus, sendBookRequest, handleDeleteBook, handleArchiveBook } =
@@ -46,6 +48,7 @@ export default function BrowseBooks() {
 
   const { filteredBooks, setFilters, loading, refreshBooks } = useBookContext();
   const [initialLoaded, setInitialLoaded] = useState(false);
+  const { showToast } = useSnackbar();
 
   const [refreshing, setRefreshing] = useState(false);
   const refreshingRef = useRef(false);
@@ -115,7 +118,7 @@ export default function BrowseBooks() {
       await doRefresh();
     } catch (e) {
       logError('BrowseBooks.handleToggleSave failed', e, { bookId: book?.id });
-      alert('Failed to update saved state.');
+      showToast('Failed to update saved state', { severity: 'error' });
     }
   };
 
@@ -123,12 +126,24 @@ export default function BrowseBooks() {
     try {
       const success = await sendBookRequest(book);
       if (success) {
-        alert('Borrow request sent!');
+        showToast('Borrow request sent!', { severity: 'success' });
         await doRefresh();
       }
     } catch (e) {
       logError('BrowseBooks.handleRequestBook failed', e, { bookId: book?.id });
-      alert('Failed to send borrow request.');
+      showToast('Failed to send borrow request', { severity: 'error' });
+    }
+  };
+
+  const handleCancelRequest = async (book) => {
+    try {
+      if (!book?.request_id) return;
+      await updateRequestStatus(book.request_id, 'cancelled');
+      showToast('Borrow request withdrawn', { severity: 'info' });
+      await doRefresh();
+    } catch (e) {
+      logError('BrowseBooks.handleCancelRequest failed', e, { requestId: book?.request_id });
+      showToast('Failed to withdraw request', { severity: 'error' });
     }
   };
 
@@ -151,8 +166,8 @@ export default function BrowseBooks() {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Stack direction="row" spacing={1} alignItems="center" mb={3} justifyContent="space-between">
+    <Container maxWidth="lg" sx={{ py: { xs: 2, md: 3 } }}>
+      <Stack direction="row" spacing={1} alignItems="center" mb={2} justifyContent="space-between">
         {!initialLoaded && loading ? (
           <Stack direction="row" spacing={1.5} alignItems="center">
             <Skeleton
@@ -201,7 +216,7 @@ export default function BrowseBooks() {
       </Stack>
 
       {!initialLoaded && loading ? (
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} mb={3} alignItems="flex-start">
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} mb={2} alignItems="flex-start">
           <Skeleton
             variant="rounded"
             height={56}
@@ -248,7 +263,7 @@ export default function BrowseBooks() {
           />
         </Stack>
       ) : (
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} mb={3} alignItems="flex-start">
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} mb={2} alignItems="flex-start">
           <TextField
             fullWidth
             label="Search by title or author"
@@ -313,7 +328,7 @@ export default function BrowseBooks() {
               }}
             />
           </Stack>
-          <Grid container spacing={2} mb={4}>
+          <Grid container spacing={2} mb={2}>
             {[...Array(6)].map((_, i) => (
               <Grid item xs={12} sm={6} md={4} key={i}>
                 <Fade in timeout={300}>
@@ -337,7 +352,7 @@ export default function BrowseBooks() {
                   My books
                 </Typography>
               </Stack>
-              <Grid container spacing={2} mb={4}>
+              <Grid container spacing={2} mb={2}>
                 {myBooks.map((book) => (
                   <Grid item xs={12} sm={6} key={book.id}>
                     <Fade in timeout={400}>
@@ -358,7 +373,7 @@ export default function BrowseBooks() {
                   </Grid>
                 ))}
               </Grid>
-              <Divider sx={{ my: 4 }} />
+              <Divider sx={{ my: 2 }} />
             </>
           )}
 
@@ -382,6 +397,7 @@ export default function BrowseBooks() {
                         context="browse"
                         onToggleSave={handleToggleSave}
                         onRequest={handleRequestBook}
+                        onCancelRequest={handleCancelRequest}
                       />
                     </Suspense>
                   </Box>

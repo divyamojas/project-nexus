@@ -1,5 +1,6 @@
 // src/features/books/components/BookCover.jsx
 import { Box, CardMedia, Typography } from '@mui/material';
+import { keyframes } from '@mui/system';
 import { useTheme } from '@mui/material/styles';
 
 export default function BookCover({ title, cover_url }) {
@@ -13,19 +14,37 @@ export default function BookCover({ title, cover_url }) {
   ];
   const gradientIndex = (title || '').length % gradients.length;
 
+  const sheen = keyframes`
+    0% { transform: translateX(-120%); }
+    100% { transform: translateX(120%); }
+  `;
+
   if (cover_url) {
     return (
-      <CardMedia
-        component="img"
-        height="160"
-        image={cover_url}
-        alt={`${title} cover`}
-        sx={{
-          objectFit: 'cover',
-          borderBottom: (t) => `1px solid ${t.palette.divider}`,
-          borderRadius: '4px 4px 0 0',
-        }}
-      />
+      <Box position="relative" height={160}>
+        <CardMedia
+          component="img"
+          height="160"
+          image={cover_url}
+          alt={`${title} cover`}
+          sx={{
+            objectFit: 'cover',
+            borderBottom: (t) => `1px solid ${t.palette.divider}`,
+            borderRadius: '4px 4px 0 0',
+          }}
+        />
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            pointerEvents: 'none',
+            background:
+              'linear-gradient(100deg, transparent 10%, rgba(255,255,255,0.25) 25%, transparent 40%)',
+            transform: 'translateX(-120%)',
+            animation: `${sheen} 2.2s ease-in-out infinite`,
+          }}
+        />
+      </Box>
     );
   }
 
@@ -35,11 +54,22 @@ export default function BookCover({ title, cover_url }) {
       display="flex"
       alignItems="center"
       justifyContent="center"
-      sx={{ background: gradients[gradientIndex] }}
+      sx={{ position: 'relative', background: gradients[gradientIndex], overflow: 'hidden' }}
     >
       <Typography variant="body2" color="text.secondary">
         No cover image
       </Typography>
+      <Box
+        sx={{
+          position: 'absolute',
+          inset: 0,
+          pointerEvents: 'none',
+          background:
+            'linear-gradient(100deg, transparent 10%, rgba(255,255,255,0.28) 25%, transparent 40%)',
+          transform: 'translateX(-120%)',
+          animation: `${sheen} 2.2s ease-in-out infinite`,
+        }}
+      />
     </Box>
   );
 }

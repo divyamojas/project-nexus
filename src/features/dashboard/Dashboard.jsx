@@ -225,8 +225,11 @@ export default function Dashboard() {
 
   return (
     <Suspense fallback={<PageLoader />}>
-      <Container maxWidth="lg" sx={{ py: 5 }}>
-        <Paper elevation={2} sx={{ p: 4, borderRadius: 4, bgcolor: 'background.paper' }}>
+      <Container maxWidth="lg" sx={{ py: { xs: 2, md: 3 } }}>
+        <Paper
+          elevation={2}
+          sx={{ p: { xs: 2, md: 3 }, borderRadius: 3, bgcolor: 'background.paper' }}
+        >
           <Box display="flex" alignItems="center" justifyContent="space-between" mb={1}>
             <Typography variant="h4" fontWeight="medium" color="text.primary">
               Hi {userFirstName || 'Friend'}, welcome to your dashboard
@@ -239,7 +242,7 @@ export default function Dashboard() {
             />
           </Box>
 
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
             You can view and manage your books here, check recent activity, and share something new
             when you&apos;re ready.
           </Typography>

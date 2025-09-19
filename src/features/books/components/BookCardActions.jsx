@@ -1,5 +1,6 @@
 // src/features/books/components/BookCardActions.jsx
 import { IconButton, Tooltip } from '@mui/material';
+import { motion } from 'framer-motion';
 import { ACTION_STYLES } from '../../../constants/constants';
 
 export default function BookCardActions({ actions, book, isSavedState, onAction }) {
@@ -23,6 +24,9 @@ export default function BookCardActions({ actions, book, isSavedState, onAction 
             }
           >
             <IconButton
+              component={motion.button}
+              whileHover={{ scale: 1.08, rotate: -3 }}
+              whileTap={{ scale: 0.95, rotate: 0 }}
               size="small"
               onClick={(e) => {
                 e.stopPropagation();

@@ -48,13 +48,13 @@ export default function BookCarouselSection({
   }, [refreshSignal]);
   return (
     <Box
-      my={5}
-      p={3}
+      my={{ xs: 3, md: 3 }}
+      p={{ xs: 1.5, md: 2 }}
       bgcolor="background.paper"
       borderRadius={3}
       sx={{ border: (t) => `1px solid ${t.palette.divider}`, boxShadow: 1 }}
     >
-      <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+      <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 1.5 }}>
         <Typography variant="h6" color="text.primary">
           {emoji} {title}
         </Typography>
@@ -62,13 +62,13 @@ export default function BookCarouselSection({
           <RefreshIconButton size="small" onClick={handleRefresh} refreshing={refreshing} />
         )}
       </Box>
-      <Divider sx={{ mb: 2 }} />
+      <Divider sx={{ mb: 1.5 }} />
 
       {loading ? (
-        <Stack direction="row" spacing={2} sx={{ overflowX: 'hidden', pb: 1 }}>
-          {[...Array(4)].map((_, i) => (
+        <Stack direction="row" spacing={1.5} sx={{ overflowX: 'hidden', pb: 1 }}>
+          {[...Array(5)].map((_, i) => (
             <Box key={i} flexShrink={0}>
-              <BookCardSkeleton />
+              <BookCardSkeleton width={220} height={330} />
             </Box>
           ))}
         </Stack>
@@ -77,10 +77,10 @@ export default function BookCarouselSection({
           No books available.
         </Typography>
       ) : (
-        <Stack direction="row" spacing={2} sx={{ overflowX: 'auto', pb: 1 }}>
+        <Stack direction="row" spacing={1.5} sx={{ overflowX: 'auto', pb: 1 }}>
           {books.map((book) => (
             <Box key={book.id || JSON.stringify(book)} flexShrink={0}>
-              <Suspense fallback={<BookCardSkeleton />}>
+              <Suspense fallback={<BookCardSkeleton width={220} height={330} />}>
                 <BookCard
                   book={book}
                   onClick={() => onBookClick(book)}
