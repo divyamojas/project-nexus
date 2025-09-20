@@ -1,7 +1,7 @@
 // src/services/bookService.js
 
 import supabase from './supabaseClient';
-import { logError } from '../utilities/logger';
+import { logError } from '@/utilities/logger';
 
 /**
  * Fetch the owner id of a book by its id.

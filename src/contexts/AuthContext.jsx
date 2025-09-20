@@ -3,9 +3,9 @@
 import { useState, useMemo } from 'react';
 import { authContext } from './authContextObject';
 
-import { ALLOWED_EMAIL_DOMAINS, DOMAIN_ERRORS } from '../constants/constants';
-import { useSessionTracker } from '../hooks';
-import * as authService from '../services/authService';
+import { ALLOWED_EMAIL_DOMAINS, DOMAIN_ERRORS } from '@/constants/constants';
+import { useSessionTracker } from '@/hooks';
+import * as authService from '@/services/authService';
 
 // context object moved to ./authContextObject to satisfy Fast Refresh
 

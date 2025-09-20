@@ -13,9 +13,9 @@ import {
   CircularProgress,
   Link,
 } from '@mui/material';
-import { useAuth } from '../../contexts/hooks/useAuth';
-import { useUser } from '../../contexts/hooks/useUser';
-import { processResetPassword } from '../../utilities';
+import { useAuth } from '@/contexts/hooks/useAuth';
+import { useUser } from '@/contexts/hooks/useUser';
+import { processResetPassword } from '@/utilities';
 
 export default function ForgotPassword() {
   const { resetPassword, isAuthenticated } = useAuth();

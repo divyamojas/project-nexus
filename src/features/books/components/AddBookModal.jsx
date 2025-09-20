@@ -31,7 +31,8 @@ import { validateAndSubmitBookForm } from '@/utilities';
 
 import { useBookForm } from '@/contexts/hooks/useBookForm';
 import { useUser } from '@/contexts/hooks/useUser';
-import { useBookCoverUpload, useDebounce } from '@/hooks';
+import { useDebounce } from '@/hooks';
+import useBookCoverUpload from '../hooks/useBookCoverUpload';
 import {
   modalPaperMotion,
   getModalPaperSx,

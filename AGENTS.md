@@ -8,8 +8,9 @@
 
 ## Folder & Module Conventions
 
-- Analyze the existing folder structure before adding new code. Prefer feature-based slices under `src/features/<domain>` with colocated hooks, components, and tests.
-- Shared UI belongs in `src/components/common`, shared hooks in `src/contexts/hooks`, and reusable utilities in `src/utilities`.
+- Analyze the existing folder structure before adding new code. Prefer feature-based slices under `src/features/<domain>` with colocated components, hooks, and tests (e.g., `features/books/hooks/useBookCoverUpload.js`).
+- Shared UI belongs in `src/components/common`; cross-feature hooks live in `src/hooks`, while context-specific hooks remain under `src/contexts/hooks`; reusable utilities stay in `src/utilities`.
+- Use the Vite `@` alias for shared imports instead of deep relative paths.
 - When introducing new services, add them under `src/services` with a clear Supabase boundary and export them via `src/services/index.js`.
 - Document any new structure rules in `structure.txt` so future contributors can follow consistent, industry-standard organization.
 

@@ -1,6 +1,6 @@
 // src/utilities/getRequestsForBooksOfOwners.js
 
-import { getRequestsForBook, getMyBooks } from '../services';
+import { getRequestsForBook, getMyBooks } from '@/services';
 
 /**
  * Fetch all requests for all books owned by the user.

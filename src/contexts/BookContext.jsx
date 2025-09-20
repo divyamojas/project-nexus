@@ -14,8 +14,8 @@ import {
   unsubscribeFromBookChanges,
   toggleSaveBook,
   getBookWithRelations,
-} from '../services';
-import { requestBorrowBook } from '../services/bookRequestService';
+  requestBorrowBook,
+} from '@/services';
 import { BookFormProvider } from './BookFormContext';
 
 // context object moved to ./bookContextObject to satisfy Fast Refresh

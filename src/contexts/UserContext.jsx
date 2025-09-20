@@ -4,8 +4,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { userContext } from './userContextObject';
 
 import { useAuth } from './hooks/useAuth';
-import { getMyBooks, getTransfers, getUserProfile, getUserReviews } from '../services';
-import { getRequestsForBooksOfUsers } from '../utilities';
+import { getMyBooks, getTransfers, getUserProfile, getUserReviews } from '@/services';
+import { getRequestsForBooksOfUsers } from '@/utilities';
 
 // context object moved to ./userContextObject to satisfy Fast Refresh
 

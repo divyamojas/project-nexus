@@ -1,6 +1,6 @@
-// src/hooks/useBookCoverUpload.js
+// src/features/books/hooks/useBookCoverUpload.js
 
-import useImageDrop from './useImageDrop';
+import useImageDrop from '@/hooks/useImageDrop';
 
 const MAX_SIZE = 500 * 1024; // 500 KB
 

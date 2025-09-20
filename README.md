@@ -140,15 +140,15 @@ See [AGENTS.md](AGENTS.md) for day-to-day responsibilities and how to manage rol
 │   │   ├── common/            # Reusable UI (AdminRoute, Layout, loaders...)
 │   │   └── providers/         # Context providers (ErrorBoundary, Snackbar...)
 │   ├── contexts/              # Contexts & hooks (Auth, Book, User, useRole)
-│   ├── features/              # Domain-driven features (admin, books, dashboard...)
+│   ├── features/              # Domain-driven slices w/ colocated components & hooks
 │   ├── services/              # Supabase data access layer (adminService, bookService...)
-│   ├── hooks/                 # Reusable hooks (dropzones, session, debounce...)
+│   ├── hooks/                 # Cross-feature hooks (session, debounce, base image drop)
 │   ├── theme/                 # Theme providers & tokens
 │   └── utilities/             # Pure helpers (form validation, logger, auth flows)
 └── structure.txt              # Up-to-date outline (generated manually)
 ```
 
-See `structure.txt` for a full tree snapshot.
+See `structure.txt` for a freshly generated tree snapshot.
 
 ---
 
@@ -183,7 +183,7 @@ See `structure.txt` for a full tree snapshot.
 
 3. **Hooks & Utilities**
 
-   - Hooks convert repeated UI logic into reusable functions (`useImageDrop`, `useRole`, `useDashboardData`).
+   - Cross-cutting hooks live in `src/hooks` (`useImageDrop`, `useSession`, `useDebounce`). Feature-specific hooks sit beside their screens under `src/features/<domain>/hooks`.
    - Utilities are pure, testable helpers (validation, login/signup flows, logging).
 
 4. **Admin Dashboard Flow**

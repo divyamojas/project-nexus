@@ -13,22 +13,17 @@ const serviceMocks = vi.hoisted(() => ({
   unsubscribeFromBookChanges: vi.fn(),
   toggleSaveBook: vi.fn(),
   getBookWithRelations: vi.fn(),
-}));
-
-const requestMocks = vi.hoisted(() => ({
   requestBorrowBook: vi.fn(),
 }));
 
 vi.mock('@/services', () => serviceMocks);
-vi.mock('@/services/bookRequestService', () => requestMocks);
 
 const {
   getBooks: mockGetBooks,
   getSavedBooks: mockGetSavedBooks,
   toggleSaveBook: mockToggleSaveBook,
+  requestBorrowBook: mockRequestBorrowBook,
 } = serviceMocks;
-
-const { requestBorrowBook: mockRequestBorrowBook } = requestMocks;
 
 const createWrapper = (userValue) => {
   const Wrapper = ({ children }) => (
@@ -42,7 +37,6 @@ const createWrapper = (userValue) => {
 
 beforeEach(() => {
   Object.values(serviceMocks).forEach((fn) => fn.mockClear?.());
-  Object.values(requestMocks).forEach((fn) => fn.mockClear?.());
   mockGetBooks.mockResolvedValue([]);
   mockGetSavedBooks.mockResolvedValue([]);
 });

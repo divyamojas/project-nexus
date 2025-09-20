@@ -1,7 +1,7 @@
 // src/services/bookLoanService.js
 
 import supabase from './supabaseClient';
-import { logError } from '../utilities/logger';
+import { logError } from '@/utilities/logger';
 
 /**
  * Create a loan for a given book between lender and borrower.

@@ -30,15 +30,15 @@ import {
   MenuBookRounded as BookIcon,
 } from '@mui/icons-material';
 
-import { useBookContext } from '../../../contexts/hooks/useBookContext';
-import { useAuth } from '../../../contexts/hooks/useAuth';
+import { useBookContext } from '@/contexts/hooks/useBookContext';
+import { useAuth } from '@/contexts/hooks/useAuth';
 import {
   requestBookReturn,
   toggleSaveBook,
   updateRequestStatus,
   completeTransfer,
-} from '../../../services';
-import { approveReturnRequest } from '../../../services/returnRequestService';
+  approveReturnRequest,
+} from '@/services';
 import ReviewsSection from './ReviewsSection';
 import { logError } from '@/utilities/logger';
 import {

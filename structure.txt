@@ -1,13 +1,7 @@
 .
-├── AGENTS.md
-├── README.md
 ├── apps
 │   └── frontend
-├── current_table_schema
-├── eslint.config.js
-├── index.html
-├── package-lock.json
-├── package.json
+│       └── .env
 ├── public
 │   ├── favicon.png
 │   └── leaflet-preview.png
@@ -15,7 +9,6 @@
 │   ├── getSchema.js
 │   └── updateDB.js
 ├── src
-│   ├── App.jsx
 │   ├── assets
 │   │   └── images
 │   │       └── leaflet-logo-full.png
@@ -32,8 +25,12 @@
 │   │   │   └── TopProgressBar.jsx
 │   │   └── providers
 │   │       ├── ErrorBoundary.jsx
+│   │       ├── RouteLoadContext.js
 │   │       ├── RouteLoadProvider.jsx
-│   │       └── SnackbarProvider.jsx
+│   │       ├── SnackbarContext.js
+│   │       ├── SnackbarProvider.jsx
+│   │       ├── useRouteLoad.js
+│   │       └── useSnackbar.js
 │   ├── constants
 │   │   ├── actionConfigs.js
 │   │   ├── actionStyles.js
@@ -42,64 +39,76 @@
 │   │   ├── dashboard.js
 │   │   └── quotes.js
 │   ├── contexts
-│   │   ├── AuthContext.jsx
-│   │   ├── BookContext.jsx
-│   │   ├── BookFormContext.jsx
-│   │   ├── UserContext.jsx
-│   │   ├── authContextObject.js
-│   │   ├── bookContextObject.js
-│   │   ├── bookFormContextObject.js
 │   │   ├── hooks
 │   │   │   ├── useAuth.js
 │   │   │   ├── useBookContext.js
 │   │   │   ├── useBookForm.js
 │   │   │   ├── useRole.js
 │   │   │   └── useUser.js
+│   │   ├── AuthContext.jsx
+│   │   ├── authContextObject.js
+│   │   ├── BookContext.jsx
+│   │   ├── BookContext.test.jsx
+│   │   ├── bookContextObject.js
+│   │   ├── BookFormContext.jsx
+│   │   ├── bookFormContextObject.js
+│   │   ├── UserContext.jsx
 │   │   └── userContextObject.js
 │   ├── features
 │   │   ├── admin
+│   │   │   ├── components
+│   │   │   │   ├── ApprovalQueueTable.jsx
+│   │   │   │   ├── BooksTable.jsx
+│   │   │   │   ├── LoansTable.jsx
+│   │   │   │   ├── ProfilePreview.jsx
+│   │   │   │   ├── RequestsTable.jsx
+│   │   │   │   ├── SummaryCards.jsx
+│   │   │   │   └── UserManagementTable.jsx
 │   │   │   └── AdminDashboard.jsx
 │   │   ├── auth
 │   │   │   ├── ForgotPassword.jsx
 │   │   │   ├── Login.jsx
+│   │   │   ├── PendingApproval.jsx
 │   │   │   └── Signup.jsx
 │   │   ├── books
-│   │   │   ├── BrowseBooks.jsx
-│   │   │   └── components
-│   │   │       ├── AddBookModal.jsx
-│   │   │       ├── BookBadges.jsx
-│   │   │       ├── BookCard.jsx
-│   │   │       ├── BookCardActions.jsx
-│   │   │       ├── BookCardSkeleton.jsx
-│   │   │       ├── BookCover.jsx
-│   │   │       ├── BookModal.jsx
-│   │   │       └── ReviewsSection.jsx
+│   │   │   ├── components
+│   │   │   │   ├── AddBookModal.jsx
+│   │   │   │   ├── BookBadges.jsx
+│   │   │   │   ├── BookCard.jsx
+│   │   │   │   ├── BookCardActions.jsx
+│   │   │   │   ├── BookCardSkeleton.jsx
+│   │   │   │   ├── BookCover.jsx
+│   │   │   │   ├── BookModal.jsx
+│   │   │   │   └── ReviewsSection.jsx
+│   │   │   ├── hooks
+│   │   │   │   └── useBookCoverUpload.js
+│   │   │   └── BrowseBooks.jsx
 │   │   ├── dashboard
-│   │   │   ├── Dashboard.jsx
 │   │   │   ├── components
 │   │   │   │   ├── BookCarouselSection.jsx
 │   │   │   │   ├── FeedbackSection.jsx
 │   │   │   │   └── MyBooksSection.jsx
-│   │   │   └── hooks
-│   │   │       ├── useDashboardData.js
-│   │   │       └── useDashboardHandlers.js
+│   │   │   ├── hooks
+│   │   │   │   ├── useDashboardData.js
+│   │   │   │   ├── useDashboardData.test.jsx
+│   │   │   │   └── useDashboardHandlers.js
+│   │   │   └── Dashboard.jsx
 │   │   ├── feedback
 │   │   │   └── Feedback.jsx
 │   │   ├── notFound
 │   │   │   └── NotFound.jsx
 │   │   └── profile
+│   │       ├── hooks
+│   │       │   ├── useAvatarDrop.js
+│   │       │   └── useProfileSave.js
 │   │       └── ProfileSetup.jsx
 │   ├── hooks
 │   │   ├── index.js
-│   │   ├── useAvatarDrop.js
-│   │   ├── useBookCoverUpload.js
 │   │   ├── useBookSubscription.js
 │   │   ├── useDebounce.js
 │   │   ├── useImageDrop.js
-│   │   ├── useProfileSave.js
 │   │   ├── useSession.js
 │   │   └── useSessionTracker.js
-│   ├── main.jsx
 │   ├── services
 │   │   ├── adminService.js
 │   │   ├── authService.js
@@ -117,26 +126,34 @@
 │   │   ├── supabaseClient.js
 │   │   ├── transferService.js
 │   │   └── userReviewService.js
-│   ├── setupGlobalErrorHandlers.js
+│   ├── test
+│   │   └── setupTests.js
 │   ├── theme
-│   │   ├── ThemeModeProvider.jsx
 │   │   ├── colorModeContext.js
 │   │   ├── modalStyles.js
 │   │   ├── theme.js
+│   │   ├── ThemeModeProvider.jsx
 │   │   ├── tokens.js
 │   │   └── useColorMode.js
-│   └── utilities
-│       ├── addBookToCatalogAndStock.js
-│       ├── formatDisplayName.js
-│       ├── getActiveBooksForBrowse.js
-│       ├── getRequestsForBooksOfOwners.js
-│       ├── getRequestsForUser.js
-│       ├── index.js
-│       ├── logger.js
-│       ├── processLogin.js
-│       ├── processResetPassword.js
-│       ├── processSignup.js
-│       └── validateAndSubmitBookForm.js
+│   ├── utilities
+│   │   ├── addBookToCatalogAndStock.js
+│   │   ├── formatDisplayName.js
+│   │   ├── getActiveBooksForBrowse.js
+│   │   ├── getRequestsForBooksOfOwners.js
+│   │   ├── getRequestsForUser.js
+│   │   ├── index.js
+│   │   ├── logger.js
+│   │   ├── processLogin.js
+│   │   ├── processLogin.test.js
+│   │   ├── processResetPassword.js
+│   │   ├── processResetPassword.test.js
+│   │   ├── processSignup.js
+│   │   ├── processSignup.test.js
+│   │   ├── validateAndSubmitBookForm.js
+│   │   └── validateAndSubmitBookForm.test.js
+│   ├── App.jsx
+│   ├── main.jsx
+│   └── setupGlobalErrorHandlers.js
 ├── supabase_schema
 │   ├── columns.json
 │   ├── constraints.json
@@ -149,5 +166,13 @@
 │   ├── triggers.json
 │   ├── update.sql
 │   └── views_ddl.json
+├── .env
+├── AGENTS.md
+├── eslint.config.js
+├── index.html
+├── package-lock.json
+├── package.json
+├── README.md
+├── structure.txt
 ├── vercel.json
 └── vite.config.js

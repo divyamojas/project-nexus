@@ -1,7 +1,7 @@
 // src/services/realtimeService.js
 
 import supabase from './supabaseClient';
-import { logError } from '../utilities/logger';
+import { logError } from '@/utilities/logger';
 
 let channel = null;
 

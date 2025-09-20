@@ -1,6 +1,6 @@
 // src/utilities/addBookToCatalogAndStock.js
 
-import { addBookInstance, addBookToCatalog, fetchCatalogBookEntry } from '../services';
+import { addBookInstance, addBookToCatalog, fetchCatalogBookEntry } from '@/services';
 
 /**
  * Ensure a catalog entry exists, then create an owned book instance.

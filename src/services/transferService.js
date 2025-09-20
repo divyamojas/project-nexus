@@ -2,7 +2,7 @@
 
 import supabase from './supabaseClient';
 import { createLoan } from './bookLoanService';
-import { logError } from '../utilities/logger';
+import { logError } from '@/utilities/logger';
 
 /**
  * Fetch transfers where the current user is either the sender or receiver.

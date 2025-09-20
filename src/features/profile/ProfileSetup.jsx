@@ -26,8 +26,9 @@ import NotesIcon from '@mui/icons-material/Notes';
 import CameraAltOutlinedIcon from '@mui/icons-material/CameraAltOutlined';
 import { alpha } from '@mui/material/styles';
 import { keyframes } from '@mui/system';
-import { useAvatarDrop, useProfileSave } from '../../hooks';
-import { useUser } from '../../contexts/hooks/useUser';
+import useAvatarDrop from './hooks/useAvatarDrop';
+import useProfileSave from './hooks/useProfileSave';
+import { useUser } from '@/contexts/hooks/useUser';
 import { useNavigate } from 'react-router-dom';
 
 export default function ProfileSetup() {

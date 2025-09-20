@@ -1,7 +1,7 @@
 // src/hooks/useSession.js
 
 import { useEffect, useState } from 'react';
-import { getSession, onAuthStateChange } from '../services/authService';
+import { getSession, onAuthStateChange } from '@/services';
 
 /**
  * Subscribe to Supabase auth session; returns { session, loading }.

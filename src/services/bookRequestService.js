@@ -2,7 +2,7 @@
 
 import supabase from './supabaseClient';
 import { createTransferForAcceptedRequest } from './transferService';
-import { logError } from '../utilities/logger';
+import { logError } from '@/utilities/logger';
 
 /**
  * Create a borrow request for a book by the current user.

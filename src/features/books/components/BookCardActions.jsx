@@ -1,7 +1,7 @@
 // src/features/books/components/BookCardActions.jsx
 import { IconButton, Tooltip } from '@mui/material';
 import { motion } from 'framer-motion';
-import { ACTION_STYLES } from '../../../constants/constants';
+import { ACTION_STYLES } from '@/constants/constants';
 
 export default function BookCardActions({ actions, book, isSavedState, onAction }) {
   return (

@@ -1,6 +1,6 @@
 // src/utilities/getActiveBooksForBrowse.js
 
-import { getBooks } from '../services';
+import { getBooks } from '@/services';
 
 /**
  * Convenience wrapper to fetch only non-archived books.

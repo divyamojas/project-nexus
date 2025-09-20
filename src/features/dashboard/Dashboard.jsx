@@ -12,9 +12,9 @@ import FeedbackSection from '@/features/dashboard/components/FeedbackSection';
 const AddBookModal = lazy(() => import('@/features/books/components/AddBookModal'));
 const BookModal = lazy(() => import('@/features/books/components/BookModal'));
 
-import { DASHBOARD_SECTIONS } from '../../constants/constants';
-import { useUser } from '../../contexts/hooks/useUser';
-import { useBookContext } from '../../contexts/hooks/useBookContext';
+import { DASHBOARD_SECTIONS } from '@/constants/constants';
+import { useUser } from '@/contexts/hooks/useUser';
+import { useBookContext } from '@/contexts/hooks/useBookContext';
 import PageLoader from '@/components/common/PageLoader';
 import useDashboardHandlers from './hooks/useDashboardHandlers';
 import useDashboardData from './hooks/useDashboardData';

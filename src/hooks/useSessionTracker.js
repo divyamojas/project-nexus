@@ -1,7 +1,7 @@
 // src/hooks/useSessionTracker.js
 
 import { useEffect } from 'react';
-import { getSession, onAuthStateChange } from '../services/authService';
+import { getSession, onAuthStateChange } from '@/services';
 
 /**
  * Track auth session and keep AuthContext's local user/loading in sync.

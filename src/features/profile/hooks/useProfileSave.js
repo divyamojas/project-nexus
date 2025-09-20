@@ -1,7 +1,7 @@
-// src/hooks/useProfileSave.js
+// src/features/profile/hooks/useProfileSave.js
 
 import { useState } from 'react';
-import { saveProfile } from '../services/profileService';
+import { saveProfile } from '@/services/profileService';
 
 /**
  * Persist profile changes and surface errors/success state to the caller.

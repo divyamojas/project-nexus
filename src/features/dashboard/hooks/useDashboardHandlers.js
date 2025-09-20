@@ -6,7 +6,7 @@ import {
   requestBookReturn,
   toggleSaveBook,
   updateRequestStatus,
-} from '../../../services';
+} from '@/services';
 import { useSnackbar } from '@/components/providers/useSnackbar';
 import { logError } from '@/utilities/logger';
 

@@ -1,7 +1,6 @@
 // src/utilities/getRequestsForUser.js
 
-import { getIncomingRequestsForBooks, getOutgoingRequestsForUser } from '../services';
-import { getMyBooks } from '../services/bookService';
+import { getIncomingRequestsForBooks, getOutgoingRequestsForUser, getMyBooks } from '@/services';
 
 /**
  * Helper to fetch both incoming and outgoing requests for the user.

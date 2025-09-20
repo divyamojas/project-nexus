@@ -22,16 +22,16 @@ import RefreshIconButton from '@/components/common/RefreshIconButton';
 import { alpha } from '@mui/material/styles';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
-import { useDebounce } from '../../hooks';
+import { useDebounce } from '@/hooks';
 const BookModal = lazy(() => import('./components/BookModal'));
 const BookCard = lazy(() => import('./components/BookCard'));
 import BookCardSkeleton from './components/BookCardSkeleton';
 
-import { useAuth } from '../../contexts/hooks/useAuth';
+import { useAuth } from '@/contexts/hooks/useAuth';
 import { useSnackbar } from '@/components/providers/useSnackbar';
 import { logError } from '@/utilities/logger';
-import { useBookContext } from '../../contexts/hooks/useBookContext';
-import { updateRequestStatus } from '../../services';
+import { useBookContext } from '@/contexts/hooks/useBookContext';
+import { updateRequestStatus } from '@/services';
 
 export default function BrowseBooks() {
   const { toggleBookSaveStatus, sendBookRequest, handleDeleteBook, handleArchiveBook } =

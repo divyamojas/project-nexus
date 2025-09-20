@@ -1,6 +1,6 @@
-// src/hooks/useAvatarDrop.js
+// src/features/profile/hooks/useAvatarDrop.js
 
-import useImageDrop from './useImageDrop';
+import useImageDrop from '@/hooks/useImageDrop';
 
 const MAX_FILE_SIZE = 300 * 1024; // 300 KB
 

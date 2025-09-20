@@ -7,8 +7,8 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import ReplayIcon from '@mui/icons-material/Replay';
 
-import { insertFeedback } from '../../services';
-import { useUser } from '../../contexts/hooks/useUser';
+import { insertFeedback } from '@/services';
+import { useUser } from '@/contexts/hooks/useUser';
 
 export default function Feedback() {
   const { user } = useUser();

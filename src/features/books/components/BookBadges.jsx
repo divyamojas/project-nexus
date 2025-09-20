@@ -1,6 +1,6 @@
 // src/features/books/components/BookBadges.jsx
 import { Stack, Chip } from '@mui/material';
-import { STATUS_COLOR } from '../../../constants/constants';
+import { STATUS_COLOR } from '@/constants/constants';
 
 export default function BookBadges({ condition, status }) {
   return (
