@@ -1,4 +1,5 @@
 .
+├── AGENTS.md
 ├── README.md
 ├── apps
 │   └── frontend
@@ -10,6 +11,9 @@
 ├── public
 │   ├── favicon.png
 │   └── leaflet-preview.png
+├── scripts
+│   ├── getSchema.js
+│   └── updateDB.js
 ├── src
 │   ├── App.jsx
 │   ├── assets
@@ -17,6 +21,7 @@
 │   │       └── leaflet-logo-full.png
 │   ├── components
 │   │   ├── common
+│   │   │   ├── AdminRoute.jsx
 │   │   │   ├── BusyFallback.jsx
 │   │   │   ├── DelayedLoader.jsx
 │   │   │   ├── Layout.jsx
@@ -48,9 +53,12 @@
 │   │   │   ├── useAuth.js
 │   │   │   ├── useBookContext.js
 │   │   │   ├── useBookForm.js
+│   │   │   ├── useRole.js
 │   │   │   └── useUser.js
 │   │   └── userContextObject.js
 │   ├── features
+│   │   ├── admin
+│   │   │   └── AdminDashboard.jsx
 │   │   ├── auth
 │   │   │   ├── ForgotPassword.jsx
 │   │   │   ├── Login.jsx
@@ -93,6 +101,7 @@
 │   │   └── useSessionTracker.js
 │   ├── main.jsx
 │   ├── services
+│   │   ├── adminService.js
 │   │   ├── authService.js
 │   │   ├── bookCatalogService.js
 │   │   ├── bookLoanService.js
@@ -128,5 +137,17 @@
 │       ├── processResetPassword.js
 │       ├── processSignup.js
 │       └── validateAndSubmitBookForm.js
+├── supabase_schema
+│   ├── columns.json
+│   ├── constraints.json
+│   ├── current_RLS.json
+│   ├── functions_ddl.json
+│   ├── getSchemaDump.sql
+│   ├── indexes.json
+│   ├── sequences_ddl.json
+│   ├── tables.json
+│   ├── triggers.json
+│   ├── update.sql
+│   └── views_ddl.json
 ├── vercel.json
 └── vite.config.js

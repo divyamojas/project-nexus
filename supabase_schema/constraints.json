@@ -1939,6 +1939,32 @@
   {
     "table_schema": "public",
     "table_name": "profiles",
+    "constraint_name": "2200_17406_9_not_null",
+    "constraint_type": "CHECK",
+    "column_name": null,
+    "foreign_table_schema": null,
+    "foreign_table_name": null,
+    "foreign_column_name": null,
+    "update_rule": null,
+    "delete_rule": null,
+    "definition": "approval_status IS NOT NULL"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "profiles",
+    "constraint_name": "profiles_approval_status_check",
+    "constraint_type": "CHECK",
+    "column_name": null,
+    "foreign_table_schema": null,
+    "foreign_table_name": null,
+    "foreign_column_name": null,
+    "update_rule": null,
+    "delete_rule": null,
+    "definition": "((approval_status = ANY (ARRAY['pending'::text, 'approved'::text, 'rejected'::text])))"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "profiles",
     "constraint_name": "profiles_id_fkey",
     "constraint_type": "FOREIGN KEY",
     "column_name": "id",

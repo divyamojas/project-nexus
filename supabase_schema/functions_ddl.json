@@ -53,21 +53,21 @@
     "function_schema": "extensions",
     "function_name": "armor",
     "result_type": "text",
-    "arguments": "bytea, text[], text[]",
-    "language": "c",
-    "prokind": "f",
-    "security_definer": false,
-    "definition": "CREATE OR REPLACE FUNCTION extensions.armor(bytea, text[], text[])\n RETURNS text\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pgcrypto', $function$pg_armor$function$\n"
-  },
-  {
-    "function_schema": "extensions",
-    "function_name": "armor",
-    "result_type": "text",
     "arguments": "bytea",
     "language": "c",
     "prokind": "f",
     "security_definer": false,
     "definition": "CREATE OR REPLACE FUNCTION extensions.armor(bytea)\n RETURNS text\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pgcrypto', $function$pg_armor$function$\n"
+  },
+  {
+    "function_schema": "extensions",
+    "function_name": "armor",
+    "result_type": "text",
+    "arguments": "bytea, text[], text[]",
+    "language": "c",
+    "prokind": "f",
+    "security_definer": false,
+    "definition": "CREATE OR REPLACE FUNCTION extensions.armor(bytea, text[], text[])\n RETURNS text\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pgcrypto', $function$pg_armor$function$\n"
   },
   {
     "function_schema": "extensions",
@@ -173,21 +173,21 @@
     "function_schema": "extensions",
     "function_name": "gen_salt",
     "result_type": "text",
-    "arguments": "text, integer",
-    "language": "c",
-    "prokind": "f",
-    "security_definer": false,
-    "definition": "CREATE OR REPLACE FUNCTION extensions.gen_salt(text, integer)\n RETURNS text\n LANGUAGE c\n PARALLEL SAFE STRICT\nAS '$libdir/pgcrypto', $function$pg_gen_salt_rounds$function$\n"
-  },
-  {
-    "function_schema": "extensions",
-    "function_name": "gen_salt",
-    "result_type": "text",
     "arguments": "text",
     "language": "c",
     "prokind": "f",
     "security_definer": false,
     "definition": "CREATE OR REPLACE FUNCTION extensions.gen_salt(text)\n RETURNS text\n LANGUAGE c\n PARALLEL SAFE STRICT\nAS '$libdir/pgcrypto', $function$pg_gen_salt$function$\n"
+  },
+  {
+    "function_schema": "extensions",
+    "function_name": "gen_salt",
+    "result_type": "text",
+    "arguments": "text, integer",
+    "language": "c",
+    "prokind": "f",
+    "security_definer": false,
+    "definition": "CREATE OR REPLACE FUNCTION extensions.gen_salt(text, integer)\n RETURNS text\n LANGUAGE c\n PARALLEL SAFE STRICT\nAS '$libdir/pgcrypto', $function$pg_gen_salt_rounds$function$\n"
   },
   {
     "function_schema": "extensions",
@@ -223,21 +223,21 @@
     "function_schema": "extensions",
     "function_name": "hmac",
     "result_type": "bytea",
-    "arguments": "text, text, text",
-    "language": "c",
-    "prokind": "f",
-    "security_definer": false,
-    "definition": "CREATE OR REPLACE FUNCTION extensions.hmac(text, text, text)\n RETURNS bytea\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pgcrypto', $function$pg_hmac$function$\n"
-  },
-  {
-    "function_schema": "extensions",
-    "function_name": "hmac",
-    "result_type": "bytea",
     "arguments": "bytea, bytea, text",
     "language": "c",
     "prokind": "f",
     "security_definer": false,
     "definition": "CREATE OR REPLACE FUNCTION extensions.hmac(bytea, bytea, text)\n RETURNS bytea\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pgcrypto', $function$pg_hmac$function$\n"
+  },
+  {
+    "function_schema": "extensions",
+    "function_name": "hmac",
+    "result_type": "bytea",
+    "arguments": "text, text, text",
+    "language": "c",
+    "prokind": "f",
+    "security_definer": false,
+    "definition": "CREATE OR REPLACE FUNCTION extensions.hmac(text, text, text)\n RETURNS bytea\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pgcrypto', $function$pg_hmac$function$\n"
   },
   {
     "function_schema": "extensions",
@@ -303,16 +303,6 @@
     "function_schema": "extensions",
     "function_name": "pgp_pub_decrypt",
     "result_type": "text",
-    "arguments": "bytea, bytea",
-    "language": "c",
-    "prokind": "f",
-    "security_definer": false,
-    "definition": "CREATE OR REPLACE FUNCTION extensions.pgp_pub_decrypt(bytea, bytea)\n RETURNS text\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pgcrypto', $function$pgp_pub_decrypt_text$function$\n"
-  },
-  {
-    "function_schema": "extensions",
-    "function_name": "pgp_pub_decrypt",
-    "result_type": "text",
     "arguments": "bytea, bytea, text, text",
     "language": "c",
     "prokind": "f",
@@ -321,13 +311,13 @@
   },
   {
     "function_schema": "extensions",
-    "function_name": "pgp_pub_decrypt_bytea",
-    "result_type": "bytea",
+    "function_name": "pgp_pub_decrypt",
+    "result_type": "text",
     "arguments": "bytea, bytea",
     "language": "c",
     "prokind": "f",
     "security_definer": false,
-    "definition": "CREATE OR REPLACE FUNCTION extensions.pgp_pub_decrypt_bytea(bytea, bytea)\n RETURNS bytea\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pgcrypto', $function$pgp_pub_decrypt_bytea$function$\n"
+    "definition": "CREATE OR REPLACE FUNCTION extensions.pgp_pub_decrypt(bytea, bytea)\n RETURNS text\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pgcrypto', $function$pgp_pub_decrypt_text$function$\n"
   },
   {
     "function_schema": "extensions",
@@ -343,6 +333,16 @@
     "function_schema": "extensions",
     "function_name": "pgp_pub_decrypt_bytea",
     "result_type": "bytea",
+    "arguments": "bytea, bytea",
+    "language": "c",
+    "prokind": "f",
+    "security_definer": false,
+    "definition": "CREATE OR REPLACE FUNCTION extensions.pgp_pub_decrypt_bytea(bytea, bytea)\n RETURNS bytea\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pgcrypto', $function$pgp_pub_decrypt_bytea$function$\n"
+  },
+  {
+    "function_schema": "extensions",
+    "function_name": "pgp_pub_decrypt_bytea",
+    "result_type": "bytea",
     "arguments": "bytea, bytea, text, text",
     "language": "c",
     "prokind": "f",
@@ -353,21 +353,21 @@
     "function_schema": "extensions",
     "function_name": "pgp_pub_encrypt",
     "result_type": "bytea",
-    "arguments": "text, bytea, text",
-    "language": "c",
-    "prokind": "f",
-    "security_definer": false,
-    "definition": "CREATE OR REPLACE FUNCTION extensions.pgp_pub_encrypt(text, bytea, text)\n RETURNS bytea\n LANGUAGE c\n PARALLEL SAFE STRICT\nAS '$libdir/pgcrypto', $function$pgp_pub_encrypt_text$function$\n"
-  },
-  {
-    "function_schema": "extensions",
-    "function_name": "pgp_pub_encrypt",
-    "result_type": "bytea",
     "arguments": "text, bytea",
     "language": "c",
     "prokind": "f",
     "security_definer": false,
     "definition": "CREATE OR REPLACE FUNCTION extensions.pgp_pub_encrypt(text, bytea)\n RETURNS bytea\n LANGUAGE c\n PARALLEL SAFE STRICT\nAS '$libdir/pgcrypto', $function$pgp_pub_encrypt_text$function$\n"
+  },
+  {
+    "function_schema": "extensions",
+    "function_name": "pgp_pub_encrypt",
+    "result_type": "bytea",
+    "arguments": "text, bytea, text",
+    "language": "c",
+    "prokind": "f",
+    "security_definer": false,
+    "definition": "CREATE OR REPLACE FUNCTION extensions.pgp_pub_encrypt(text, bytea, text)\n RETURNS bytea\n LANGUAGE c\n PARALLEL SAFE STRICT\nAS '$libdir/pgcrypto', $function$pgp_pub_encrypt_text$function$\n"
   },
   {
     "function_schema": "extensions",

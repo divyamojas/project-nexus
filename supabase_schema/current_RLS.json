@@ -126,7 +126,7 @@
     "permissive": "PERMISSIVE",
     "roles": "{public}",
     "cmd": "SELECT",
-    "qual": "(is_admin() OR (archived = false))",
+    "qual": "(is_super_admin() OR is_admin() OR (archived = false))",
     "with_check": null
   },
   {
@@ -136,8 +136,8 @@
     "permissive": "PERMISSIVE",
     "roles": "{public}",
     "cmd": "ALL",
-    "qual": "(is_admin() OR (auth.uid() = user_id))",
-    "with_check": "(is_admin() OR (auth.uid() = user_id))"
+    "qual": "(is_super_admin() OR is_admin() OR (auth.uid() = user_id))",
+    "with_check": "(is_super_admin() OR is_admin() OR (auth.uid() = user_id))"
   },
   {
     "table_schema": "public",
@@ -166,7 +166,7 @@
     "permissive": "PERMISSIVE",
     "roles": "{public}",
     "cmd": "DELETE",
-    "qual": "(is_super_admin() OR (auth.uid() = id))",
+    "qual": "(is_super_admin() OR is_admin() OR (auth.uid() = id))",
     "with_check": null
   },
   {
@@ -177,7 +177,7 @@
     "roles": "{public}",
     "cmd": "INSERT",
     "qual": null,
-    "with_check": "(is_super_admin() OR (auth.uid() = id))"
+    "with_check": "(is_super_admin() OR is_admin() OR ((auth.uid() = id) AND (approval_status = 'pending'::text)))"
   },
   {
     "table_schema": "public",
@@ -186,8 +186,8 @@
     "permissive": "PERMISSIVE",
     "roles": "{public}",
     "cmd": "UPDATE",
-    "qual": "(auth.uid() = id)",
-    "with_check": "(is_super_admin() OR (auth.uid() = id))"
+    "qual": "((auth.uid() = id) OR is_admin() OR is_super_admin())",
+    "with_check": "(is_super_admin() OR is_admin() OR ((auth.uid() = id) AND (approval_status = ( SELECT p.approval_status\n   FROM profiles p\n  WHERE (p.id = auth.uid())))))"
   },
   {
     "table_schema": "public",

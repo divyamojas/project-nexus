@@ -12,7 +12,8 @@
     "format": "prettier --write .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "getSchema": "node scripts/getSchema.js"
+    "getSchema": "node scripts/getSchema.js",
+    "updateDB": "node scripts/updateDB.js"
   },
   "lint-staged": {
     "**/*.{js,jsx}": [

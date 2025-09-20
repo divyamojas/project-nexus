@@ -104,7 +104,9 @@ async function ensureSchemaDir() {
   await fs.mkdir(SCHEMA_DIR, { recursive: true });
 }
 
-async function main() {
+async function getSchema(options = {}) {
+  const { silent = false } = options;
+
   await ensureSchemaDir();
 
   const sql = await fs.readFile(SQL_FILE, 'utf8');
@@ -138,11 +140,19 @@ async function main() {
     await client.end();
   }
 
-  console.log('\nSchema dump complete:');
-  console.table(summary.map((row) => ({ Section: row.section, File: row.file, Rows: row.rows })));
+  if (!silent) {
+    console.log('\nSchema dump complete:');
+    console.table(summary.map((row) => ({ Section: row.section, File: row.file, Rows: row.rows })));
+  }
+
+  return summary;
 }
 
-main().catch((error) => {
-  console.error('getSchema failed:', error);
-  process.exit(1);
-});
+export default getSchema;
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  getSchema().catch((error) => {
+    console.error('getSchema failed:', error);
+    process.exit(1);
+  });
+}
