@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Avatar, Box, Button, Divider, Rating, Stack, TextField, Typography } from '@mui/material';
 import { addBookReview, getBookRatingSummary, getBookReviews } from '@/services';
-import { useSnackbar } from '@/components/providers/SnackbarProvider';
+import { useSnackbar } from '@/components/providers/useSnackbar';
 import formatDisplayName from '@/utilities/formatDisplayName';
 
 export default function ReviewsSection({ bookId, ownerId, user }) {

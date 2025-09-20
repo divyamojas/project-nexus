@@ -39,7 +39,7 @@ export default function PendingApproval() {
 
   const headline = isRejected ? 'Account review update' : 'Thanks for joining Leaflet!';
   const description = isRejected
-    ? `Hi ${greetingName}, your account request was not approved. You can update your profile details and reach out to an administrator if you believe this was in error.`
+    ? `Hi ${greetingName}, your signup request has been rejected. Please reach out to an administrator if you believe this was in error.`
     : `Hi ${greetingName}, your account is under review. You will receive an email once an administrator approves it. You can update your profile at any time to help the review process.`;
 
   const alertSeverity = isRejected ? 'error' : 'info';
@@ -80,7 +80,7 @@ export default function PendingApproval() {
 
         <Alert severity={alertSeverity} variant="outlined">
           {isRejected
-            ? 'Update your profile and contact support if you would like the team to reconsider.'
+            ? 'Please contact an administrator if you would like the team to reconsider your signup.'
             : 'Approvals are usually processed quickly. You can refresh the status below or try again later.'}
         </Alert>
 

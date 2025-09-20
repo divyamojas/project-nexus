@@ -1,4 +1,4 @@
-// src/constants/constants.jsx
+// src/constants/constants.js
 // Aggregator for constants split into modules. Existing imports stay intact.
 export { QUOTES } from './quotes';
 export { ACTION_STYLES, STATUS_COLOR } from './actionStyles';

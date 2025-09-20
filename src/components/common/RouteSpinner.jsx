@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Box, CircularProgress, Fade } from '@mui/material';
-import { useRouteLoad } from '@/components/providers/RouteLoadProvider';
+import { useRouteLoad } from '@/components/providers/useRouteLoad';
 
 /**
  * Shows a centered spinner briefly on route changes. Complements TopProgressBar.

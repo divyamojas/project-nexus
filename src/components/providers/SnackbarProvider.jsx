@@ -1,8 +1,7 @@
 // src/components/providers/SnackbarProvider.jsx
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Snackbar, Alert } from '@mui/material';
-
-const SnackbarContext = createContext({ showToast: () => {} });
+import SnackbarContext from './SnackbarContext';
 
 export function SnackbarProvider({ children }) {
   const [open, setOpen] = useState(false);
@@ -38,5 +37,3 @@ export function SnackbarProvider({ children }) {
     </SnackbarContext.Provider>
   );
 }
-
-export const useSnackbar = () => useContext(SnackbarContext);

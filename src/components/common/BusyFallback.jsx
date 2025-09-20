@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Box, CircularProgress, Fade } from '@mui/material';
-import { useRouteLoad } from '@/components/providers/RouteLoadProvider';
+import { useRouteLoad } from '@/components/providers/useRouteLoad';
 
 /**
  * Suspense fallback that sets global route-load pending while it renders.

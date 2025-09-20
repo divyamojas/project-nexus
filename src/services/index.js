@@ -59,6 +59,7 @@ export {
   updateUserApprovalStatus,
   approveUserAccount,
   rejectUserAccount,
+  deleteUserAccount,
   getAllBooks,
   getAllBookRequests,
   getAllBookLoans,

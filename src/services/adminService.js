@@ -12,46 +12,28 @@ export async function listUsers() {
   try {
     const { data, error } = await supabase
       .from('profiles')
-      .select(
-        'id, username, first_name, last_name, role, approval_status, created_at, auth_users(email)',
-      )
+      .select('id, username, first_name, last_name, role, approval_status, created_at')
       .order('created_at', { ascending: true });
+
+    if (error) throw error;
 
     const rows = data ?? [];
 
-    if (error) {
-      const fallback = await supabase
-        .from('profiles')
-        .select('id, username, first_name, last_name, role, approval_status, created_at')
-        .order('created_at', { ascending: true });
-      if (fallback.error) throw fallback.error;
-      return (
-        fallback.data?.map((row) => ({
-          id: row.id,
-          username: row.username,
-          firstName: row.first_name,
-          lastName: row.last_name,
-          role: row.role,
-          approvalStatus: row.approval_status ?? 'pending',
-          email: '',
-          createdAt: row.created_at,
-          updatedAt: row.updated_at ?? null,
-        })) ?? []
-      );
-    }
-
     return rows.map((row) => {
-      const authInfo = Array.isArray(row.auth_users) ? row.auth_users[0] : row.auth_users;
+      const firstName = row.first_name ?? '';
+      const lastName = row.last_name ?? '';
+      const fullName = `${firstName} ${lastName}`.trim();
       return {
         id: row.id,
         username: row.username,
         firstName: row.first_name,
         lastName: row.last_name,
+        fullName: fullName || row.username || '',
         role: row.role,
         approvalStatus: row.approval_status ?? 'pending',
-        email: authInfo?.email || '',
+        email: '',
         createdAt: row.created_at,
-        updatedAt: row.updated_at ?? null,
+        updatedAt: null,
       };
     });
   } catch (error) {
@@ -104,6 +86,17 @@ export async function rejectUserAccount(userId) {
     return true;
   } catch (error) {
     logError('adminService.rejectUserAccount failed', error, { userId });
+    throw error;
+  }
+}
+
+export async function deleteUserAccount(userId) {
+  try {
+    const { error } = await supabase.from('profiles').delete().eq('id', userId);
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    logError('adminService.deleteUserAccount failed', error, { userId });
     throw error;
   }
 }

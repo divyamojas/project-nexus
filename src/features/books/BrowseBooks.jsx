@@ -28,7 +28,7 @@ const BookCard = lazy(() => import('./components/BookCard'));
 import BookCardSkeleton from './components/BookCardSkeleton';
 
 import { useAuth } from '../../contexts/hooks/useAuth';
-import { useSnackbar } from '@/components/providers/SnackbarProvider';
+import { useSnackbar } from '@/components/providers/useSnackbar';
 import { logError } from '@/utilities/logger';
 import { useBookContext } from '../../contexts/hooks/useBookContext';
 import { updateRequestStatus } from '../../services';

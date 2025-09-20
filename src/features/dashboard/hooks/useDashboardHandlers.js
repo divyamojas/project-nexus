@@ -7,7 +7,7 @@ import {
   toggleSaveBook,
   updateRequestStatus,
 } from '../../../services';
-import { useSnackbar } from '@/components/providers/SnackbarProvider';
+import { useSnackbar } from '@/components/providers/useSnackbar';
 import { logError } from '@/utilities/logger';
 
 export default function useDashboardHandlers({

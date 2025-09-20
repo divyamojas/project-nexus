@@ -38,7 +38,7 @@
 │   │   ├── actionConfigs.js
 │   │   ├── actionStyles.js
 │   │   ├── bookForm.js
-│   │   ├── constants.jsx
+│   │   ├── constants.js
 │   │   ├── dashboard.js
 │   │   └── quotes.js
 │   ├── contexts

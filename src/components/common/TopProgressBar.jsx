@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { LinearProgress, Box } from '@mui/material';
 import { alpha } from '@mui/material/styles';
-import { useRouteLoad } from '@/components/providers/RouteLoadProvider';
+import { useRouteLoad } from '@/components/providers/useRouteLoad';
 
 /**
  * Lightweight top progress bar shown briefly on navigation.
