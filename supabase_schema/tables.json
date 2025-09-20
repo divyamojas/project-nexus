@@ -193,6 +193,14 @@
   },
   {
     "table_schema": "public",
+    "table_name": "crud_event_logs",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
+  },
+  {
+    "table_schema": "public",
     "table_name": "profiles",
     "table_type": "BASE TABLE",
     "is_insertable": "YES",

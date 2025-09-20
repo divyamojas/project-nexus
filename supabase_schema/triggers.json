@@ -9,11 +9,281 @@
     "definition": "EXECUTE FUNCTION handle_new_user()"
   },
   {
+    "trigger_schema": "public",
+    "trigger_name": "audit_book_loans_crud",
+    "table_schema": "public",
+    "table_name": "book_loans",
+    "event_manipulation": "UPDATE",
+    "action_timing": "AFTER",
+    "definition": "EXECUTE FUNCTION tg_record_crud_event()"
+  },
+  {
+    "trigger_schema": "public",
+    "trigger_name": "audit_book_loans_crud",
+    "table_schema": "public",
+    "table_name": "book_loans",
+    "event_manipulation": "DELETE",
+    "action_timing": "AFTER",
+    "definition": "EXECUTE FUNCTION tg_record_crud_event()"
+  },
+  {
+    "trigger_schema": "public",
+    "trigger_name": "audit_book_loans_crud",
+    "table_schema": "public",
+    "table_name": "book_loans",
+    "event_manipulation": "INSERT",
+    "action_timing": "AFTER",
+    "definition": "EXECUTE FUNCTION tg_record_crud_event()"
+  },
+  {
+    "trigger_schema": "public",
+    "trigger_name": "audit_book_requests_crud",
+    "table_schema": "public",
+    "table_name": "book_requests",
+    "event_manipulation": "DELETE",
+    "action_timing": "AFTER",
+    "definition": "EXECUTE FUNCTION tg_record_crud_event()"
+  },
+  {
+    "trigger_schema": "public",
+    "trigger_name": "audit_book_requests_crud",
+    "table_schema": "public",
+    "table_name": "book_requests",
+    "event_manipulation": "UPDATE",
+    "action_timing": "AFTER",
+    "definition": "EXECUTE FUNCTION tg_record_crud_event()"
+  },
+  {
+    "trigger_schema": "public",
+    "trigger_name": "audit_book_requests_crud",
+    "table_schema": "public",
+    "table_name": "book_requests",
+    "event_manipulation": "INSERT",
+    "action_timing": "AFTER",
+    "definition": "EXECUTE FUNCTION tg_record_crud_event()"
+  },
+  {
+    "trigger_schema": "public",
+    "trigger_name": "audit_book_reviews_crud",
+    "table_schema": "public",
+    "table_name": "book_reviews",
+    "event_manipulation": "INSERT",
+    "action_timing": "AFTER",
+    "definition": "EXECUTE FUNCTION tg_record_crud_event()"
+  },
+  {
+    "trigger_schema": "public",
+    "trigger_name": "audit_book_reviews_crud",
+    "table_schema": "public",
+    "table_name": "book_reviews",
+    "event_manipulation": "DELETE",
+    "action_timing": "AFTER",
+    "definition": "EXECUTE FUNCTION tg_record_crud_event()"
+  },
+  {
+    "trigger_schema": "public",
+    "trigger_name": "audit_book_reviews_crud",
+    "table_schema": "public",
+    "table_name": "book_reviews",
+    "event_manipulation": "UPDATE",
+    "action_timing": "AFTER",
+    "definition": "EXECUTE FUNCTION tg_record_crud_event()"
+  },
+  {
+    "trigger_schema": "public",
+    "trigger_name": "audit_books_catalog_crud",
+    "table_schema": "public",
+    "table_name": "books_catalog",
+    "event_manipulation": "DELETE",
+    "action_timing": "AFTER",
+    "definition": "EXECUTE FUNCTION tg_record_crud_event()"
+  },
+  {
+    "trigger_schema": "public",
+    "trigger_name": "audit_books_catalog_crud",
+    "table_schema": "public",
+    "table_name": "books_catalog",
+    "event_manipulation": "UPDATE",
+    "action_timing": "AFTER",
+    "definition": "EXECUTE FUNCTION tg_record_crud_event()"
+  },
+  {
+    "trigger_schema": "public",
+    "trigger_name": "audit_books_catalog_crud",
+    "table_schema": "public",
+    "table_name": "books_catalog",
+    "event_manipulation": "INSERT",
+    "action_timing": "AFTER",
+    "definition": "EXECUTE FUNCTION tg_record_crud_event()"
+  },
+  {
+    "trigger_schema": "public",
+    "trigger_name": "audit_books_crud",
+    "table_schema": "public",
+    "table_name": "books",
+    "event_manipulation": "INSERT",
+    "action_timing": "AFTER",
+    "definition": "EXECUTE FUNCTION tg_record_crud_event()"
+  },
+  {
+    "trigger_schema": "public",
+    "trigger_name": "audit_books_crud",
+    "table_schema": "public",
+    "table_name": "books",
+    "event_manipulation": "UPDATE",
+    "action_timing": "AFTER",
+    "definition": "EXECUTE FUNCTION tg_record_crud_event()"
+  },
+  {
+    "trigger_schema": "public",
+    "trigger_name": "audit_books_crud",
+    "table_schema": "public",
+    "table_name": "books",
+    "event_manipulation": "DELETE",
+    "action_timing": "AFTER",
+    "definition": "EXECUTE FUNCTION tg_record_crud_event()"
+  },
+  {
+    "trigger_schema": "public",
+    "trigger_name": "audit_profiles_crud",
+    "table_schema": "public",
+    "table_name": "profiles",
+    "event_manipulation": "INSERT",
+    "action_timing": "AFTER",
+    "definition": "EXECUTE FUNCTION tg_record_crud_event()"
+  },
+  {
+    "trigger_schema": "public",
+    "trigger_name": "audit_profiles_crud",
+    "table_schema": "public",
+    "table_name": "profiles",
+    "event_manipulation": "DELETE",
+    "action_timing": "AFTER",
+    "definition": "EXECUTE FUNCTION tg_record_crud_event()"
+  },
+  {
+    "trigger_schema": "public",
+    "trigger_name": "audit_profiles_crud",
+    "table_schema": "public",
+    "table_name": "profiles",
+    "event_manipulation": "UPDATE",
+    "action_timing": "AFTER",
+    "definition": "EXECUTE FUNCTION tg_record_crud_event()"
+  },
+  {
+    "trigger_schema": "public",
+    "trigger_name": "audit_return_requests_crud",
+    "table_schema": "public",
+    "table_name": "return_requests",
+    "event_manipulation": "UPDATE",
+    "action_timing": "AFTER",
+    "definition": "EXECUTE FUNCTION tg_record_crud_event()"
+  },
+  {
+    "trigger_schema": "public",
+    "trigger_name": "audit_return_requests_crud",
+    "table_schema": "public",
+    "table_name": "return_requests",
+    "event_manipulation": "DELETE",
+    "action_timing": "AFTER",
+    "definition": "EXECUTE FUNCTION tg_record_crud_event()"
+  },
+  {
+    "trigger_schema": "public",
+    "trigger_name": "audit_return_requests_crud",
+    "table_schema": "public",
+    "table_name": "return_requests",
+    "event_manipulation": "INSERT",
+    "action_timing": "AFTER",
+    "definition": "EXECUTE FUNCTION tg_record_crud_event()"
+  },
+  {
+    "trigger_schema": "public",
+    "trigger_name": "audit_saved_books_crud",
+    "table_schema": "public",
+    "table_name": "saved_books",
+    "event_manipulation": "INSERT",
+    "action_timing": "AFTER",
+    "definition": "EXECUTE FUNCTION tg_record_crud_event()"
+  },
+  {
+    "trigger_schema": "public",
+    "trigger_name": "audit_saved_books_crud",
+    "table_schema": "public",
+    "table_name": "saved_books",
+    "event_manipulation": "UPDATE",
+    "action_timing": "AFTER",
+    "definition": "EXECUTE FUNCTION tg_record_crud_event()"
+  },
+  {
+    "trigger_schema": "public",
+    "trigger_name": "audit_saved_books_crud",
+    "table_schema": "public",
+    "table_name": "saved_books",
+    "event_manipulation": "DELETE",
+    "action_timing": "AFTER",
+    "definition": "EXECUTE FUNCTION tg_record_crud_event()"
+  },
+  {
+    "trigger_schema": "public",
+    "trigger_name": "audit_transfers_crud",
+    "table_schema": "public",
+    "table_name": "transfers",
+    "event_manipulation": "DELETE",
+    "action_timing": "AFTER",
+    "definition": "EXECUTE FUNCTION tg_record_crud_event()"
+  },
+  {
+    "trigger_schema": "public",
+    "trigger_name": "audit_transfers_crud",
+    "table_schema": "public",
+    "table_name": "transfers",
+    "event_manipulation": "UPDATE",
+    "action_timing": "AFTER",
+    "definition": "EXECUTE FUNCTION tg_record_crud_event()"
+  },
+  {
+    "trigger_schema": "public",
+    "trigger_name": "audit_transfers_crud",
+    "table_schema": "public",
+    "table_name": "transfers",
+    "event_manipulation": "INSERT",
+    "action_timing": "AFTER",
+    "definition": "EXECUTE FUNCTION tg_record_crud_event()"
+  },
+  {
+    "trigger_schema": "public",
+    "trigger_name": "audit_user_reviews_crud",
+    "table_schema": "public",
+    "table_name": "user_reviews",
+    "event_manipulation": "UPDATE",
+    "action_timing": "AFTER",
+    "definition": "EXECUTE FUNCTION tg_record_crud_event()"
+  },
+  {
+    "trigger_schema": "public",
+    "trigger_name": "audit_user_reviews_crud",
+    "table_schema": "public",
+    "table_name": "user_reviews",
+    "event_manipulation": "INSERT",
+    "action_timing": "AFTER",
+    "definition": "EXECUTE FUNCTION tg_record_crud_event()"
+  },
+  {
+    "trigger_schema": "public",
+    "trigger_name": "audit_user_reviews_crud",
+    "table_schema": "public",
+    "table_name": "user_reviews",
+    "event_manipulation": "DELETE",
+    "action_timing": "AFTER",
+    "definition": "EXECUTE FUNCTION tg_record_crud_event()"
+  },
+  {
     "trigger_schema": "realtime",
     "trigger_name": "tr_check_filters",
     "table_schema": "realtime",
     "table_name": "subscription",
-    "event_manipulation": "UPDATE",
+    "event_manipulation": "INSERT",
     "action_timing": "BEFORE",
     "definition": "EXECUTE FUNCTION realtime.subscription_check_filters()"
   },
@@ -22,7 +292,7 @@
     "trigger_name": "tr_check_filters",
     "table_schema": "realtime",
     "table_name": "subscription",
-    "event_manipulation": "INSERT",
+    "event_manipulation": "UPDATE",
     "action_timing": "BEFORE",
     "definition": "EXECUTE FUNCTION realtime.subscription_check_filters()"
   },

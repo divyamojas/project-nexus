@@ -457,6 +457,18 @@
   },
   {
     "table_schema": "public",
+    "table_name": "crud_event_logs",
+    "indexname": "crud_event_logs_pkey",
+    "indexdef": "CREATE UNIQUE INDEX crud_event_logs_pkey ON public.crud_event_logs USING btree (id)"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "crud_event_logs",
+    "indexname": "crud_event_logs_table_sort_idx",
+    "indexdef": "CREATE INDEX crud_event_logs_table_sort_idx ON public.crud_event_logs USING btree (table_schema, table_name, event_type, occurred_at DESC, id DESC)"
+  },
+  {
+    "table_schema": "public",
     "table_name": "profiles",
     "indexname": "profiles_pkey",
     "indexdef": "CREATE UNIQUE INDEX profiles_pkey ON public.profiles USING btree (id)"

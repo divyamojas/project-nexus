@@ -161,6 +161,26 @@
   },
   {
     "table_schema": "public",
+    "table_name": "crud_event_logs",
+    "policyname": "crud_event_logs_delete_super_admin",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "DELETE",
+    "qual": "is_super_admin()",
+    "with_check": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "crud_event_logs",
+    "policyname": "crud_event_logs_select_admins",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(is_admin() OR is_super_admin())",
+    "with_check": null
+  },
+  {
+    "table_schema": "public",
     "table_name": "profiles",
     "policyname": "Users can delete their own profile",
     "permissive": "PERMISSIVE",
