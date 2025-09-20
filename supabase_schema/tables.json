@@ -1,0 +1,354 @@
+[
+  {
+    "schema": "auth",
+    "table": "audit_log_entries",
+    "owner": "supabase_auth_admin",
+    "rls_enabled": true,
+    "rls_force": false,
+    "table_comment": "Auth: Audit trail for user actions."
+  },
+  {
+    "schema": "auth",
+    "table": "flow_state",
+    "owner": "supabase_auth_admin",
+    "rls_enabled": true,
+    "rls_force": false,
+    "table_comment": "stores metadata for pkce logins"
+  },
+  {
+    "schema": "auth",
+    "table": "identities",
+    "owner": "supabase_auth_admin",
+    "rls_enabled": true,
+    "rls_force": false,
+    "table_comment": "Auth: Stores identities associated to a user."
+  },
+  {
+    "schema": "auth",
+    "table": "instances",
+    "owner": "supabase_auth_admin",
+    "rls_enabled": true,
+    "rls_force": false,
+    "table_comment": "Auth: Manages users across multiple sites."
+  },
+  {
+    "schema": "auth",
+    "table": "mfa_amr_claims",
+    "owner": "supabase_auth_admin",
+    "rls_enabled": true,
+    "rls_force": false,
+    "table_comment": "auth: stores authenticator method reference claims for multi factor authentication"
+  },
+  {
+    "schema": "auth",
+    "table": "mfa_challenges",
+    "owner": "supabase_auth_admin",
+    "rls_enabled": true,
+    "rls_force": false,
+    "table_comment": "auth: stores metadata about challenge requests made"
+  },
+  {
+    "schema": "auth",
+    "table": "mfa_factors",
+    "owner": "supabase_auth_admin",
+    "rls_enabled": true,
+    "rls_force": false,
+    "table_comment": "auth: stores metadata about factors"
+  },
+  {
+    "schema": "auth",
+    "table": "oauth_clients",
+    "owner": "supabase_auth_admin",
+    "rls_enabled": false,
+    "rls_force": false,
+    "table_comment": null
+  },
+  {
+    "schema": "auth",
+    "table": "one_time_tokens",
+    "owner": "supabase_auth_admin",
+    "rls_enabled": true,
+    "rls_force": false,
+    "table_comment": null
+  },
+  {
+    "schema": "auth",
+    "table": "refresh_tokens",
+    "owner": "supabase_auth_admin",
+    "rls_enabled": true,
+    "rls_force": false,
+    "table_comment": "Auth: Store of tokens used to refresh JWT tokens once they expire."
+  },
+  {
+    "schema": "auth",
+    "table": "saml_providers",
+    "owner": "supabase_auth_admin",
+    "rls_enabled": true,
+    "rls_force": false,
+    "table_comment": "Auth: Manages SAML Identity Provider connections."
+  },
+  {
+    "schema": "auth",
+    "table": "saml_relay_states",
+    "owner": "supabase_auth_admin",
+    "rls_enabled": true,
+    "rls_force": false,
+    "table_comment": "Auth: Contains SAML Relay State information for each Service Provider initiated login."
+  },
+  {
+    "schema": "auth",
+    "table": "schema_migrations",
+    "owner": "supabase_auth_admin",
+    "rls_enabled": true,
+    "rls_force": false,
+    "table_comment": "Auth: Manages updates to the auth system."
+  },
+  {
+    "schema": "auth",
+    "table": "sessions",
+    "owner": "supabase_auth_admin",
+    "rls_enabled": true,
+    "rls_force": false,
+    "table_comment": "Auth: Stores session data associated to a user."
+  },
+  {
+    "schema": "auth",
+    "table": "sso_domains",
+    "owner": "supabase_auth_admin",
+    "rls_enabled": true,
+    "rls_force": false,
+    "table_comment": "Auth: Manages SSO email address domain mapping to an SSO Identity Provider."
+  },
+  {
+    "schema": "auth",
+    "table": "sso_providers",
+    "owner": "supabase_auth_admin",
+    "rls_enabled": true,
+    "rls_force": false,
+    "table_comment": "Auth: Manages SSO identity provider information; see saml_providers for SAML."
+  },
+  {
+    "schema": "auth",
+    "table": "users",
+    "owner": "supabase_auth_admin",
+    "rls_enabled": true,
+    "rls_force": false,
+    "table_comment": "Auth: Stores user login data within a secure schema."
+  },
+  {
+    "schema": "public",
+    "table": "book_loans",
+    "owner": "postgres",
+    "rls_enabled": true,
+    "rls_force": false,
+    "table_comment": null
+  },
+  {
+    "schema": "public",
+    "table": "book_requests",
+    "owner": "postgres",
+    "rls_enabled": true,
+    "rls_force": false,
+    "table_comment": null
+  },
+  {
+    "schema": "public",
+    "table": "book_reviews",
+    "owner": "postgres",
+    "rls_enabled": true,
+    "rls_force": false,
+    "table_comment": null
+  },
+  {
+    "schema": "public",
+    "table": "books",
+    "owner": "postgres",
+    "rls_enabled": true,
+    "rls_force": false,
+    "table_comment": null
+  },
+  {
+    "schema": "public",
+    "table": "books_catalog",
+    "owner": "postgres",
+    "rls_enabled": true,
+    "rls_force": false,
+    "table_comment": null
+  },
+  {
+    "schema": "public",
+    "table": "profiles",
+    "owner": "postgres",
+    "rls_enabled": true,
+    "rls_force": false,
+    "table_comment": null
+  },
+  {
+    "schema": "public",
+    "table": "return_requests",
+    "owner": "postgres",
+    "rls_enabled": true,
+    "rls_force": false,
+    "table_comment": null
+  },
+  {
+    "schema": "public",
+    "table": "saved_books",
+    "owner": "postgres",
+    "rls_enabled": true,
+    "rls_force": false,
+    "table_comment": null
+  },
+  {
+    "schema": "public",
+    "table": "transfers",
+    "owner": "postgres",
+    "rls_enabled": true,
+    "rls_force": false,
+    "table_comment": null
+  },
+  {
+    "schema": "public",
+    "table": "user_reviews",
+    "owner": "postgres",
+    "rls_enabled": true,
+    "rls_force": false,
+    "table_comment": null
+  },
+  {
+    "schema": "realtime",
+    "table": "messages_2025_09_17",
+    "owner": "supabase_admin",
+    "rls_enabled": false,
+    "rls_force": false,
+    "table_comment": null
+  },
+  {
+    "schema": "realtime",
+    "table": "messages_2025_09_18",
+    "owner": "supabase_admin",
+    "rls_enabled": false,
+    "rls_force": false,
+    "table_comment": null
+  },
+  {
+    "schema": "realtime",
+    "table": "messages_2025_09_19",
+    "owner": "supabase_admin",
+    "rls_enabled": false,
+    "rls_force": false,
+    "table_comment": null
+  },
+  {
+    "schema": "realtime",
+    "table": "messages_2025_09_20",
+    "owner": "supabase_admin",
+    "rls_enabled": false,
+    "rls_force": false,
+    "table_comment": null
+  },
+  {
+    "schema": "realtime",
+    "table": "messages_2025_09_21",
+    "owner": "supabase_admin",
+    "rls_enabled": false,
+    "rls_force": false,
+    "table_comment": null
+  },
+  {
+    "schema": "realtime",
+    "table": "messages_2025_09_22",
+    "owner": "supabase_admin",
+    "rls_enabled": false,
+    "rls_force": false,
+    "table_comment": null
+  },
+  {
+    "schema": "realtime",
+    "table": "messages_2025_09_23",
+    "owner": "supabase_admin",
+    "rls_enabled": false,
+    "rls_force": false,
+    "table_comment": null
+  },
+  {
+    "schema": "realtime",
+    "table": "schema_migrations",
+    "owner": "supabase_admin",
+    "rls_enabled": false,
+    "rls_force": false,
+    "table_comment": null
+  },
+  {
+    "schema": "realtime",
+    "table": "subscription",
+    "owner": "supabase_admin",
+    "rls_enabled": false,
+    "rls_force": false,
+    "table_comment": null
+  },
+  {
+    "schema": "storage",
+    "table": "buckets",
+    "owner": "supabase_storage_admin",
+    "rls_enabled": true,
+    "rls_force": false,
+    "table_comment": null
+  },
+  {
+    "schema": "storage",
+    "table": "buckets_analytics",
+    "owner": "supabase_storage_admin",
+    "rls_enabled": true,
+    "rls_force": false,
+    "table_comment": null
+  },
+  {
+    "schema": "storage",
+    "table": "migrations",
+    "owner": "supabase_storage_admin",
+    "rls_enabled": true,
+    "rls_force": false,
+    "table_comment": null
+  },
+  {
+    "schema": "storage",
+    "table": "objects",
+    "owner": "supabase_storage_admin",
+    "rls_enabled": true,
+    "rls_force": false,
+    "table_comment": null
+  },
+  {
+    "schema": "storage",
+    "table": "prefixes",
+    "owner": "supabase_storage_admin",
+    "rls_enabled": true,
+    "rls_force": false,
+    "table_comment": null
+  },
+  {
+    "schema": "storage",
+    "table": "s3_multipart_uploads",
+    "owner": "supabase_storage_admin",
+    "rls_enabled": true,
+    "rls_force": false,
+    "table_comment": null
+  },
+  {
+    "schema": "storage",
+    "table": "s3_multipart_uploads_parts",
+    "owner": "supabase_storage_admin",
+    "rls_enabled": true,
+    "rls_force": false,
+    "table_comment": null
+  },
+  {
+    "schema": "vault",
+    "table": "secrets",
+    "owner": "supabase_admin",
+    "rls_enabled": false,
+    "rls_force": false,
+    "table_comment": "Table with encrypted `secret` column for storing sensitive information on disk."
+  }
+]
