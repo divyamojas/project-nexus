@@ -1,354 +1,386 @@
 [
   {
-    "schema": "auth",
-    "table": "audit_log_entries",
-    "owner": "supabase_auth_admin",
-    "rls_enabled": true,
-    "rls_force": false,
-    "table_comment": "Auth: Audit trail for user actions."
+    "table_schema": "auth",
+    "table_name": "audit_log_entries",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "auth",
-    "table": "flow_state",
-    "owner": "supabase_auth_admin",
-    "rls_enabled": true,
-    "rls_force": false,
-    "table_comment": "stores metadata for pkce logins"
+    "table_schema": "auth",
+    "table_name": "flow_state",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "auth",
-    "table": "identities",
-    "owner": "supabase_auth_admin",
-    "rls_enabled": true,
-    "rls_force": false,
-    "table_comment": "Auth: Stores identities associated to a user."
+    "table_schema": "auth",
+    "table_name": "identities",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "auth",
-    "table": "instances",
-    "owner": "supabase_auth_admin",
-    "rls_enabled": true,
-    "rls_force": false,
-    "table_comment": "Auth: Manages users across multiple sites."
+    "table_schema": "auth",
+    "table_name": "instances",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "auth",
-    "table": "mfa_amr_claims",
-    "owner": "supabase_auth_admin",
-    "rls_enabled": true,
-    "rls_force": false,
-    "table_comment": "auth: stores authenticator method reference claims for multi factor authentication"
+    "table_schema": "auth",
+    "table_name": "mfa_amr_claims",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "auth",
-    "table": "mfa_challenges",
-    "owner": "supabase_auth_admin",
-    "rls_enabled": true,
-    "rls_force": false,
-    "table_comment": "auth: stores metadata about challenge requests made"
+    "table_schema": "auth",
+    "table_name": "mfa_challenges",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "auth",
-    "table": "mfa_factors",
-    "owner": "supabase_auth_admin",
-    "rls_enabled": true,
-    "rls_force": false,
-    "table_comment": "auth: stores metadata about factors"
+    "table_schema": "auth",
+    "table_name": "mfa_factors",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "auth",
-    "table": "oauth_clients",
-    "owner": "supabase_auth_admin",
-    "rls_enabled": false,
-    "rls_force": false,
-    "table_comment": null
+    "table_schema": "auth",
+    "table_name": "oauth_clients",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "auth",
-    "table": "one_time_tokens",
-    "owner": "supabase_auth_admin",
-    "rls_enabled": true,
-    "rls_force": false,
-    "table_comment": null
+    "table_schema": "auth",
+    "table_name": "one_time_tokens",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "auth",
-    "table": "refresh_tokens",
-    "owner": "supabase_auth_admin",
-    "rls_enabled": true,
-    "rls_force": false,
-    "table_comment": "Auth: Store of tokens used to refresh JWT tokens once they expire."
+    "table_schema": "auth",
+    "table_name": "refresh_tokens",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "auth",
-    "table": "saml_providers",
-    "owner": "supabase_auth_admin",
-    "rls_enabled": true,
-    "rls_force": false,
-    "table_comment": "Auth: Manages SAML Identity Provider connections."
+    "table_schema": "auth",
+    "table_name": "saml_providers",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "auth",
-    "table": "saml_relay_states",
-    "owner": "supabase_auth_admin",
-    "rls_enabled": true,
-    "rls_force": false,
-    "table_comment": "Auth: Contains SAML Relay State information for each Service Provider initiated login."
+    "table_schema": "auth",
+    "table_name": "saml_relay_states",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "auth",
-    "table": "schema_migrations",
-    "owner": "supabase_auth_admin",
-    "rls_enabled": true,
-    "rls_force": false,
-    "table_comment": "Auth: Manages updates to the auth system."
+    "table_schema": "auth",
+    "table_name": "schema_migrations",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "auth",
-    "table": "sessions",
-    "owner": "supabase_auth_admin",
-    "rls_enabled": true,
-    "rls_force": false,
-    "table_comment": "Auth: Stores session data associated to a user."
+    "table_schema": "auth",
+    "table_name": "sessions",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "auth",
-    "table": "sso_domains",
-    "owner": "supabase_auth_admin",
-    "rls_enabled": true,
-    "rls_force": false,
-    "table_comment": "Auth: Manages SSO email address domain mapping to an SSO Identity Provider."
+    "table_schema": "auth",
+    "table_name": "sso_domains",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "auth",
-    "table": "sso_providers",
-    "owner": "supabase_auth_admin",
-    "rls_enabled": true,
-    "rls_force": false,
-    "table_comment": "Auth: Manages SSO identity provider information; see saml_providers for SAML."
+    "table_schema": "auth",
+    "table_name": "sso_providers",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "auth",
-    "table": "users",
-    "owner": "supabase_auth_admin",
-    "rls_enabled": true,
-    "rls_force": false,
-    "table_comment": "Auth: Stores user login data within a secure schema."
+    "table_schema": "auth",
+    "table_name": "users",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "public",
-    "table": "book_loans",
-    "owner": "postgres",
-    "rls_enabled": true,
-    "rls_force": false,
-    "table_comment": null
+    "table_schema": "extensions",
+    "table_name": "pg_stat_statements",
+    "table_type": "VIEW",
+    "is_insertable": "NO",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "public",
-    "table": "book_requests",
-    "owner": "postgres",
-    "rls_enabled": true,
-    "rls_force": false,
-    "table_comment": null
+    "table_schema": "extensions",
+    "table_name": "pg_stat_statements_info",
+    "table_type": "VIEW",
+    "is_insertable": "NO",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "public",
-    "table": "book_reviews",
-    "owner": "postgres",
-    "rls_enabled": true,
-    "rls_force": false,
-    "table_comment": null
+    "table_schema": "public",
+    "table_name": "book_loans",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "public",
-    "table": "books",
-    "owner": "postgres",
-    "rls_enabled": true,
-    "rls_force": false,
-    "table_comment": null
+    "table_schema": "public",
+    "table_name": "book_requests",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "public",
-    "table": "books_catalog",
-    "owner": "postgres",
-    "rls_enabled": true,
-    "rls_force": false,
-    "table_comment": null
+    "table_schema": "public",
+    "table_name": "book_reviews",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "public",
-    "table": "profiles",
-    "owner": "postgres",
-    "rls_enabled": true,
-    "rls_force": false,
-    "table_comment": null
+    "table_schema": "public",
+    "table_name": "books",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "public",
-    "table": "return_requests",
-    "owner": "postgres",
-    "rls_enabled": true,
-    "rls_force": false,
-    "table_comment": null
+    "table_schema": "public",
+    "table_name": "books_catalog",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "public",
-    "table": "saved_books",
-    "owner": "postgres",
-    "rls_enabled": true,
-    "rls_force": false,
-    "table_comment": null
+    "table_schema": "public",
+    "table_name": "profiles",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "public",
-    "table": "transfers",
-    "owner": "postgres",
-    "rls_enabled": true,
-    "rls_force": false,
-    "table_comment": null
+    "table_schema": "public",
+    "table_name": "return_requests",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "public",
-    "table": "user_reviews",
-    "owner": "postgres",
-    "rls_enabled": true,
-    "rls_force": false,
-    "table_comment": null
+    "table_schema": "public",
+    "table_name": "saved_books",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "realtime",
-    "table": "messages_2025_09_17",
-    "owner": "supabase_admin",
-    "rls_enabled": false,
-    "rls_force": false,
-    "table_comment": null
+    "table_schema": "public",
+    "table_name": "transfers",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "realtime",
-    "table": "messages_2025_09_18",
-    "owner": "supabase_admin",
-    "rls_enabled": false,
-    "rls_force": false,
-    "table_comment": null
+    "table_schema": "public",
+    "table_name": "user_reviews",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "realtime",
-    "table": "messages_2025_09_19",
-    "owner": "supabase_admin",
-    "rls_enabled": false,
-    "rls_force": false,
-    "table_comment": null
+    "table_schema": "realtime",
+    "table_name": "messages",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "realtime",
-    "table": "messages_2025_09_20",
-    "owner": "supabase_admin",
-    "rls_enabled": false,
-    "rls_force": false,
-    "table_comment": null
+    "table_schema": "realtime",
+    "table_name": "messages_2025_09_17",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "realtime",
-    "table": "messages_2025_09_21",
-    "owner": "supabase_admin",
-    "rls_enabled": false,
-    "rls_force": false,
-    "table_comment": null
+    "table_schema": "realtime",
+    "table_name": "messages_2025_09_18",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "realtime",
-    "table": "messages_2025_09_22",
-    "owner": "supabase_admin",
-    "rls_enabled": false,
-    "rls_force": false,
-    "table_comment": null
+    "table_schema": "realtime",
+    "table_name": "messages_2025_09_19",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "realtime",
-    "table": "messages_2025_09_23",
-    "owner": "supabase_admin",
-    "rls_enabled": false,
-    "rls_force": false,
-    "table_comment": null
+    "table_schema": "realtime",
+    "table_name": "messages_2025_09_20",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "realtime",
-    "table": "schema_migrations",
-    "owner": "supabase_admin",
-    "rls_enabled": false,
-    "rls_force": false,
-    "table_comment": null
+    "table_schema": "realtime",
+    "table_name": "messages_2025_09_21",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "realtime",
-    "table": "subscription",
-    "owner": "supabase_admin",
-    "rls_enabled": false,
-    "rls_force": false,
-    "table_comment": null
+    "table_schema": "realtime",
+    "table_name": "messages_2025_09_22",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "storage",
-    "table": "buckets",
-    "owner": "supabase_storage_admin",
-    "rls_enabled": true,
-    "rls_force": false,
-    "table_comment": null
+    "table_schema": "realtime",
+    "table_name": "messages_2025_09_23",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "storage",
-    "table": "buckets_analytics",
-    "owner": "supabase_storage_admin",
-    "rls_enabled": true,
-    "rls_force": false,
-    "table_comment": null
+    "table_schema": "realtime",
+    "table_name": "schema_migrations",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "storage",
-    "table": "migrations",
-    "owner": "supabase_storage_admin",
-    "rls_enabled": true,
-    "rls_force": false,
-    "table_comment": null
+    "table_schema": "realtime",
+    "table_name": "subscription",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "storage",
-    "table": "objects",
-    "owner": "supabase_storage_admin",
-    "rls_enabled": true,
-    "rls_force": false,
-    "table_comment": null
+    "table_schema": "storage",
+    "table_name": "buckets",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "storage",
-    "table": "prefixes",
-    "owner": "supabase_storage_admin",
-    "rls_enabled": true,
-    "rls_force": false,
-    "table_comment": null
+    "table_schema": "storage",
+    "table_name": "buckets_analytics",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "storage",
-    "table": "s3_multipart_uploads",
-    "owner": "supabase_storage_admin",
-    "rls_enabled": true,
-    "rls_force": false,
-    "table_comment": null
+    "table_schema": "storage",
+    "table_name": "migrations",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "storage",
-    "table": "s3_multipart_uploads_parts",
-    "owner": "supabase_storage_admin",
-    "rls_enabled": true,
-    "rls_force": false,
-    "table_comment": null
+    "table_schema": "storage",
+    "table_name": "objects",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   },
   {
-    "schema": "vault",
-    "table": "secrets",
-    "owner": "supabase_admin",
-    "rls_enabled": false,
-    "rls_force": false,
-    "table_comment": "Table with encrypted `secret` column for storing sensitive information on disk."
+    "table_schema": "storage",
+    "table_name": "prefixes",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
+  },
+  {
+    "table_schema": "storage",
+    "table_name": "s3_multipart_uploads",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
+  },
+  {
+    "table_schema": "storage",
+    "table_name": "s3_multipart_uploads_parts",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
+  },
+  {
+    "table_schema": "vault",
+    "table_name": "decrypted_secrets",
+    "table_type": "VIEW",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
+  },
+  {
+    "table_schema": "vault",
+    "table_name": "secrets",
+    "table_type": "BASE TABLE",
+    "is_insertable": "YES",
+    "is_typed": "NO",
+    "commit_action": null
   }
 ]

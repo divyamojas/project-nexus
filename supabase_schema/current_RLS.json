@@ -1,7 +1,7 @@
 [
   {
-    "schema": "public",
-    "table": "book_loans",
+    "table_schema": "public",
+    "table_name": "book_loans",
     "policyname": "Allow borrower or lender to read",
     "permissive": "PERMISSIVE",
     "roles": "{public}",
@@ -10,8 +10,8 @@
     "with_check": null
   },
   {
-    "schema": "public",
-    "table": "book_requests",
+    "table_schema": "public",
+    "table_name": "book_requests",
     "policyname": "Users can delete their own requests",
     "permissive": "PERMISSIVE",
     "roles": "{public}",
@@ -20,8 +20,8 @@
     "with_check": null
   },
   {
-    "schema": "public",
-    "table": "book_requests",
+    "table_schema": "public",
+    "table_name": "book_requests",
     "policyname": "Users can request books",
     "permissive": "PERMISSIVE",
     "roles": "{public}",
@@ -30,8 +30,8 @@
     "with_check": "((auth.uid() = requested_by) AND (requested_by <> requested_to) AND (requested_to = ( SELECT b.user_id\n   FROM books b\n  WHERE (b.id = book_requests.book_id))))"
   },
   {
-    "schema": "public",
-    "table": "book_requests",
+    "table_schema": "public",
+    "table_name": "book_requests",
     "policyname": "Users can update relevant requests",
     "permissive": "PERMISSIVE",
     "roles": "{public}",
@@ -40,8 +40,8 @@
     "with_check": "(((auth.uid() = requested_by) OR (auth.uid() = requested_to)) AND (requested_by <> requested_to) AND (requested_to = ( SELECT b.user_id\n   FROM books b\n  WHERE (b.id = book_requests.book_id))))"
   },
   {
-    "schema": "public",
-    "table": "book_requests",
+    "table_schema": "public",
+    "table_name": "book_requests",
     "policyname": "Users can view their book requests",
     "permissive": "PERMISSIVE",
     "roles": "{public}",
@@ -50,8 +50,8 @@
     "with_check": null
   },
   {
-    "schema": "public",
-    "table": "book_reviews",
+    "table_schema": "public",
+    "table_name": "book_reviews",
     "policyname": "Anyone can view book reviews",
     "permissive": "PERMISSIVE",
     "roles": "{public}",
@@ -60,8 +60,8 @@
     "with_check": null
   },
   {
-    "schema": "public",
-    "table": "book_reviews",
+    "table_schema": "public",
+    "table_name": "book_reviews",
     "policyname": "Users can insert their own book reviews",
     "permissive": "PERMISSIVE",
     "roles": "{public}",
@@ -70,8 +70,8 @@
     "with_check": "(auth.uid() = reviewer_id)"
   },
   {
-    "schema": "public",
-    "table": "book_reviews",
+    "table_schema": "public",
+    "table_name": "book_reviews",
     "policyname": "book_reviews_delete_own",
     "permissive": "PERMISSIVE",
     "roles": "{authenticated}",
@@ -80,8 +80,8 @@
     "with_check": null
   },
   {
-    "schema": "public",
-    "table": "book_reviews",
+    "table_schema": "public",
+    "table_name": "book_reviews",
     "policyname": "book_reviews_insert_non_owner",
     "permissive": "PERMISSIVE",
     "roles": "{authenticated}",
@@ -90,8 +90,8 @@
     "with_check": "((reviewer_id = auth.uid()) AND (EXISTS ( SELECT 1\n   FROM books b\n  WHERE ((b.id = book_reviews.book_id) AND (b.user_id <> auth.uid())))))"
   },
   {
-    "schema": "public",
-    "table": "book_reviews",
+    "table_schema": "public",
+    "table_name": "book_reviews",
     "policyname": "book_reviews_select_all",
     "permissive": "PERMISSIVE",
     "roles": "{authenticated}",
@@ -100,8 +100,8 @@
     "with_check": null
   },
   {
-    "schema": "public",
-    "table": "book_reviews",
+    "table_schema": "public",
+    "table_name": "book_reviews",
     "policyname": "book_reviews_update_own",
     "permissive": "PERMISSIVE",
     "roles": "{authenticated}",
@@ -110,8 +110,8 @@
     "with_check": "(reviewer_id = auth.uid())"
   },
   {
-    "schema": "public",
-    "table": "books",
+    "table_schema": "public",
+    "table_name": "books",
     "policyname": "Anyone can view available books",
     "permissive": "PERMISSIVE",
     "roles": "{public}",
@@ -120,8 +120,8 @@
     "with_check": null
   },
   {
-    "schema": "public",
-    "table": "books",
+    "table_schema": "public",
+    "table_name": "books",
     "policyname": "Users can manage their own books",
     "permissive": "PERMISSIVE",
     "roles": "{public}",
@@ -130,8 +130,8 @@
     "with_check": "(auth.uid() = user_id)"
   },
   {
-    "schema": "public",
-    "table": "books_catalog",
+    "table_schema": "public",
+    "table_name": "books_catalog",
     "policyname": "Users can insert catalog entries",
     "permissive": "PERMISSIVE",
     "roles": "{public}",
@@ -140,8 +140,8 @@
     "with_check": "((created_by IS NULL) OR (auth.uid() = created_by))"
   },
   {
-    "schema": "public",
-    "table": "books_catalog",
+    "table_schema": "public",
+    "table_name": "books_catalog",
     "policyname": "Users can view catalog entries",
     "permissive": "PERMISSIVE",
     "roles": "{public}",
@@ -150,8 +150,8 @@
     "with_check": null
   },
   {
-    "schema": "public",
-    "table": "profiles",
+    "table_schema": "public",
+    "table_name": "profiles",
     "policyname": "Users can delete their own profile",
     "permissive": "PERMISSIVE",
     "roles": "{public}",
@@ -160,8 +160,8 @@
     "with_check": null
   },
   {
-    "schema": "public",
-    "table": "profiles",
+    "table_schema": "public",
+    "table_name": "profiles",
     "policyname": "Users can insert their own profile",
     "permissive": "PERMISSIVE",
     "roles": "{public}",
@@ -170,8 +170,8 @@
     "with_check": "(auth.uid() = id)"
   },
   {
-    "schema": "public",
-    "table": "profiles",
+    "table_schema": "public",
+    "table_name": "profiles",
     "policyname": "Users can update their own profile",
     "permissive": "PERMISSIVE",
     "roles": "{public}",
@@ -180,8 +180,8 @@
     "with_check": null
   },
   {
-    "schema": "public",
-    "table": "profiles",
+    "table_schema": "public",
+    "table_name": "profiles",
     "policyname": "Users can view their own profile",
     "permissive": "PERMISSIVE",
     "roles": "{public}",
@@ -190,8 +190,8 @@
     "with_check": null
   },
   {
-    "schema": "public",
-    "table": "return_requests",
+    "table_schema": "public",
+    "table_name": "return_requests",
     "policyname": "Borrower or lender can read return requests",
     "permissive": "PERMISSIVE",
     "roles": "{public}",
@@ -200,8 +200,8 @@
     "with_check": null
   },
   {
-    "schema": "public",
-    "table": "return_requests",
+    "table_schema": "public",
+    "table_name": "return_requests",
     "policyname": "Borrower or lender can request return",
     "permissive": "PERMISSIVE",
     "roles": "{public}",
@@ -210,8 +210,8 @@
     "with_check": "((auth.uid() = requested_by) AND ((auth.uid() IN ( SELECT book_loans.borrower_id\n   FROM book_loans\n  WHERE (book_loans.id = return_requests.loan_id))) OR (auth.uid() IN ( SELECT book_loans.lender_id\n   FROM book_loans\n  WHERE (book_loans.id = return_requests.loan_id)))))"
   },
   {
-    "schema": "public",
-    "table": "return_requests",
+    "table_schema": "public",
+    "table_name": "return_requests",
     "policyname": "Only lender can update return status",
     "permissive": "PERMISSIVE",
     "roles": "{public}",
@@ -220,8 +220,8 @@
     "with_check": null
   },
   {
-    "schema": "public",
-    "table": "saved_books",
+    "table_schema": "public",
+    "table_name": "saved_books",
     "policyname": "Can save books for self",
     "permissive": "PERMISSIVE",
     "roles": "{public}",
@@ -230,8 +230,8 @@
     "with_check": "(auth.uid() = user_id)"
   },
   {
-    "schema": "public",
-    "table": "saved_books",
+    "table_schema": "public",
+    "table_name": "saved_books",
     "policyname": "Can unsave own books",
     "permissive": "PERMISSIVE",
     "roles": "{public}",
@@ -240,8 +240,8 @@
     "with_check": null
   },
   {
-    "schema": "public",
-    "table": "saved_books",
+    "table_schema": "public",
+    "table_name": "saved_books",
     "policyname": "Can view own saved books",
     "permissive": "PERMISSIVE",
     "roles": "{public}",
@@ -250,8 +250,8 @@
     "with_check": null
   },
   {
-    "schema": "public",
-    "table": "saved_books",
+    "table_schema": "public",
+    "table_name": "saved_books",
     "policyname": "Users can remove their saved books",
     "permissive": "PERMISSIVE",
     "roles": "{public}",
@@ -260,8 +260,8 @@
     "with_check": null
   },
   {
-    "schema": "public",
-    "table": "saved_books",
+    "table_schema": "public",
+    "table_name": "saved_books",
     "policyname": "Users can save books for themselves",
     "permissive": "PERMISSIVE",
     "roles": "{public}",
@@ -270,8 +270,8 @@
     "with_check": "(auth.uid() = user_id)"
   },
   {
-    "schema": "public",
-    "table": "saved_books",
+    "table_schema": "public",
+    "table_name": "saved_books",
     "policyname": "Users can view their saved books",
     "permissive": "PERMISSIVE",
     "roles": "{public}",
@@ -280,8 +280,8 @@
     "with_check": null
   },
   {
-    "schema": "public",
-    "table": "transfers",
+    "table_schema": "public",
+    "table_name": "transfers",
     "policyname": "Only involved users can insert transfer",
     "permissive": "PERMISSIVE",
     "roles": "{public}",
@@ -290,8 +290,8 @@
     "with_check": "(((auth.uid() = from_user) OR (auth.uid() = to_user)) AND (EXISTS ( SELECT 1\n   FROM book_requests br\n  WHERE ((br.id = transfers.request_id) AND (br.book_id = transfers.book_id) AND (br.requested_by = transfers.to_user) AND (br.requested_to = transfers.from_user) AND (br.status = 'accepted'::text)))))"
   },
   {
-    "schema": "public",
-    "table": "transfers",
+    "table_schema": "public",
+    "table_name": "transfers",
     "policyname": "Only involved users can update transfer",
     "permissive": "PERMISSIVE",
     "roles": "{public}",
@@ -300,8 +300,8 @@
     "with_check": "(((auth.uid() = from_user) OR (auth.uid() = to_user)) AND (EXISTS ( SELECT 1\n   FROM book_requests br\n  WHERE ((br.id = transfers.request_id) AND (br.book_id = transfers.book_id) AND (br.requested_by = transfers.to_user) AND (br.requested_to = transfers.from_user)))))"
   },
   {
-    "schema": "public",
-    "table": "transfers",
+    "table_schema": "public",
+    "table_name": "transfers",
     "policyname": "Users involved in transfer can view",
     "permissive": "PERMISSIVE",
     "roles": "{public}",
@@ -310,8 +310,8 @@
     "with_check": null
   },
   {
-    "schema": "public",
-    "table": "user_reviews",
+    "table_schema": "public",
+    "table_name": "user_reviews",
     "policyname": "Reviewer and reviewee can view the review",
     "permissive": "PERMISSIVE",
     "roles": "{public}",
@@ -320,8 +320,8 @@
     "with_check": null
   },
   {
-    "schema": "public",
-    "table": "user_reviews",
+    "table_schema": "public",
+    "table_name": "user_reviews",
     "policyname": "Users can review other users",
     "permissive": "PERMISSIVE",
     "roles": "{public}",
@@ -330,8 +330,8 @@
     "with_check": "((auth.uid() = reviewer_id) AND (reviewer_id <> reviewee_id) AND (EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE (p.id = user_reviews.reviewee_id))))"
   },
   {
-    "schema": "storage",
-    "table": "objects",
+    "table_schema": "storage",
+    "table_name": "objects",
     "policyname": "Allow authenticated upload",
     "permissive": "PERMISSIVE",
     "roles": "{public}",
@@ -340,8 +340,8 @@
     "with_check": "(auth.role() = 'authenticated'::text)"
   },
   {
-    "schema": "storage",
-    "table": "objects",
+    "table_schema": "storage",
+    "table_name": "objects",
     "policyname": "Allow public read",
     "permissive": "PERMISSIVE",
     "roles": "{public}",

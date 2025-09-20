@@ -1,12 +1,22 @@
 [
   {
-    "schema": "auth",
+    "sequence_schema": "auth",
     "sequence_name": "refresh_tokens_id_seq",
-    "ddl": "CREATE SEQUENCE auth.refresh_tokens_id_seq INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 START WITH 1;"
+    "data_type": "bigint",
+    "start_value": "1",
+    "minimum_value": "1",
+    "maximum_value": "9223372036854775807",
+    "increment": "1",
+    "cycle_option": "NO"
   },
   {
-    "schema": "graphql",
+    "sequence_schema": "graphql",
     "sequence_name": "seq_schema_version",
-    "ddl": "CREATE SEQUENCE graphql.seq_schema_version INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CYCLE;"
+    "data_type": "integer",
+    "start_value": "1",
+    "minimum_value": "1",
+    "maximum_value": "2147483647",
+    "increment": "1",
+    "cycle_option": "YES"
   }
 ]
