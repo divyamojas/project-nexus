@@ -1965,6 +1965,19 @@
   {
     "table_schema": "public",
     "table_name": "profiles",
+    "constraint_name": "profiles_role_check",
+    "constraint_type": "CHECK",
+    "column_name": null,
+    "foreign_table_schema": null,
+    "foreign_table_name": null,
+    "foreign_column_name": null,
+    "update_rule": null,
+    "delete_rule": null,
+    "definition": "((role = ANY (ARRAY['user'::text, 'admin'::text, 'super_admin'::text])))"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "profiles",
     "constraint_name": "profiles_username_key",
     "constraint_type": "UNIQUE",
     "column_name": "username",

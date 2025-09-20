@@ -52,3 +52,14 @@ export {
 export { createLoan, markLoanReturned, getActiveLoanForBook, getMyLoans } from './bookLoanService';
 
 export { addBookReview, getBookReviews, getBookRatingSummary } from './bookReviewService';
+
+export {
+  listUsers,
+  updateUserRole,
+  getAllBooks,
+  getAllBookRequests,
+  getAllBookLoans,
+  setBookArchived,
+  setRequestStatus,
+  completeLoan,
+} from './adminService';

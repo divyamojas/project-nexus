@@ -25,10 +25,12 @@ import SpaceDashboardIcon from '@mui/icons-material/SpaceDashboard';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import RateReviewIcon from '@mui/icons-material/RateReview';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import { alpha } from '@mui/material/styles';
 import SpaIcon from '@mui/icons-material/Spa';
 import { keyframes } from '@mui/system';
 import { useUser } from '@/contexts/hooks/useUser';
+import useRole from '@/contexts/hooks/useRole';
 
 export default function Layout({ children }) {
   const [showNavbar, setShowNavbar] = useState(true);
@@ -38,6 +40,7 @@ export default function Layout({ children }) {
   const muiTheme = useTheme();
   const { toggleColorMode } = useColorMode();
   const { userProfile } = useUser();
+  const { isAdmin } = useRole();
   const canNavigate = !!(userProfile && userProfile.username);
   const isProfile = location.pathname === '/profile';
 
@@ -196,6 +199,23 @@ export default function Layout({ children }) {
                 </IconButton>
               </span>
             </Tooltip>
+            {isAdmin && (
+              <Tooltip title="Admin">
+                <span>
+                  <IconButton
+                    color={isActive('/admin') ? 'primary' : 'inherit'}
+                    component={Link}
+                    to="/admin"
+                    sx={{
+                      transition: 'transform 150ms ease',
+                      '&:hover': { transform: 'translateY(-2px)' },
+                    }}
+                  >
+                    <AdminPanelSettingsIcon />
+                  </IconButton>
+                </span>
+              </Tooltip>
+            )}
             <Tooltip title={muiTheme.palette.mode === 'dark' ? 'Light mode' : 'Dark mode'}>
               <IconButton
                 color="inherit"
@@ -272,6 +292,11 @@ export default function Layout({ children }) {
               >
                 Browse
               </MenuItem>
+              {isAdmin && (
+                <MenuItem component={Link} to="/admin" onClick={handleMenuClose}>
+                  Admin
+                </MenuItem>
+              )}
               <MenuItem
                 onClick={() => {
                   toggleColorMode();

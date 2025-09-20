@@ -4,7 +4,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/hooks/useAuth';
 import { useUser } from '@/contexts/hooks/useUser';
 
-export default function PrivateRoute({ children }) {
+export default function PrivateRoute({ children, requireProfile = true }) {
   const { isAuthenticated, loading } = useAuth();
   const { userProfile, loading: userLoading } = useUser();
   const location = useLocation();
@@ -19,7 +19,7 @@ export default function PrivateRoute({ children }) {
   if (userLoading) return null;
 
   // Prevent error if userProfile is undefined/null
-  if (isAuthenticated && (!userProfile || !userProfile.username)) {
+  if (requireProfile && isAuthenticated && (!userProfile || !userProfile.username)) {
     // Optional: If already at /profile, don't redirect again to avoid loop
     if (location.pathname !== '/profile') {
       return <Navigate to="/profile" state={{ from: location }} replace />;

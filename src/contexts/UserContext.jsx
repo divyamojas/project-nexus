@@ -18,7 +18,7 @@ import { getRequestsForBooksOfUsers } from '../utilities';
 export const UserProvider = ({ children }) => {
   const { user } = useAuth();
   const [firstName, setFirstName] = useState('');
-  const [userProfile, setUserProfile] = useState('');
+  const [userProfile, setUserProfile] = useState(null);
   const [userReviews, setUserReviews] = useState({ given: [], received: [] });
   const [myBooks, setMyBooks] = useState([]);
   const [requests, setRequests] = useState({ incoming: [], outgoing: [] });
@@ -32,8 +32,7 @@ export const UserProvider = ({ children }) => {
 
   const fetchCompleteUserProfile = useCallback(async () => {
     const profile = await getUserProfile(user);
-
-    setUserProfile(profile || []);
+    setUserProfile(profile || null);
   }, [user]);
 
   const fetchUserReviews = useCallback(async () => {
@@ -80,6 +79,10 @@ export const UserProvider = ({ children }) => {
     if (user?.id) refresh();
   }, [user?.id, refresh]);
 
+  const role = userProfile?.role || 'user';
+  const isSuperAdmin = role === 'super_admin';
+  const isAdmin = isSuperAdmin || role === 'admin';
+
   return (
     <userContext.Provider
       value={{
@@ -92,6 +95,9 @@ export const UserProvider = ({ children }) => {
         transfers,
         refresh,
         loading,
+        role,
+        isAdmin,
+        isSuperAdmin,
       }}
     >
       {children}

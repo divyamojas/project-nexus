@@ -25,6 +25,8 @@ const NotFound = lazy(() => import('@/features/notFound/NotFound'));
 const ProfileSetup = lazy(() => import('@/features/profile/ProfileSetup'));
 const PrivateRoute = lazy(() => import('@/components/common/PrivateRoute'));
 const Layout = lazy(() => import('@/components/common/Layout'));
+const AdminDashboard = lazy(() => import('@/features/admin/AdminDashboard'));
+const AdminRoute = lazy(() => import('@/components/common/AdminRoute'));
 
 const protectedRoutes = [
   { path: '/dashboard', element: <Dashboard /> },
@@ -74,6 +76,19 @@ function RouteWrapper() {
           }
         />
       ))}
+
+      <Route
+        path="/admin"
+        element={
+          <PrivateRoute requireProfile={false}>
+            <AdminRoute>
+              <Layout>
+                <AdminDashboard />
+              </Layout>
+            </AdminRoute>
+          </PrivateRoute>
+        }
+      />
 
       {/* 404 fallback */}
       <Route path="*" element={<NotFound />} />
