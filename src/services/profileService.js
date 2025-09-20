@@ -3,31 +3,6 @@
 import supabase from './supabaseClient';
 
 /**
- * Fetch only the current user's first name for light UI displays.
- */
-export const getCurrentUserFirstName = async (user) => {
-  if (!user?.id) return null;
-
-  try {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('first_name')
-      .eq('id', user.id)
-      .single();
-
-    if (error) {
-      console.error('Error fetching user first_name:', error);
-      return null;
-    }
-
-    return data?.first_name || null;
-  } catch (err) {
-    console.error('Unexpected error in getCurrentUserFirstName:', err);
-    return null;
-  }
-};
-
-/**
  * Fetch the full user profile row.
  */
 export const getUserProfile = async (user) => {

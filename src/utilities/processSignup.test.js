@@ -71,7 +71,7 @@ describe('processSignup', () => {
     expect(setError).toHaveBeenCalledWith('Email already registered');
   });
 
-  it('navigates to profile on success', async () => {
+  it('navigates to pending approval on success', async () => {
     const setError = vi.fn();
     const navigate = vi.fn();
     const signup = vi.fn().mockResolvedValue({});
@@ -84,6 +84,6 @@ describe('processSignup', () => {
       signup,
     });
 
-    expect(navigate).toHaveBeenCalledWith('/profile');
+    expect(navigate).toHaveBeenCalledWith('/pending-approval');
   });
 });

@@ -16,11 +16,15 @@ import {
   Divider,
   CircularProgress,
   ButtonGroup,
+  Grid,
 } from '@mui/material';
 
 import {
   listUsers,
   updateUserRole,
+  updateUserApprovalStatus,
+  approveUserAccount,
+  rejectUserAccount,
   getAllBooks,
   getAllBookRequests,
   getAllBookLoans,
@@ -55,6 +59,8 @@ export default function AdminDashboard() {
   const [books, setBooks] = useState([]);
   const [requests, setRequests] = useState([]);
   const [loans, setLoans] = useState([]);
+  const [roleLoadingMap, setRoleLoadingMap] = useState({});
+  const [approvalLoadingMap, setApprovalLoadingMap] = useState({});
 
   const loadData = useCallback(async () => {
     if (!isAdmin) return;
@@ -85,13 +91,25 @@ export default function AdminDashboard() {
     }
   }, [isAdmin, loadData]);
 
+  const setRoleLoading = useCallback((userId, value) => {
+    setRoleLoadingMap((prev) => ({ ...prev, [userId]: value }));
+  }, []);
+
+  const setApprovalLoading = useCallback((userId, value) => {
+    setApprovalLoadingMap((prev) => ({ ...prev, [userId]: value }));
+  }, []);
+
   const handleRoleChange = async (userId, nextRole) => {
+    if (!isSuperAdmin) return;
+    setRoleLoading(userId, true);
     try {
       await updateUserRole(userId, nextRole);
       showToast('Role updated', { severity: 'success' });
-      loadData();
+      await loadData();
     } catch (err) {
       showToast(err?.message || 'Failed to update role', { severity: 'error' });
+    } finally {
+      setRoleLoading(userId, false);
     }
   };
 
@@ -99,7 +117,7 @@ export default function AdminDashboard() {
     try {
       await setBookArchived(book.id, !book.archived);
       showToast(`Book ${book.archived ? 'restored' : 'archived'}`, { severity: 'info' });
-      loadData();
+      await loadData();
     } catch (err) {
       showToast(err?.message || 'Failed to update book', { severity: 'error' });
     }
@@ -109,7 +127,7 @@ export default function AdminDashboard() {
     try {
       await setRequestStatus(requestId, status);
       showToast('Request updated', { severity: 'success' });
-      loadData();
+      await loadData();
     } catch (err) {
       showToast(err?.message || 'Failed to update request', { severity: 'error' });
     }
@@ -119,11 +137,35 @@ export default function AdminDashboard() {
     try {
       await completeLoan(loanId);
       showToast('Loan marked as returned', { severity: 'success' });
-      loadData();
+      await loadData();
     } catch (err) {
       showToast(err?.message || 'Failed to update loan', { severity: 'error' });
     }
   };
+
+  const handleApprovalAction = async (userId, action, successMessage) => {
+    setApprovalLoading(userId, true);
+    try {
+      await action();
+      showToast(successMessage, { severity: 'success' });
+      await loadData();
+    } catch (err) {
+      showToast(err?.message || 'Failed to update approval status', { severity: 'error' });
+    } finally {
+      setApprovalLoading(userId, false);
+    }
+  };
+
+  const approveUser = (userId) =>
+    handleApprovalAction(userId, () => approveUserAccount(userId), 'User approved');
+  const rejectUser = (userId) =>
+    handleApprovalAction(userId, () => rejectUserAccount(userId), 'User rejected');
+  const resetApproval = (userId) =>
+    handleApprovalAction(
+      userId,
+      () => updateUserApprovalStatus(userId, 'pending'),
+      'User moved to pending',
+    );
 
   const profileLookup = useMemo(() => {
     const map = new Map();
@@ -132,6 +174,25 @@ export default function AdminDashboard() {
     });
     return map;
   }, [users]);
+
+  const approvalCounts = useMemo(() => {
+    return users.reduce(
+      (acc, userRow) => {
+        const status = userRow.approvalStatus || 'pending';
+        acc.total += 1;
+        acc[status] = (acc[status] || 0) + 1;
+        if (userRow.role === 'admin') acc.admins += 1;
+        if (userRow.role === 'super_admin') acc.superAdmins += 1;
+        return acc;
+      },
+      { total: 0, pending: 0, approved: 0, rejected: 0, admins: 0, superAdmins: 0 },
+    );
+  }, [users]);
+
+  const pendingUsers = useMemo(
+    () => users.filter((row) => (row.approvalStatus || 'pending') === 'pending'),
+    [users],
+  );
 
   const formatName = useCallback((profile, fallback) => {
     if (!profile) return fallback || '—';
@@ -161,6 +222,71 @@ export default function AdminDashboard() {
         Admin Dashboard
       </Typography>
 
+      {!loading && (
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6} md={4} lg={3}>
+            <Paper sx={{ p: 2 }}>
+              <Typography variant="subtitle2" color="text.secondary">
+                Total Members
+              </Typography>
+              <Typography variant="h5" fontWeight={700}>
+                {approvalCounts.total}
+              </Typography>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} sm={6} md={4} lg={3}>
+            <Paper sx={{ p: 2 }}>
+              <Typography variant="subtitle2" color="text.secondary">
+                Pending Approval
+              </Typography>
+              <Typography variant="h5" fontWeight={700} color="warning.main">
+                {approvalCounts.pending}
+              </Typography>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} sm={6} md={4} lg={3}>
+            <Paper sx={{ p: 2 }}>
+              <Typography variant="subtitle2" color="text.secondary">
+                Approved Members
+              </Typography>
+              <Typography variant="h5" fontWeight={700} color="success.main">
+                {approvalCounts.approved}
+              </Typography>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} sm={6} md={4} lg={3}>
+            <Paper sx={{ p: 2 }}>
+              <Typography variant="subtitle2" color="text.secondary">
+                Rejected Accounts
+              </Typography>
+              <Typography variant="h5" fontWeight={700} color="error.main">
+                {approvalCounts.rejected}
+              </Typography>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} sm={6} md={4} lg={3}>
+            <Paper sx={{ p: 2 }}>
+              <Typography variant="subtitle2" color="text.secondary">
+                Admins
+              </Typography>
+              <Typography variant="h5" fontWeight={700}>
+                {approvalCounts.admins}
+              </Typography>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} sm={6} md={4} lg={3}>
+            <Paper sx={{ p: 2 }}>
+              <Typography variant="subtitle2" color="text.secondary">
+                Super Admins
+              </Typography>
+              <Typography variant="h5" fontWeight={700}>
+                {approvalCounts.superAdmins}
+              </Typography>
+            </Paper>
+          </Grid>
+        </Grid>
+      )}
+
       {loading && (
         <Box display="flex" justifyContent="center" py={4}>
           <CircularProgress />
@@ -173,19 +299,87 @@ export default function AdminDashboard() {
         </Paper>
       )}
 
-      {isSuperAdmin && !loading && (
+      {isAdmin && !loading && pendingUsers.length > 0 && (
         <Paper sx={{ p: 3 }}>
           <Typography variant="h6" gutterBottom>
-            User Management
+            Approval Queue
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Promote or demote members. Only super administrators can manage roles.
+            Review and approve new members. Approved accounts instantly gain the permissions tied to
+            their role.
           </Typography>
           <Table size="small">
             <TableHead>
               <TableRow>
                 <TableCell>Name</TableCell>
                 <TableCell>Email</TableCell>
+                <TableCell>Requested</TableCell>
+                <TableCell>Status</TableCell>
+                <TableCell align="right">Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {pendingUsers.map((row) => {
+                const fullName =
+                  row.firstName || row.lastName
+                    ? `${row.firstName ?? ''} ${row.lastName ?? ''}`.trim()
+                    : row.username || '—';
+                const requestedAt = row.createdAt ? new Date(row.createdAt) : null;
+                return (
+                  <TableRow key={row.id} hover>
+                    <TableCell>{fullName}</TableCell>
+                    <TableCell>{row.email || '—'}</TableCell>
+                    <TableCell>{requestedAt ? requestedAt.toLocaleString() : '—'}</TableCell>
+                    <TableCell>
+                      <Chip label="Pending" size="small" color="warning" />
+                    </TableCell>
+                    <TableCell align="right">
+                      <ButtonGroup size="small" variant="outlined">
+                        <Button
+                          onClick={() => resetApproval(row.id)}
+                          disabled={approvalLoadingMap[row.id]}
+                        >
+                          Keep Pending
+                        </Button>
+                        <Button
+                          onClick={() => approveUser(row.id)}
+                          color="success"
+                          disabled={approvalLoadingMap[row.id]}
+                        >
+                          Approve
+                        </Button>
+                        <Button
+                          onClick={() => rejectUser(row.id)}
+                          color="error"
+                          disabled={approvalLoadingMap[row.id]}
+                        >
+                          Reject
+                        </Button>
+                      </ButtonGroup>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </Paper>
+      )}
+
+      {!loading && (
+        <Paper sx={{ p: 3 }}>
+          <Typography variant="h6" gutterBottom>
+            User Management
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Manage member approvals and roles. Approval controls are available to admins and super
+            admins; role changes remain restricted to super administrators.
+          </Typography>
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell>Name</TableCell>
+                <TableCell>Email</TableCell>
+                <TableCell>Approval</TableCell>
                 <TableCell>Role</TableCell>
                 <TableCell align="right">Actions</TableCell>
               </TableRow>
@@ -197,25 +391,73 @@ export default function AdminDashboard() {
                     ? `${row.firstName ?? ''} ${row.lastName ?? ''}`.trim()
                     : row.username || '—';
                 const isSelf = user?.id === row.id;
+                const approvalStatus = row.approvalStatus || 'pending';
+                const approvalColor =
+                  approvalStatus === 'approved'
+                    ? 'success'
+                    : approvalStatus === 'rejected'
+                      ? 'error'
+                      : 'warning';
                 return (
                   <TableRow key={row.id} hover>
                     <TableCell>{fullName}</TableCell>
                     <TableCell>{row.email || '—'}</TableCell>
                     <TableCell>
+                      <Chip
+                        size="small"
+                        label={approvalStatus}
+                        color={approvalColor}
+                        variant={approvalStatus === 'approved' ? 'filled' : 'outlined'}
+                      />
+                    </TableCell>
+                    <TableCell>
                       <RoleChip role={row.role} />
                     </TableCell>
                     <TableCell align="right">
-                      <ButtonGroup variant="outlined" size="small" disabled={isSelf}>
-                        {['user', 'admin', 'super_admin'].map((roleOption) => (
+                      <Stack
+                        direction={{ xs: 'column', md: 'row' }}
+                        spacing={1}
+                        justifyContent="flex-end"
+                      >
+                        <ButtonGroup variant="outlined" size="small">
                           <Button
-                            key={roleOption}
-                            color={row.role === roleOption ? 'primary' : 'inherit'}
-                            onClick={() => handleRoleChange(row.id, roleOption)}
+                            onClick={() => resetApproval(row.id)}
+                            disabled={approvalLoadingMap[row.id]}
                           >
-                            {roleOption.replace('_', ' ')}
+                            Pending
                           </Button>
-                        ))}
-                      </ButtonGroup>
+                          <Button
+                            onClick={() => approveUser(row.id)}
+                            color="success"
+                            disabled={approvalLoadingMap[row.id]}
+                          >
+                            Approve
+                          </Button>
+                          <Button
+                            onClick={() => rejectUser(row.id)}
+                            color="error"
+                            disabled={approvalLoadingMap[row.id]}
+                          >
+                            Reject
+                          </Button>
+                        </ButtonGroup>
+                        <ButtonGroup
+                          variant="outlined"
+                          size="small"
+                          disabled={isSelf || !isSuperAdmin}
+                        >
+                          {['user', 'admin', 'super_admin'].map((roleOption) => (
+                            <Button
+                              key={roleOption}
+                              color={row.role === roleOption ? 'primary' : 'inherit'}
+                              onClick={() => handleRoleChange(row.id, roleOption)}
+                              disabled={roleLoadingMap[row.id]}
+                            >
+                              {roleOption.replace('_', ' ')}
+                            </Button>
+                          ))}
+                        </ButtonGroup>
+                      </Stack>
                     </TableCell>
                   </TableRow>
                 );

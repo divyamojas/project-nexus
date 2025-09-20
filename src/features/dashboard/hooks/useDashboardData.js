@@ -1,12 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import {
-  getCurrentUserFirstName,
-  getMyLoans,
-  getSavedBooks,
-  getTransfers,
-  getUserReviews,
-} from '@/services';
+import { getMyLoans, getSavedBooks, getTransfers, getUserReviews } from '@/services';
 import { getRequestsForUser } from '@/utilities';
 import { logError } from '@/utilities/logger';
 
@@ -101,12 +95,11 @@ export default function useDashboardData({
       return;
     }
     try {
-      const [req, trf, saved, rev, name, myLoans] = await Promise.all([
+      const [req, trf, saved, rev, myLoans] = await Promise.all([
         getRequestsForUser(user),
         getTransfers(),
         getSavedBooks(user),
         getUserReviews(user),
-        getCurrentUserFirstName(user),
         getMyLoans({ role: 'borrower' }),
       ]);
 
@@ -114,7 +107,7 @@ export default function useDashboardData({
       setTransfers(trf);
       setSavedBooks(saved);
       setReviews(rev);
-      setUserFirstName(name || firstNameFromContext || user?.first_name || 'Friend');
+      setUserFirstName(firstNameFromContext || user?.first_name || 'Friend');
 
       const borrowed = (myLoans || []).map((loan) => ({
         id: loan.book?.id,

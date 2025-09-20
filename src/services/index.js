@@ -32,7 +32,7 @@ export {
 
 export { insertFeedback } from './feedbackService';
 
-export { getCurrentUserFirstName, getUserProfile } from './profileService';
+export { getUserProfile } from './profileService';
 
 export { subscribeToBookChanges, unsubscribeFromBookChanges } from './realtimeService';
 
@@ -56,6 +56,9 @@ export { addBookReview, getBookReviews, getBookRatingSummary } from './bookRevie
 export {
   listUsers,
   updateUserRole,
+  updateUserApprovalStatus,
+  approveUserAccount,
+  rejectUserAccount,
   getAllBooks,
   getAllBookRequests,
   getAllBookLoans,

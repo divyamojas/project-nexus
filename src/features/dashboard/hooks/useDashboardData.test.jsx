@@ -3,7 +3,6 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import useDashboardData from './useDashboardData';
 
 const servicesMocks = vi.hoisted(() => ({
-  getCurrentUserFirstName: vi.fn(),
   getMyLoans: vi.fn(),
   getSavedBooks: vi.fn(),
   getTransfers: vi.fn(),
@@ -18,7 +17,6 @@ vi.mock('@/services', () => servicesMocks);
 vi.mock('@/utilities', () => utilitiesMocks);
 
 const {
-  getCurrentUserFirstName: mockGetCurrentUserFirstName,
   getMyLoans: mockGetMyLoans,
   getSavedBooks: mockGetSavedBooks,
   getTransfers: mockGetTransfers,
@@ -50,7 +48,6 @@ describe('useDashboardData', () => {
     await waitFor(() => expect(result.current.initialLoaded).toBe(true));
 
     expect(mockGetRequestsForUser).not.toHaveBeenCalled();
-    expect(mockGetCurrentUserFirstName).not.toHaveBeenCalled();
     expect(mockGetMyLoans).not.toHaveBeenCalled();
     expect(mockGetSavedBooks).not.toHaveBeenCalled();
     expect(mockGetTransfers).not.toHaveBeenCalled();
@@ -67,7 +64,6 @@ describe('useDashboardData', () => {
     mockGetTransfers.mockResolvedValue([{ id: 'transfer-1' }]);
     mockGetSavedBooks.mockResolvedValue([{ id: 'book-1' }]);
     mockGetUserReviews.mockResolvedValue({ given: [], received: [{ id: 'review-1' }] });
-    mockGetCurrentUserFirstName.mockResolvedValue('Taylor');
     mockGetMyLoans.mockResolvedValue([
       {
         id: 'loan-1',
@@ -124,7 +120,6 @@ describe('useDashboardData', () => {
     mockGetTransfers.mockResolvedValue([]);
     mockGetSavedBooks.mockResolvedValue([]);
     mockGetUserReviews.mockResolvedValue({ given: [], received: [] });
-    mockGetCurrentUserFirstName.mockResolvedValue('Taylor');
     mockGetMyLoans.mockResolvedValue([]);
 
     const refreshBooks = vi.fn().mockResolvedValue();

@@ -6,11 +6,15 @@ import { updateRequestStatus } from './bookRequestService';
 import { markLoanReturned } from './bookLoanService';
 import { logError } from '@/utilities/logger';
 
+const APPROVAL_STATUSES = new Set(['pending', 'approved', 'rejected']);
+
 export async function listUsers() {
   try {
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, username, first_name, last_name, role, created_at, auth_users(email)')
+      .select(
+        'id, username, first_name, last_name, role, approval_status, created_at, auth_users(email)',
+      )
       .order('created_at', { ascending: true });
 
     const rows = data ?? [];
@@ -18,7 +22,7 @@ export async function listUsers() {
     if (error) {
       const fallback = await supabase
         .from('profiles')
-        .select('id, username, first_name, last_name, role, created_at')
+        .select('id, username, first_name, last_name, role, approval_status, created_at')
         .order('created_at', { ascending: true });
       if (fallback.error) throw fallback.error;
       return (
@@ -28,6 +32,7 @@ export async function listUsers() {
           firstName: row.first_name,
           lastName: row.last_name,
           role: row.role,
+          approvalStatus: row.approval_status ?? 'pending',
           email: '',
           createdAt: row.created_at,
           updatedAt: row.updated_at ?? null,
@@ -43,6 +48,7 @@ export async function listUsers() {
         firstName: row.first_name,
         lastName: row.last_name,
         role: row.role,
+        approvalStatus: row.approval_status ?? 'pending',
         email: authInfo?.email || '',
         createdAt: row.created_at,
         updatedAt: row.updated_at ?? null,
@@ -61,6 +67,43 @@ export async function updateUserRole(userId, role) {
     return true;
   } catch (error) {
     logError('adminService.updateUserRole failed', error, { userId, role });
+    throw error;
+  }
+}
+
+export async function updateUserApprovalStatus(userId, status) {
+  try {
+    if (!APPROVAL_STATUSES.has(status)) {
+      throw new Error(`Invalid approval status: ${status}`);
+    }
+    const { error } = await supabase
+      .from('profiles')
+      .update({ approval_status: status })
+      .eq('id', userId);
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    logError('adminService.updateUserApprovalStatus failed', error, { userId, status });
+    throw error;
+  }
+}
+
+export async function approveUserAccount(userId) {
+  try {
+    await updateUserApprovalStatus(userId, 'approved');
+    return true;
+  } catch (error) {
+    logError('adminService.approveUserAccount failed', error, { userId });
+    throw error;
+  }
+}
+
+export async function rejectUserAccount(userId) {
+  try {
+    await updateUserApprovalStatus(userId, 'rejected');
+    return true;
+  } catch (error) {
+    logError('adminService.rejectUserAccount failed', error, { userId });
     throw error;
   }
 }

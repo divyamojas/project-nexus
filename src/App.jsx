@@ -23,6 +23,7 @@ const BrowseBooks = lazy(() => import('@/features/books/BrowseBooks'));
 const Feedback = lazy(() => import('@/features/feedback/Feedback'));
 const NotFound = lazy(() => import('@/features/notFound/NotFound'));
 const ProfileSetup = lazy(() => import('@/features/profile/ProfileSetup'));
+const PendingApproval = lazy(() => import('@/features/auth/PendingApproval'));
 const PrivateRoute = lazy(() => import('@/components/common/PrivateRoute'));
 const Layout = lazy(() => import('@/components/common/Layout'));
 const AdminDashboard = lazy(() => import('@/features/admin/AdminDashboard'));
@@ -32,7 +33,7 @@ const protectedRoutes = [
   { path: '/dashboard', element: <Dashboard /> },
   { path: '/browse', element: <BrowseBooks /> },
   { path: '/feedback', element: <Feedback /> },
-  { path: '/profile', element: <ProfileSetup /> },
+  { path: '/profile', element: <ProfileSetup />, requireApproval: false },
 ];
 
 function RouteWrapper() {
@@ -65,17 +66,28 @@ function RouteWrapper() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
 
       {/* Protected Routes (mapped) */}
-      {protectedRoutes.map(({ path, element }) => (
+      {protectedRoutes.map(({ path, element, requireProfile = true, requireApproval = true }) => (
         <Route
           key={path}
           path={path}
           element={
-            <PrivateRoute>
+            <PrivateRoute requireProfile={requireProfile} requireApproval={requireApproval}>
               <Layout>{element}</Layout>
             </PrivateRoute>
           }
         />
       ))}
+
+      <Route
+        path="/pending-approval"
+        element={
+          <PrivateRoute requireProfile={false} requireApproval={false}>
+            <Layout>
+              <PendingApproval />
+            </Layout>
+          </PrivateRoute>
+        }
+      />
 
       <Route
         path="/admin"

@@ -34,7 +34,6 @@ export default async function processSignup({
   if (signupError) {
     setError(signupError.message);
   } else {
-    // After signup, prompt user to complete profile (set username)
-    navigate('/profile');
+    navigate('/pending-approval');
   }
 }

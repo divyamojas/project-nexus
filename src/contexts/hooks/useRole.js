@@ -3,6 +3,13 @@
 import { useUser } from './useUser';
 
 export default function useRole() {
-  const { role = 'user', isAdmin = false, isSuperAdmin = false } = useUser() || {};
-  return { role, isAdmin, isSuperAdmin };
+  const {
+    role = 'user',
+    isAdmin = false,
+    isSuperAdmin = false,
+    approvalStatus = 'pending',
+    isApproved = false,
+  } = useUser() || {};
+
+  return { role, isAdmin, isSuperAdmin, approvalStatus, isApproved };
 }

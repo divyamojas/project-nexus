@@ -4,35 +4,37 @@ import { useCallback, useEffect, useState } from 'react';
 import { userContext } from './userContextObject';
 
 import { useAuth } from './hooks/useAuth';
-import {
-  getCurrentUserFirstName,
-  getMyBooks,
-  getTransfers,
-  getUserProfile,
-  getUserReviews,
-} from '../services';
+import { getMyBooks, getTransfers, getUserProfile, getUserReviews } from '../services';
 import { getRequestsForBooksOfUsers } from '../utilities';
 
 // context object moved to ./userContextObject to satisfy Fast Refresh
 
 export const UserProvider = ({ children }) => {
   const { user } = useAuth();
-  const [firstName, setFirstName] = useState('');
   const [userProfile, setUserProfile] = useState(null);
   const [userReviews, setUserReviews] = useState({ given: [], received: [] });
   const [myBooks, setMyBooks] = useState([]);
   const [requests, setRequests] = useState({ incoming: [], outgoing: [] });
   const [transfers, setTransfers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [approvalStatus, setApprovalStatus] = useState('pending');
 
   const fetchUserProfile = useCallback(async () => {
-    const name = await getCurrentUserFirstName(user);
-    setFirstName(name || '');
-  }, [user]);
+    if (!user?.id) {
+      setUserProfile(null);
+      setApprovalStatus('pending');
+      return null;
+    }
 
-  const fetchCompleteUserProfile = useCallback(async () => {
     const profile = await getUserProfile(user);
-    setUserProfile(profile || null);
+    if (profile) {
+      setUserProfile(profile);
+      setApprovalStatus(profile.approval_status || 'pending');
+    } else {
+      setUserProfile(null);
+      setApprovalStatus('pending');
+    }
+    return profile || null;
   }, [user]);
 
   const fetchUserReviews = useCallback(async () => {
@@ -63,25 +65,27 @@ export const UserProvider = ({ children }) => {
       fetchMyBooks(),
       fetchRequests(),
       fetchTransfers(),
-      fetchCompleteUserProfile(),
     ]);
     setLoading(false);
-  }, [
-    fetchUserProfile,
-    fetchUserReviews,
-    fetchMyBooks,
-    fetchRequests,
-    fetchTransfers,
-    fetchCompleteUserProfile,
-  ]);
+  }, [fetchUserProfile, fetchUserReviews, fetchMyBooks, fetchRequests, fetchTransfers]);
 
   useEffect(() => {
-    if (user?.id) refresh();
+    if (user?.id) {
+      refresh();
+    } else {
+      setUserProfile(null);
+      setApprovalStatus('pending');
+      setLoading(false);
+    }
   }, [user?.id, refresh]);
 
   const role = userProfile?.role || 'user';
-  const isSuperAdmin = role === 'super_admin';
-  const isAdmin = isSuperAdmin || role === 'admin';
+  const firstName = userProfile?.first_name || '';
+  const isApproved = approvalStatus === 'approved';
+  const isPendingApproval = approvalStatus === 'pending';
+  const isRejected = approvalStatus === 'rejected';
+  const isSuperAdmin = isApproved && role === 'super_admin';
+  const isAdmin = isApproved && (role === 'admin' || role === 'super_admin');
 
   return (
     <userContext.Provider
@@ -89,6 +93,10 @@ export const UserProvider = ({ children }) => {
         user,
         userProfile,
         firstName,
+        approvalStatus,
+        isApproved,
+        isPendingApproval,
+        isRejected,
         userReviews,
         myBooks,
         requests,
