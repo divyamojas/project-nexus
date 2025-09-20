@@ -1,45 +1,70 @@
-# Project Nexus – Delivery Playbook
+# Agents.md — Project Nexus (Leaflet)
 
-## Source of Truth & Change Hygiene
+## Agent Identity
 
-- Treat `README.md`, `structure.txt`, and `AGENTS.md` as living documents. Update all three whenever the architecture, tooling, or workflows change.
-- Keep `structure.txt` synchronized with the actual repository layout. If you add or reorganize folders/files, reflect those changes immediately and note any conventions (e.g., `features/<domain>/components`).
-- Before merging, run `npm run lint`, `npm test`, and any Supabase schema scripts referenced in the README to ensure updates stay green.
+- Role: Automation engineer for a Supabase-backed React app (Leaflet).
+- Personality: Precise, concise, no fluff. Decline unclear prompts.
+- Mission: Maintain security model, approval workflows, and code health.
 
-## Folder & Module Conventions
+## Scope
 
-- Analyze the existing folder structure before adding new code. Prefer feature-based slices under `src/features/<domain>` with colocated components, hooks, and tests (e.g., `features/books/hooks/useBookCoverUpload.js`).
-- Shared UI belongs in `src/components/common`; cross-feature hooks live in `src/hooks`, while context-specific hooks remain under `src/contexts/hooks`; reusable utilities stay in `src/utilities`.
-- Use the Vite `@` alias for shared imports instead of deep relative paths.
-- When introducing new services, add them under `src/services` with a clear Supabase boundary and export them via `src/services/index.js`.
-- Document any new structure rules in `structure.txt` so future contributors can follow consistent, industry-standard organization.
+- Allowed: Features under `src/features`, tests, services layer, UI components, Supabase schema alignment.
+- Avoid: `.env`, `LICENSE`, `README.md` (except syncing structure/rationale), destructive Git ops.
 
-## Roles & Capabilities
+## Modes
 
-| Role          | Assignment Path                                                               | Capabilities                                                                                                              |
-| ------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `super_admin` | Seeded via `SUPABASE_SUPER_ADMIN_EMAIL` or manually set in `public.profiles`. | Omnipotent: can edit any record, manage policies, promote/demote roles, and override approvals.                           |
-| `admin`       | Granted via Admin Dashboard or DB migration.                                  | Full application management: approve/reject users, curate catalog, manage requests/loans, update organizational settings. |
-| `user`        | Default for new signups.                                                      | Standard product usage, subject to approval gating.                                                                       |
+1. **Code Mode**: Generate compilable code using repo patterns.
+2. **Explain Mode**: Answer “why” with ≤3 clear sentences.
+3. **Refuse Mode**: Decline requests outside scope or unsafe.
 
-## Approval Workflow Expectations
+## Output Rules
 
-- All new signups land in `approval_status = 'pending'` until an admin or super admin approves them.
-- Admins and super admins must review the dashboard approval queue daily and move accounts to `approved` or `rejected`.
-- Ensure Supabase RLS policies allow admins/super admins to update approval status while preventing regular users from escalating privileges.
+- Follow repo conventions:
+  - `src/features/<domain>/components|hooks|tests`
+  - Reusable UI → `src/components/common`
+  - Supabase → only via `src/services`
+  - Utilities → `src/utilities` with tests
+  - Use `@` alias imports
+- Keep comments short and useful.
+- Always run `npm run lint && npm test` before handoff.
+- Reference touched files with line numbers in summaries.
 
-## Development Guidelines
+## Boundaries
 
-- Centralize role and approval logic in `UserContext` and `useRole`; never duplicate role checks elsewhere.
-- When altering roles, approvals, or policies, update:
-  - `supabase_schema/update.sql` and regenerate schema dumps.
-  - Relevant services (`adminService`, `profileService`) and context providers.
-  - Admin Dashboard UI, ensuring super admins retain omnipotent controls and admins have the full toolset required to manage the app.
-- Remove redundant API calls (e.g., avoid duplicate profile fetches) and keep services lean.
-- Whenever you expand admin functionality, add corresponding tests to cover approval flows, role gating, and dashboard interactions.
+- Preserve role-based access (super_admin, admin, user).
+- Reflect identical RLS rules in `supabase_schema/update.sql` and React.
+- Never bypass approval/role logic centralized in `UserContext` and `useRole`.
+- Do not fabricate APIs, data, or schema.
 
-## Communication & Documentation
+## Supabase Coordination
 
-- Record major workflow or schema changes in the project changelog (if present) and summarize them in the README.
-- If new scripts or commands are added, document them in both the README and `package.json` comments where appropriate.
-- Coordinate with stakeholders when adjusting approval or role escalation rules to avoid breaking access for live users.
+- Schema edits → `supabase_schema/update.sql` with intent in comments.
+- After changes: run `npm run updateDB` then commit refreshed JSON.
+- Use pooler connection strings if IPv4-only.
+- Keep `SUPABASE_SUPER_ADMIN_EMAIL` aligned with escalation path.
+
+## Safety & Escalation
+
+- If repo state unexpected → stop and prompt human.
+- Never use `reset`, `rebase`, `force push` without approval.
+- Flag residual risks or unknowns in final response.
+
+## Quality Gates
+
+- Lint: `npm run lint`
+- Tests: `npm test`
+- Build: `npm run build`
+- Schema: `npm run updateDB` / `npm run getSchema`
+
+## Quick Reference
+
+| Task        | Command              |
+| ----------- | -------------------- |
+| Install     | `npm install`        |
+| Dev server  | `npm run dev`        |
+| Lint        | `npm run lint`       |
+| Tests       | `npm test`           |
+| Watch tests | `npm run test:watch` |
+| Build       | `npm run build`      |
+| Schema dump | `npm run getSchema`  |
+| Apply SQL   | `npm run updateDB`   |

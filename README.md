@@ -1,231 +1,256 @@
 # Leaflet
 
-Leaflet is a community-first library for lending and borrowing books. The frontend is a Vite-powered React SPA that talks to Supabase for authentication, storage, realtime updates, and Postgres access. This repository contains everything you need to run Leaflet locally, contribute new features, and maintain the Supabase schema metadata that accompanies the app.
+Leaflet is a community-first library for lending and borrowing books. Think of it as a neighbourhood shelf that lives online: anyone can request to join, admins keep the catalogue tidy, and super admins make sure the rules stay fair. The frontend is a Vite-powered React single-page app, and Supabase handles authentication, databases, and realtime updates.
 
 ---
 
 ## Table of Contents
 
-1. [Key Capabilities](#key-capabilities)
-2. [Tech Stack](#tech-stack)
-3. [Quick Start](#quick-start)
-   - [Prerequisites](#prerequisites)
-   - [Clone & Install](#clone--install)
-   - [Environment Variables](#environment-variables)
-   - [Run Locally](#run-locally)
-4. [Supabase & Schema Dumps](#supabase--schema-dumps)
-5. [Role-Based Administration](#role-based-administration)
-6. [Project Structure](#project-structure)
-7. [Scripts & Tooling](#scripts--tooling)
-8. [Architecture Notes](#architecture-notes)
-9. [Development Guidelines](#development-guidelines)
-10. [Testing & Quality](#testing--quality)
-11. [Deployment Tips](#deployment-tips)
-12. [Further Reading](#further-reading)
+1. [Welcome & Purpose](#welcome--purpose)
+2. [Guided Project Tour](#guided-project-tour)
+3. [Plain-Language Setup](#plain-language-setup)
+   - [Step 1: Gather your tools](#step-1-gather-your-tools)
+   - [Step 2: Create a Supabase project](#step-2-create-a-supabase-project)
+   - [Step 3: Configure environment variables](#step-3-configure-environment-variables)
+   - [Step 4: Install dependencies](#step-4-install-dependencies)
+   - [Step 5: Start the app](#step-5-start-the-app)
+4. [Everyday App Workflow](#everyday-app-workflow)
+   - [New member journey](#new-member-journey)
+   - [Admin daily checklist](#admin-daily-checklist)
+   - [Super admin safety net](#super-admin-safety-net)
+5. [How Data Flows Through Leaflet](#how-data-flows-through-leaflet)
+   - [Authentication & sessions](#authentication--sessions)
+   - [Profiles, approvals & roles](#profiles-approvals--roles)
+   - [Books, requests & loans](#books-requests--loans)
+   - [Realtime updates](#realtime-updates)
+6. [Code Map in Plain English](#code-map-in-plain-english)
+7. [Why We Built It This Way](#why-we-built-it-this-way)
+8. [Tools, Commands & Scripts](#tools-commands--scripts)
+9. [Quality Checks, Deployment & Next Steps](#quality-checks-deployment--next-steps)
+10. [Further Resources](#further-resources)
 
 ---
 
-## Key Capabilities
+## Welcome & Purpose
 
-- ✅ Email/password authentication (with domain allowlist) via Supabase Auth
-- ✅ Profile onboarding with avatar uploads to Supabase Storage
-- ✅ Browse, filter, and save books with realtime updates across clients
-- ✅ Add books with catalog lookup, cover upload, and request workflows
-- ✅ Request/accept/reject/cancel borrowing with live status tracking
-- ✅ Role-based admin dashboard for moderating books, requests, and loans
-- ✅ Super-admin can promote/demote users and export schema snapshots
+We built Leaflet to solve a simple problem: neighbours and co-workers own interesting books that sit unread. Leaflet keeps track of who owns what, who wants to borrow it, and how those loans progress. The project balances three audiences:
 
----
+- **Members** who just want to join, browse, and borrow.
+- **Admins** who approve new members and keep the catalogue organised.
+- **Super admins** who can rescue any account or policy if something breaks.
 
-## Tech Stack
-
-| Layer        | Technology                                   |
-| ------------ | -------------------------------------------- |
-| Frontend     | React 19, React Router 7, Material UI 7      |
-| State        | React Context + custom hooks                 |
-| Animations   | Framer Motion                                |
-| Backend APIs | Supabase (Auth, Postgres, Realtime, Storage) |
-| Tooling      | Vite, ESLint, Prettier, Vitest               |
+This README explains the entire workflow in plain language so anyone—technical or not—can stand up the app, understand its moving parts, and maintain it with confidence.
 
 ---
 
-## Quick Start
+## Guided Project Tour
 
-### Prerequisites
+- **Frontend shell:** A React SPA (Single Page Application) created with Vite for fast local development. Routing lives in `src/App.jsx`, and we lean on Material UI for layout and components.
+- **State management:** Three main React Contexts keep the UI in sync:
+  - `AuthContext` tracks who is logged in.
+  - `UserContext` loads the member profile, approval status, loans, and saved books.
+  - `BookContext` fetches book lists, keeps filters applied, and listens for realtime updates.
+- **Supabase backend:** Supabase Auth manages signups/login, Postgres stores books and profiles, Storage keeps avatars, and the realtime channel notifies the UI when books change.
+- **Services layer:** Every call to Supabase is wrapped in a service (e.g., `src/services/bookService.js`). UI components never talk to Supabase directly; they go through these functions for consistent permissions and error handling.
+- **Admin tools:** The admin dashboard (under `/admin`) shows approval queues, catalogue health, active loans, and user management. Admins can promote, demote, or archive content without leaving the dashboard.
 
-- **Node.js 18+** (ESM support & fetch in Node)
-- **npm** (ships with Node)
-- **Supabase project** with Postgres, Realtime, Storage enabled
+If you would rather watch it run than read code, follow the setup instructions below and click through the app—the routing, modals, and flows mirror what you see described here.
 
-### Clone & Install
+---
+
+## Plain-Language Setup
+
+Setting up Leaflet takes about 20 minutes. You only need basic computer skills: copying text, pasting keys, and running simple commands.
+
+### Step 1: Gather your tools
+
+- **Node.js 18 or newer**: download from [nodejs.org](https://nodejs.org/). Installing Node also installs `npm`, the package manager we use.
+- **A Supabase account**: sign up at [supabase.com](https://supabase.com/) with any email address.
+- **Git (optional but helpful)**: lets you download updates and contribute back.
+
+### Step 2: Create a Supabase project
+
+1. Log in to Supabase and click **New project**.
+2. Give it a name (for example “leaflet-dev”).
+3. Choose the **Free** plan and any region close to you.
+4. Set a database password you will remember.
+5. Once the project finishes provisioning, open **Settings → API**. You will need:
+   - the **Project URL** (looks like `https://your-project.supabase.co`)
+   - the **anon public key**
+6. In **Authentication → URL Configuration** add `http://localhost:5173` to the redirect URLs so Supabase lets you sign in during local development.
+7. In **Authentication → Policies** create (or note) the email allowlist you want. By default Leaflet accepts `@sprinklr.com` or `@gmail.com` emails; you can change this later in code under `src/constants/constants.js`.
+
+### Step 3: Configure environment variables
+
+1. In the project root, duplicate `.env.sample` if it exists or create a new `.env` file.
+2. Add the Supabase values you collected:
+
+   ```ini
+   VITE_SUPABASE_URL=https://<your-project>.supabase.co
+   VITE_SUPABASE_ANON_KEY=<your-public-anon-key>
+   SUPABASE_SUPER_ADMIN_EMAIL=<email-that-should-start-as-super-admin>
+   ```
+
+3. If you want to export schema snapshots or run SQL migrations from your machine, also add the database connection string (find it under **Settings → Database → Connection String**):
+
+   ```ini
+   SUPABASE_DB_URL=postgresql://postgres:<your-password>@<host>:5432/postgres
+   ```
+
+   This optional value lets scripts in `supabase_schema/` connect securely.
+
+> Tip: Environment variables stay on your computer. Do not share `.env` or commit it to Git.
+
+### Step 4: Install dependencies
+
+Open a terminal (or Command Prompt on Windows), change into the project folder, and run:
 
 ```bash
-git clone https://github.com/your-org/project-nexus.git
-cd project-nexus
 npm install
 ```
 
-> ⚠️ You may see a warning from Husky if Git hooks cannot be installed (e.g., in read-only environments). This does not impact local development.
+This downloads the React, Supabase, and tooling packages listed in `package.json`.
 
-### Environment Variables
-
-Create a `.env` file in the project root. At minimum you need client-side Supabase credentials:
-
-```
-VITE_SUPABASE_URL=https://<project-ref>.supabase.co
-VITE_SUPABASE_ANON_KEY=<anon-key>
-```
-
-If you plan to export Supabase schema metadata (see [Supabase & Schema Dumps](#supabase--schema-dumps)), also populate the database connection variables listed in `.env.sample`.
-
-### Run Locally
+### Step 5: Start the app
 
 ```bash
 npm run dev
 ```
 
-Open http://localhost:5173 in your browser. Supabase Auth requires exact URL matches for redirect URIs, so ensure `http://localhost:5173` is whitelisted in your Supabase project settings.
+Visit `http://localhost:5173` in your browser. The Vite dev server live-reloads whenever you edit files. Use the **Signup** form to create a new account with an allowed email domain. Your first signup should use the `SUPABASE_SUPER_ADMIN_EMAIL` so you have full control.
 
 ---
 
-## Supabase & Schema Dumps
+## Everyday App Workflow
 
-Leaflet tracks Supabase metadata (tables, columns, RLS policies, etc.) in JSON files under `supabase_schema/`. To refresh them after changing the database:
+### New member journey
 
-1. Ensure you have database credentials in `.env` (`SUPABASE_DB_URL` _or_ host/user/password) and `SUPABASE_SUPER_ADMIN_EMAIL`.
-2. Use the pooler connection string if you are on an IPv4-only network (e.g., `aws-0-<region>.pooler.supabase.com`).
-3. Run manually whenever you need fresh metadata:
-   ```bash
-   npm run getSchema
-   ```
-4. Commit the updated JSON files alongside the database migration (`supabase_schema/update.sql`).
+1. **Signup:** A visitor enters an approved email and password. Supabase Auth creates the account but marks it as `pending` approval.
+2. **Email confirmation:** Supabase sends a confirmation email. After clicking the link, the user can log in but still sees a “Pending Approval” screen.
+3. **Profile setup:** Once approved, the member fills out their name, preferred contact info, and optionally uploads an avatar. The profile lives in the `profiles` table.
+4. **Browse & request:** Members explore the catalogue (books pulled from `books` and `catalog` tables). They can save favourites, request to borrow, and track requests from the dashboard.
+5. **Borrow & return:** When a lender accepts a request, a loan record is created. The borrower can see due dates; the lender marks the book returned.
 
-> Tip: To apply SQL changes and refresh metadata in one step, run `npm run updateDB`. The script will apply `supabase_schema/update.sql`, invoke `npm run getSchema`, and then clear `update.sql`.
+### Admin daily checklist
 
-The script reads `supabase_schema/getSchemaDump.sql` which is organised into nine sections (tables, columns, constraints, indexes, triggers, views, functions, sequences, RLS policies). Each section is written atomically to a matching JSON file.
+1. Open the **Admin Dashboard** (`/admin`).
+2. Review the **Approval Queue**: approve or reject pending users.
+3. Check **Books** for duplicates or archived items and tidy as needed.
+4. Monitor **Requests** and **Loans** for anything stuck or overdue.
+5. Use **User Management** to promote helpful members to admins or demote inactive admins back to regular users.
 
----
+### Super admin safety net
 
-## Role-Based Administration
-
-Leaflet recognises three roles. Policies are enforced by Supabase RLS functions defined in `supabase_schema/update.sql`.
-
-| Role          | Description & Powers                                                                                                                           |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `user`        | Default. Full end-user functionality but no moderation controls.                                                                               |
-| `admin`       | Can access `/admin` to moderate books, requests, and active loans.                                                                             |
-| `super_admin` | Seeded account determined by the `SUPABASE_SUPER_ADMIN_EMAIL` environment variable. Can promote/demote roles, has unrestricted access via RLS. |
-
-See [AGENTS.md](AGENTS.md) for day-to-day responsibilities and how to manage roles through the Admin Dashboard.
+- Can do everything an admin does plus:
+  - Update any user’s role instantly.
+  - Export schema snapshots via `npm run getSchema` to audit policies.
+  - Apply emergency SQL fixes by editing `supabase_schema/update.sql` and running `npm run updateDB`.
+- Should regularly check that RLS (Row Level Security) policies still align with the same role rules our automation uses (documented for Codex in `AGENTS.md`).
 
 ---
 
-## Project Structure
+## How Data Flows Through Leaflet
+
+### Authentication & sessions
+
+- `AuthContext` (`src/contexts/AuthContext.jsx`) listens to Supabase Auth. It keeps the current session in state and exposes simple helpers like `signup`, `login`, and `logout`.
+- Email domains are validated before any request leaves the browser using `ALLOWED_EMAIL_DOMAINS` (`src/constants/constants.js`). This prevents unwanted signups.
+- `useSessionTracker` (`src/hooks/useSessionTracker.js`) subscribes to Supabase session events so the UI updates instantly when someone logs in or out.
+
+### Profiles, approvals & roles
+
+- After Auth signs a member in, `UserContext` (`src/contexts/UserContext.jsx`) fetches their profile via `getUserProfile` (`src/services/profileService.js`).
+- Approval status lives on the profile record. `UserContext` exposes `isApproved`, `isPendingApproval`, and `role` so components know when to gate screens.
+- The route guards (`PrivateRoute.jsx` and `AdminRoute.jsx`) rely on those flags to redirect members who are still pending or who lack admin rights.
+- Role changes flow only through services inside `src/services/adminService.js`. Admins and super admins trigger these functions from the dashboard tables.
+
+### Books, requests & loans
+
+- `BookContext` loads all relevant book data using `getBooks`, `getSavedBooks`, and `getBookWithRelations` from `src/services`. It also exposes helpers to archive, delete, or save a book and to send borrow requests.
+- When a member requests a book, `requestBorrowBook` (`src/services/bookRequestService.js`) writes a record to `book_requests`. The response updates both the main list and the saved-books view to keep the UI consistent.
+- Approving a request creates a loan via `bookLoanService.js`. The borrower sees due dates in their dashboard; the lender (or an admin) can mark the loan as returned.
+- Shared helpers in `src/utilities` (for example `validateAndSubmitBookForm.js`) keep validation and form submission logic away from components so features stay easy to maintain.
+
+### Realtime updates
+
+- `subscribeToBookChanges` (`src/services/realtimeService.js`) opens a Supabase realtime channel for `books` and related tables.
+- When Supabase broadcasts an insert, update, or delete, `BookContext` refreshes the local list or performs a focused fetch (`addBookById`) so viewers see changes without refreshing.
+- Window-level custom events (e.g., `'books:added'`) ensure optimistic UI updates when the current member adds a book.
+
+---
+
+## Code Map in Plain English
 
 ```
-.
-├── AGENTS.md                  # Role definitions & responsibilities
-├── README.md
-├── scripts/
-│   ├── getSchema.js           # Supabase schema export utility
-│   └── updateDB.js            # Applies update.sql and refreshes schema
-├── supabase_schema/
-│   ├── getSchemaDump.sql      # SQL queries executed by getSchema.js
-│   ├── update.sql             # RLS/seed/role helpers to run on Supabase
-│   └── *.json                 # Generated metadata snapshots
 ├── src/
-│   ├── App.jsx
-│   ├── main.jsx
+│   ├── App.jsx                 # Routes and layout wiring
+│   ├── main.jsx                # React entry point
 │   ├── components/
-│   │   ├── common/            # Reusable UI (AdminRoute, Layout, loaders...)
-│   │   └── providers/         # Context providers (ErrorBoundary, Snackbar...)
-│   ├── contexts/              # Contexts & hooks (Auth, Book, User, useRole)
-│   ├── features/              # Domain-driven slices w/ colocated components & hooks
-│   ├── services/              # Supabase data access layer (adminService, bookService...)
-│   ├── hooks/                 # Cross-feature hooks (session, debounce, base image drop)
-│   ├── theme/                 # Theme providers & tokens
-│   └── utilities/             # Pure helpers (form validation, logger, auth flows)
-└── structure.txt              # Up-to-date outline (generated manually)
+│   │   ├── common/             # Shared UI pieces like loaders and route guards
+│   │   └── providers/          # Error boundaries and Snackbar context
+│   ├── contexts/               # Auth, User, Book providers plus their hooks
+│   ├── features/               # Screens grouped by domain (auth, books, admin…)
+│   ├── hooks/                  # Reusable hooks (session tracking, debouncing)
+│   ├── services/               # Supabase access layer (one file per domain)
+│   ├── theme/                  # Material UI theme helpers
+│   └── utilities/              # Pure helper functions and validations
+├── supabase_schema/            # SQL helper + JSON snapshots of database metadata
+├── scripts/                    # Node scripts for schema exports and migrations
+├── structure.txt               # Plain-text outline kept in sync with the repo
+└── AGENTS.md                   # Automation instructions for Codex (not a human guide)
 ```
 
-See `structure.txt` for a freshly generated tree snapshot.
+Keep `structure.txt` aligned with any structural change so new contributors can rely on it as a quick map.
 
 ---
 
-## Scripts & Tooling
+## Why We Built It This Way
 
-| Command              | Description                                                         |
-| -------------------- | ------------------------------------------------------------------- |
-| `npm run dev`        | Start Vite dev server                                               |
-| `npm run build`      | Production build                                                    |
-| `npm run preview`    | Preview built app                                                   |
-| `npm run lint`       | ESLint across the repo                                              |
-| `npm run test`       | Run Vitest unit/integration suites                                  |
-| `npm run test:watch` | Vitest in watch mode                                                |
-| `npm run getSchema`  | Export Supabase metadata to JSON (requires DB creds)                |
-| `npm run updateDB`   | Apply SQL in supabase_schema/update.sql, refresh schema, reset file |
+- **Separation of concerns:** UI components stay lean because data fetching and mutations live in services. This reduces the risk of bypassing security policies.
+- **Context-driven state:** React Contexts supply the minimal data each screen needs—sessions, profiles, books—without dragging in global state libraries.
+- **Supabase-first backend:** Supabase combines authentication, database, file storage, and realtime messaging with generous free tiers, making it ideal for community projects.
+- **Role-based access control:** Roles (`user`, `admin`, `super_admin`) match the operating rules maintained for Codex in `AGENTS.md`, and RLS policies in `supabase_schema/update.sql` mirror the same structure so database access stays consistent.
+- **Testable utilities:** Form validation, auth flows, and other logic sit in `src/utilities` with dedicated tests. This keeps regressions low when requirements change.
 
 ---
 
-## Architecture Notes
+## Tools, Commands & Scripts
 
-1. **Services (data access)**
+| Command              | What it does and why it matters                                                                |
+| -------------------- | ---------------------------------------------------------------------------------------------- |
+| `npm run dev`        | Starts the Vite dev server at `http://localhost:5173` with live reloads.                       |
+| `npm run build`      | Creates an optimised production bundle (useful before deploying to Vercel or similar).         |
+| `npm run preview`    | Serves the built bundle locally to mimic production.                                           |
+| `npm run lint`       | Runs ESLint with project rules; fixes style issues early.                                      |
+| `npm run test`       | Executes Vitest suites for hooks, utilities, and contexts.                                     |
+| `npm run test:watch` | Runs tests continuously while you develop.                                                     |
+| `npm run getSchema`  | Pulls Supabase metadata into JSON snapshots (needs `SUPABASE_DB_URL`).                         |
+| `npm run updateDB`   | Applies `supabase_schema/update.sql`, refreshes metadata, then clears the SQL file for safety. |
 
-   - Located under `src/services/**` and the sole authorised place to use Supabase JS client.
-   - Each file targets a domain (`bookService`, `adminService`, etc.).
-   - `src/services/index.js` re-exports a curated surface for UI consumption.
-
-2. **Contexts (state orchestration)**
-
-   - `AuthContext` wraps Supabase session handling.
-   - `BookContext` coordinates book lists, saved state, realtime listeners.
-   - `UserContext` aggregates profile data, requests, and loans; exposes `role`, `isAdmin`, `isSuperAdmin`.
-
-3. **Hooks & Utilities**
-
-   - Cross-cutting hooks live in `src/hooks` (`useImageDrop`, `useSession`, `useDebounce`). Feature-specific hooks sit beside their screens under `src/features/<domain>/hooks`.
-   - Utilities are pure, testable helpers (validation, login/signup flows, logging).
-
-4. **Admin Dashboard Flow**
-   - `AdminRoute` ensures an authenticated admin (or super admin) can access `/admin` without forcing profile completion.
-   - `AdminDashboard` relies on `adminService.js` to list users (for super admin) and moderate books/requests/loans.
-   - RLS policies in `supabase_schema/update.sql` mirror the checks enforced in the client.
+When introducing new tooling or scripts, document them here and in `package.json` comments so the team stays aligned.
 
 ---
 
-## Development Guidelines
+## Quality Checks, Deployment & Next Steps
 
-- **Boundary discipline**: UI never touches Supabase directly. Add new calls to `src/services/**` and export via `index.js`.
-- **Profile-guarded routes**: `PrivateRoute` defaults to requiring a completed profile but can be relaxed via `requireProfile={false}` (used for `/admin`).
-- **Role checks**: Use `useRole()` or `useUser()` so logic stays consistent with context state.
-- **Supabase changes**: Update `supabase_schema/update.sql`, then regenerate JSON via `npm run getSchema`, and document in commit/PR.
-- **Error handling**: Services call `logError` with context; UI shows toast or inline feedback.
+- **Before pushing changes** run `npm run lint` and `npm test`. Both should pass without warnings.
+- **Database changes** belong in `supabase_schema/update.sql`. After editing, run `npm run getSchema` to refresh the JSON snapshots and commit them together.
+- **Deployments**: supply `.env` values to your hosting provider (for example Vercel) and run `npm run build` to verify the production bundle. Ensure Supabase policies in your hosted project match the checked-in SQL.
+- **Monitoring**: Super admins should periodically export the schema to confirm RLS still protects sensitive data. Admins should review the approval queue daily so newcomers are not blocked.
 
----
+Suggested follow-up tasks once you are comfortable:
 
-## Testing & Quality
-
-- **Unit / Integration**: `npm run test` (Vitest) covers hooks, contexts, and utilities.
-- **Linting**: `npm run lint` (ESLint) with React recommended rules.
-- **Pre-commit**: Husky + lint-staged run `eslint --fix` + `prettier` on staged files when hooks are enabled.
+1. Tailor the email allowlist in `src/constants/constants.js` to match your community.
+2. Add onboarding content or welcome emails for newly approved users.
+3. Expand test coverage around any new approval or loan workflows you introduce.
 
 ---
 
-## Deployment Tips
+## Further Resources
 
-- **Environment variables**: Supply the same `.env` values to your hosting provider (e.g., Vercel). Never expose service-role keys.
-- **Supabase policies**: Ensure `supabase_schema/update.sql` has been executed on your Supabase instance. Run schema exports before each release to catch drift.
-- **IPv4 vs IPv6**: Supabase direct connection hosts are IPv6-only. Use the transaction or session pooler host when connecting from IPv4 environments (local dev, CI).
-
----
-
-## Further Reading
-
-- [AGENTS.md](AGENTS.md) — Roles, responsibilities, and admin workflows
-- [Supabase Docs](https://supabase.com/docs)
-- [Material UI Docs](https://mui.com/)
-- [Framer Motion](https://www.framer.com/motion/)
-
----
+- [`AGENTS.md`](AGENTS.md) — automation notes used by Codex (humans can stick with this README).
+- [`structure.txt`](structure.txt) — current repository layout, updated with every structural change.
+- [Supabase Docs](https://supabase.com/docs) — guides for auth, database policies, and storage.
+- [Material UI](https://mui.com/) and [Framer Motion](https://www.framer.com/motion/) — component and animation systems used in the UI.
 
 Built with care for communities that read. 📚🌿
