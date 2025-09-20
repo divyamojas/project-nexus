@@ -27,7 +27,7 @@
     "roles": "{public}",
     "cmd": "INSERT",
     "qual": null,
-    "with_check": "(auth.uid() = requested_by)"
+    "with_check": "((auth.uid() = requested_by) AND (requested_by <> requested_to) AND (requested_to = ( SELECT b.user_id\n   FROM books b\n  WHERE (b.id = book_requests.book_id))))"
   },
   {
     "schema": "public",
@@ -37,7 +37,7 @@
     "roles": "{public}",
     "cmd": "UPDATE",
     "qual": "((auth.uid() = requested_by) OR (auth.uid() = requested_to))",
-    "with_check": "((auth.uid() = requested_by) OR (auth.uid() = requested_to))"
+    "with_check": "(((auth.uid() = requested_by) OR (auth.uid() = requested_to)) AND (requested_by <> requested_to) AND (requested_to = ( SELECT b.user_id\n   FROM books b\n  WHERE (b.id = book_requests.book_id))))"
   },
   {
     "schema": "public",
@@ -287,7 +287,7 @@
     "roles": "{public}",
     "cmd": "INSERT",
     "qual": null,
-    "with_check": "((auth.uid() = from_user) OR (auth.uid() = to_user))"
+    "with_check": "(((auth.uid() = from_user) OR (auth.uid() = to_user)) AND (EXISTS ( SELECT 1\n   FROM book_requests br\n  WHERE ((br.id = transfers.request_id) AND (br.book_id = transfers.book_id) AND (br.requested_by = transfers.to_user) AND (br.requested_to = transfers.from_user) AND (br.status = 'accepted'::text)))))"
   },
   {
     "schema": "public",
@@ -297,7 +297,7 @@
     "roles": "{public}",
     "cmd": "UPDATE",
     "qual": "((auth.uid() = from_user) OR (auth.uid() = to_user))",
-    "with_check": null
+    "with_check": "(((auth.uid() = from_user) OR (auth.uid() = to_user)) AND (EXISTS ( SELECT 1\n   FROM book_requests br\n  WHERE ((br.id = transfers.request_id) AND (br.book_id = transfers.book_id) AND (br.requested_by = transfers.to_user) AND (br.requested_to = transfers.from_user)))))"
   },
   {
     "schema": "public",
@@ -327,7 +327,7 @@
     "roles": "{public}",
     "cmd": "INSERT",
     "qual": null,
-    "with_check": "(auth.uid() = reviewer_id)"
+    "with_check": "((auth.uid() = reviewer_id) AND (reviewer_id <> reviewee_id) AND (EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE (p.id = user_reviews.reviewee_id))))"
   },
   {
     "schema": "storage",
