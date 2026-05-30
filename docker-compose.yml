@@ -1,0 +1,53 @@
+name: project-nexus
+
+networks:
+  nexus:
+    driver: bridge
+
+volumes:
+  nexus_node_modules:
+
+services:
+  nexus-light:
+    container_name: nexus-light
+    build:
+      context: ./project-nexus-light
+      dockerfile: Dockerfile
+    volumes:
+      - ./project-nexus-light:/app
+      - nexus_node_modules:/app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    env_file:
+      - path: ./project-nexus-light/.env
+        required: false          # start.sh warns if missing; app boots without it
+    networks:
+      - nexus
+    restart: unless-stopped
+
+  nexus-source:
+    container_name: nexus-source
+    build:
+      context: ./project-nexus-source
+      dockerfile: Dockerfile
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./project-nexus-source:/app
+    ports:
+      - "127.0.0.1:8000:8000"   # browser reaches API at http://localhost:8000
+    env_file:
+      - path: ./project-nexus-source/.env
+        required: false          # api profile only activates when .env has required keys
+    networks:
+      - nexus
+    profiles:
+      - api
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

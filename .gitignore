@@ -1,5 +1,17 @@
+# ─── Sub-repos (separate git repos nested here) ──────────────────────────────
+project-nexus-light/
+project-nexus-source/
+
+# ─── Start logs ───────────────────────────────────────────────────────────────
+logs/
+
+# ─── Secrets ──────────────────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ─── Legacy Vite app (root was a SPA before restructure) ─────────────────────
 # Logs
-logs
 *.log
 npm-debug.log*
 yarn-debug.log*

@@ -1,70 +1,42 @@
-# Agents.md — Project Nexus (Leaflet)
+# Agents Guide — project-nexus (Root Orchestrator)
 
-## Agent Identity
+## Purpose
+Docker orchestration for Leaflet. This repo contains no application code.
 
-- Role: Automation engineer for a Supabase-backed React app (Leaflet).
-- Personality: Precise, concise, no fluff. Decline unclear prompts.
-- Mission: Maintain security model, approval workflows, and code health.
+## Out of Scope
+Do NOT add application code here. All logic lives in sub-repos:
+- `project-nexus-light/` — Next.js frontend
+- `project-nexus-source/` — FastAPI backend
 
-## Scope
+## Key Files
+| File | Role |
+|------|------|
+| `docker-compose.yml` | Three services: `app`, `proxy`, `api` (api under `api` profile) |
+| `start.sh` | Canonical entrypoint — all flags documented in file header |
+| `test.sh` | Delegates to `./start.sh --test` |
+| `push.sh` | Pushes all three repos |
+| `logs/` | Timestamped start logs (gitignored) |
 
-- Allowed: Features under `src/features`, tests, services layer, UI components, Supabase schema alignment.
-- Avoid: `.env`, `LICENSE`, `README.md` (except syncing structure/rationale), destructive Git ops.
+## Repo Layout
+```
+project-nexus/
+  project-nexus-light/    (nested separate git repo — gitignored by root)
+  project-nexus-source/   (nested separate git repo — gitignored by root)
+  docker-compose.yml
+  start.sh
+  ...
+```
 
-## Modes
+## Running
+```bash
+./start.sh            # start everything
+./start.sh --status   # check services
+./start.sh --down     # stop
+./start.sh --doctor   # diagnose issues
+./start.sh --logs     # tail logs
+```
 
-1. **Code Mode**: Generate compilable code using repo patterns.
-2. **Explain Mode**: Answer “why” with ≤3 clear sentences.
-3. **Refuse Mode**: Decline requests outside scope or unsafe.
-
-## Output Rules
-
-- Follow repo conventions:
-  - `src/features/<domain>/components|hooks|tests`
-  - Reusable UI → `src/components/common`
-  - Supabase → only via `src/services`
-  - Utilities → `src/utilities` with tests
-  - Use `@` alias imports
-- Keep comments short and useful.
-- Always run `npm run lint && npm test` before handoff.
-- Reference touched files with line numbers in summaries.
-
-## Boundaries
-
-- Preserve role-based access (super_admin, admin, user).
-- Reflect identical RLS rules in `supabase_schema/update.sql` and React.
-- Never bypass approval/role logic centralized in `UserContext` and `useRole`.
-- Do not fabricate APIs, data, or schema.
-
-## Supabase Coordination
-
-- Schema edits → `supabase_schema/update.sql` with intent in comments.
-- After changes: run `npm run updateDB` then commit refreshed JSON.
-- Use pooler connection strings if IPv4-only.
-- Keep `SUPABASE_SUPER_ADMIN_EMAIL` aligned with escalation path.
-
-## Safety & Escalation
-
-- If repo state unexpected → stop and prompt human.
-- Never use `reset`, `rebase`, `force push` without approval.
-- Flag residual risks or unknowns in final response.
-
-## Quality Gates
-
-- Lint: `npm run lint`
-- Tests: `npm test`
-- Build: `npm run build`
-- Schema: `npm run updateDB` / `npm run getSchema`
-
-## Quick Reference
-
-| Task        | Command              |
-| ----------- | -------------------- |
-| Install     | `npm install`        |
-| Dev server  | `npm run dev`        |
-| Lint        | `npm run lint`       |
-| Tests       | `npm test`           |
-| Watch tests | `npm run test:watch` |
-| Build       | `npm run build`      |
-| Schema dump | `npm run getSchema`  |
-| Apply SQL   | `npm run updateDB`   |
+## Rules
+- No app code in this repo
+- No hardcoded secrets — all config in sub-repo `.env` files
+- `project-nexus-light/` and `project-nexus-source/` are gitignored by root
