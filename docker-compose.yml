@@ -6,6 +6,7 @@ networks:
 
 volumes:
   nexus_node_modules:
+  supabase_db_data:    # PostgreSQL data — persists across ./dev.sh --down restarts
 
 services:
   nexus-light:
@@ -40,14 +41,160 @@ services:
     env_file:
       - path: ./project-nexus-source/.env
         required: false          # api profile only activates when .env has required keys
+    depends_on:
+      supabase-auth:
+        condition: service_started
+        required: false          # ignored when supabase profile is not active
     networks:
       - nexus
     profiles:
       - api
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 10s
+
+  # ── Local Supabase stack (--profile supabase / ./dev.sh --local) ─────────────
+  # All services join the nexus network so nexus-source can reach them by name.
+  # Ports are exposed to the host for direct access and Studio.
+  # Dev credentials below are the well-known Supabase local-dev values (expire 2033).
+  # REPLACE all secrets before using in production.
+
+  supabase-db:
+    container_name: supabase-db
+    image: supabase/postgres:15.8.1.085
+    profiles: [supabase]
+    environment:
+      POSTGRES_HOST: /var/run/postgresql
+      PGPORT: 5432
+      POSTGRES_PORT: 5432
+      PGPASSWORD: your-super-secret-and-long-postgres-password
+      POSTGRES_PASSWORD: your-super-secret-and-long-postgres-password
+      PGDATABASE: postgres
+      POSTGRES_DB: postgres
+      JWT_SECRET: super-secret-jwt-token-with-at-least-32-characters-long
+      JWT_EXP: 3600
+    volumes:
+      - supabase_db_data:/var/lib/postgresql/data
+      - ./supabase/volumes/db/init/01_set_auth_passwords.sql:/docker-entrypoint-initdb.d/migrations/99-nexus-passwords.sql:ro
+    ports:
+      - "54322:5432"             # direct DB access from host tools / migrations
+    networks:
+      nexus:
+        aliases:
+          - db                   # Studio/pg-meta expect the DB hostname to be "db"
+    restart: unless-stopped
+    healthcheck:
+      test: pg_isready -U postgres -h localhost
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  supabase-auth:
+    container_name: supabase-auth
+    image: supabase/gotrue:v2.186.0
+    profiles: [supabase]
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: 9999
+      API_EXTERNAL_URL: http://localhost:54321
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:your-super-secret-and-long-postgres-password@supabase-db:5432/postgres
+      GOTRUE_SITE_URL: http://localhost:3000
+      GOTRUE_URI_ALLOW_LIST: ""
+      GOTRUE_DISABLE_SIGNUP: "false"
+      GOTRUE_JWT_ADMIN_ROLES: service_role
+      GOTRUE_JWT_AUD: authenticated
+      GOTRUE_JWT_DEFAULT_EXP: 3600
+      GOTRUE_JWT_SECRET: super-secret-jwt-token-with-at-least-32-characters-long
+      GOTRUE_MAILER_AUTOCONFIRM: "true"   # skip email confirmation in dev
+      GOTRUE_MAILER_URLPATHS_INVITE: /auth/v1/verify
+      GOTRUE_MAILER_URLPATHS_CONFIRMATION: /auth/v1/verify
+      GOTRUE_MAILER_URLPATHS_RECOVERY: /auth/v1/recover
+      GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE: /auth/v1/verify
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: "true"
+      GOTRUE_MAILER_SECURE_EMAIL_CHANGE_ENABLED: "true"
+    networks:
+      - nexus
+    restart: unless-stopped
+
+  supabase-kong:
+    container_name: supabase-kong
+    image: kong:3.9.1
+    profiles: [supabase]
+    depends_on:
+      supabase-auth:
+        condition: service_started
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /var/lib/kong/kong.yml
+      KONG_DNS_RESOLVER: 127.0.0.11          # use Docker's internal DNS — prevents stale cache on restart
+      KONG_DNS_ORDER: LAST,A,CNAME
+      KONG_PLUGINS: request-transformer,cors
+      KONG_NGINX_PROXY_PROXY_BUFFER_SIZE: 160k
+      KONG_NGINX_PROXY_PROXY_BUFFERS: 64 160k
+    volumes:
+      - ./supabase/kong/kong.yml:/var/lib/kong/kong.yml:ro
+    ports:
+      - "54321:8000"             # Supabase API gateway — set SUPABASE_URL to http://supabase-kong:8000
+    networks:
+      - nexus
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "kong", "health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  supabase-meta:
+    container_name: supabase-meta
+    image: supabase/postgres-meta:v0.84.2
+    profiles: [supabase]
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    environment:
+      PG_META_PORT: 8080
+      PG_META_DB_HOST: supabase-db
+      PG_META_DB_PORT: 5432
+      PG_META_DB_NAME: postgres
+      PG_META_DB_USER: supabase_admin
+      PG_META_DB_PASSWORD: your-super-secret-and-long-postgres-password
+    networks:
+      - nexus
+    restart: unless-stopped
+
+  supabase-studio:
+    container_name: supabase-studio
+    image: supabase/studio:2026.04.27-sha-5f60601
+    profiles: [supabase]
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+      supabase-kong:
+        condition: service_healthy
+    healthcheck:
+      disable: true
+    environment:
+      STUDIO_PG_META_URL: http://supabase-meta:8080
+      NEXT_PUBLIC_ENABLE_LOGS: "false"
+      NEXT_ANALYTICS_BACKEND_PROVIDER: ""
+      DEFAULT_ORGANIZATION_NAME: Leaflet Dev
+      DEFAULT_PROJECT_NAME: leaflet
+      SUPABASE_URL: http://supabase-kong:8000
+      SUPABASE_PUBLIC_URL: http://localhost:54321
+      SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRFA0NiK7kyqd6500d-f7tp0tzclWtt9-KWe9SiADEA
+      SUPABASE_SERVICE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hj04zWl196z2-SBc0
+      EDGE_FUNCTIONS_MANAGEMENT_FOLDER: /functions
+    ports:
+      - "54323:3000"             # Supabase Studio admin UI
+    networks:
+      - nexus
+    restart: unless-stopped

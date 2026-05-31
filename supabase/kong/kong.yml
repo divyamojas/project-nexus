@@ -1,0 +1,39 @@
+_format_version: "2.1"
+
+# Minimal Kong config for local Supabase dev.
+# Only routes /auth/v1/* — the only Supabase service this app uses.
+# PostgREST, Realtime, Storage, Edge Functions are not included.
+
+services:
+  - name: supabase-auth
+    url: http://supabase-auth:9999/
+    routes:
+      - name: auth-v1
+        strip_path: true
+        paths:
+          - /auth/v1/
+    plugins:
+      - name: cors
+        config:
+          origins:
+            - http://localhost:3000
+          methods:
+            - GET
+            - POST
+            - PUT
+            - PATCH
+            - DELETE
+            - OPTIONS
+          headers:
+            - Accept
+            - Accept-Version
+            - Content-Length
+            - Content-MD5
+            - Content-Type
+            - Date
+            - apikey
+            - Authorization
+          exposed_headers:
+            - X-Auth-Token
+          credentials: true
+          max_age: 3600

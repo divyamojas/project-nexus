@@ -1,417 +1,732 @@
-#!/usr/bin/env bash
-# dev.sh — project-nexus dev CLI
+#!/bin/bash
+# dev.sh — Leaflet local stack orchestrator
 
-show_usage() {
-  cat <<'EOF'
-Usage: ./dev.sh [flag]
-
-  ./dev.sh                           Start the stack
-  ./dev.sh --rebuild                 Rebuild images (no-cache), then start
-  ./dev.sh --clean                   Down containers, then restart
-    -v                                 Also remove named volumes
-    -i                                 Also remove built images
-    -o                                 Also remove orphan containers
-    -c                                 Also clear build cache
-    -a                                 All of the above
-  ./dev.sh --down                    Stop and remove all containers
-  ./dev.sh --status                  Show service status
-  ./dev.sh --logs[=svc]              Tail logs  (svc: nexus-light | nexus-source)
-  ./dev.sh --doctor                  Run environment diagnostics
-  ./dev.sh --test                    Run backend test suite
-  ./dev.sh --attach[=svc]            Shell into a container (default: nexus-light)
-  ./dev.sh --push[=branch]           Push all repos to remote (default branch: main)
-  ./dev.sh --help                    Show this help
-EOF
-}
-
-set -euo pipefail
-
-# ─── Config ──────────────────────────────────────────────
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOT_DIR="$SCRIPT_DIR"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 FRONTEND_DIR="$ROOT_DIR/project-nexus-light"
 BACKEND_DIR="$ROOT_DIR/project-nexus-source"
-LOG_DIR="$ROOT_DIR/logs"
 COMPOSE_FILE="$ROOT_DIR/docker-compose.yml"
-TIMESTAMP="$(date +%Y%m%d_%H%M%S)"
-LOG_FILE="$LOG_DIR/dev_${TIMESTAMP}.log"
-REQUIRED_PORTS=(3000 8000)
+LOG_DIR="$ROOT_DIR/logs"
+LOG_FILE="$LOG_DIR/dev-$(date +%Y-%m-%dT%H-%M-%S).log"
+SCRIPT_START_TIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+STARTUP_FAILED=false
+VERBOSE=false
 
-# Git remotes — used to bootstrap missing sibling repos
 FRONTEND_REMOTE="${LEAFLET_FRONTEND_REMOTE:-https://github.com/divyamojas/project-nexus-light.git}"
 BACKEND_REMOTE="${LEAFLET_BACKEND_REMOTE:-https://github.com/divyamojas/project-nexus-source.git}"
 
-# ─── Colors ──────────────────────────────────────────────
-RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
-BLUE='\033[0;34m'; BOLD='\033[1m'; NC='\033[0m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+CYAN='\033[0;36m'
+NC='\033[0m'
 
-# ─── Flags ───────────────────────────────────────────────
-REBUILD=false
-CLEAN=false; CLEAN_VOLUMES=false; CLEAN_IMAGES=false
-CLEAN_ORPHANS=false; CLEAN_CACHE=false; CLEAN_ALL=false
-DOWN=false; STATUS=false; LOGS_SERVICE=""; DOCTOR=false
-TEST=false; ATTACH_SERVICE=""; PUSH_BRANCH=""
+# Ordered list of actions to execute — populated by parse_args or the interactive menu
+ACTIONS=()
 
-# ─── Helpers ─────────────────────────────────────────────
-phase()  { echo -e "\n${BOLD}[Phase $1]${NC} $2" | tee -a "$LOG_FILE"; }
-ok()     { echo -e "  ${GREEN}✓${NC} $1" | tee -a "$LOG_FILE"; }
-warn()   { echo -e "  ${YELLOW}⚠${NC} $1" | tee -a "$LOG_FILE"; }
-fail()   { echo -e "  ${RED}✗${NC} $1" | tee -a "$LOG_FILE"; }
-info()   { echo -e "  ${BLUE}→${NC} $1" | tee -a "$LOG_FILE"; }
+# Other command flags
+MODE="queue"       # queue | status | logs | doctor | test | attach | push | help
+LOGS_SERVICE=""
+LOGS_NOW=false     # --now: anchor to current time instead of container start time
+ATTACH_SERVICE="nexus-light"
+PUSH_BRANCH=""
+COMPOSE_ARGS=()
+_BACKEND_ENABLED=false
 
-port_free() { ! lsof -i ":$1" -sTCP:LISTEN -t >/dev/null 2>&1; }
+# ─── Logging helpers ──────────────────────────────────────────────────────────
 
-translate_error() {
-  local out="$1"
-  echo "$out" | grep -q "connection refused\|no route to host" && { echo "Network/DNS error — check internet connection."; return; }
-  echo "$out" | grep -q "toomanyrequests\|rate limit"         && { echo "Docker Hub rate limit — docker login or wait 6h."; return; }
-  echo "$out" | grep -q "port is already allocated\|address already in use" && { echo "Port conflict — run ./dev.sh --status"; return; }
-  echo "$out" | grep -q "Cannot connect to the Docker daemon" && { echo "Docker not running — start Docker Desktop."; return; }
-  echo "$out"
+log() {
+  mkdir -p "$LOG_DIR" > /dev/null 2>&1 || true
+  echo "[$(date +%Y-%m-%dT%H:%M:%S)] $1" >> "$LOG_FILE"
 }
 
-# ─── Argument parsing ─────────────────────────────────────
+say() {
+  echo -e "$1"
+  log "$(echo -e "$1" | sed 's/\x1b\[[0-9;]*m//g')"
+}
+
+step() {
+  local n=$((${#ACTIONS[@]} > 1 ? 1 : 0))  # only number steps when doing multiple actions
+  echo ""
+  if [ "$n" -gt 0 ]; then
+    say "${CYAN}▸ $1${NC}"
+  else
+    say "${CYAN}[ $((++_STEP)) ] $1${NC}"
+  fi
+}
+_STEP=0
+
+ok()   { say "${GREEN}      ✓ $1${NC}"; }
+info() { say "      $1"; }
+fail() { say "${RED}ERROR: $1${NC}"; exit 1; }
+
+# ─── Usage ────────────────────────────────────────────────────────────────────
+
+print_usage() {
+  cat <<EOF
+Usage: ./dev.sh [actions...] [command]
+
+  (no args)         Interactive menu — pick actions by number
+  --start           Start the stack (build + up + follow logs)
+  -s / --stop       Stop and remove containers
+  -v / --volumes    Stop containers and wipe DB volumes
+  -i / --images     Stop containers and remove local images
+  -p / --prune      Prune Docker build cache
+  -l / --clear-logs Clear all container log buffers
+
+  Actions execute in the order they are given:
+    ./dev.sh -v -i -p --start     wipe → remove images → prune → start
+    ./dev.sh -p --start           prune cache → start
+
+Other commands (run alone):
+  --status          Show service status
+  --logs            Tail logs since containers last started
+  --logs=NAME       Tail logs for a specific service since containers last started
+  --logs --now      Tail from this moment only (re-anchor after Ctrl+C)
+  --doctor          Run environment diagnostics
+  --test            Run the backend test suite
+  --exec            Shell into the frontend container
+  --exec=NAME       Shell into a named container (e.g. nexus-source)
+  --push            Push all repos to origin/main
+  --push=BRANCH     Push all repos to a specific branch
+  --help            Show this help
+  --verbose         Print docker commands before running them
+EOF
+}
+
+# ─── Arg parsing ──────────────────────────────────────────────────────────────
+
 parse_args() {
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-      --rebuild) REBUILD=true ;;
-      --clean)
-        CLEAN=true; shift
-        while [[ $# -gt 0 ]] && [[ "$1" =~ ^-[vioaca]$ ]]; do
-          case "$1" in
-            -v) CLEAN_VOLUMES=true ;; -i) CLEAN_IMAGES=true ;;
-            -o) CLEAN_ORPHANS=true ;; -c) CLEAN_CACHE=true ;;
-            -a) CLEAN_ALL=true ;;
-          esac
-          shift
-        done
-        continue ;;
-      --down)       DOWN=true ;;
-      --status)     STATUS=true ;;
-      --logs=*)     LOGS_SERVICE="${1#--logs=}" ;;
-      --logs)       LOGS_SERVICE="all" ;;
-      --doctor)     DOCTOR=true ;;
-      --test)       TEST=true ;;
-      --attach=*)   ATTACH_SERVICE="${1#--attach=}" ;;
-      --attach)     ATTACH_SERVICE="nexus-light" ;;
-      --push=*)     PUSH_BRANCH="${1#--push=}" ;;
-      --push)       PUSH_BRANCH="main" ;;
-      --help|-h)    show_usage; exit 0 ;;
-      *) echo "Unknown flag: $1" >&2; show_usage >&2; exit 1 ;;
+  if [ "$#" -eq 0 ]; then
+    MODE="menu"
+    return
+  fi
+
+  local arg
+  for arg in "$@"; do
+    case "$arg" in
+      --start)         ACTIONS+=("start") ;;
+      -s|--stop)       ACTIONS+=("stop") ;;
+      -v|--volumes)    ACTIONS+=("volumes") ;;
+      -i|--images)     ACTIONS+=("images") ;;
+      -p|--prune)      ACTIONS+=("prune") ;;
+      -l|--clear-logs) ACTIONS+=("clearlogs") ;;
+      --status)      MODE="status" ;;
+      --logs)        MODE="logs" ;;
+      --logs=*)      MODE="logs"; LOGS_SERVICE="${arg#--logs=}" ;;
+      --now)         LOGS_NOW=true ;;
+      --doctor)      MODE="doctor" ;;
+      --test)        MODE="test" ;;
+      --exec)        MODE="attach"; ATTACH_SERVICE="nexus-light" ;;
+      --exec=*)      MODE="attach"; ATTACH_SERVICE="${arg#--exec=}" ;;
+      --attach)      MODE="attach"; ATTACH_SERVICE="nexus-light" ;;
+      --attach=*)    MODE="attach"; ATTACH_SERVICE="${arg#--attach=}" ;;
+      --push)        MODE="push"; PUSH_BRANCH="main" ;;
+      --push=*)      MODE="push"; PUSH_BRANCH="${arg#--push=}" ;;
+      --help|-h)     MODE="help" ;;
+      --verbose)     VERBOSE=true ;;
+      *) fail "Unknown option: $arg\nRun ./dev.sh --help for supported options." ;;
     esac
-    shift
   done
 }
 
-# ─── Operations ───────────────────────────────────────────
-do_down() {
-  info "Stopping services..."
-  docker compose -f "$COMPOSE_FILE" down --remove-orphans 2>&1 | tee -a "$LOG_FILE"
-  ok "Services stopped."
+# ─── Backend state ────────────────────────────────────────────────────────────
+
+backend_can_start() {
+  [ -d "$BACKEND_DIR" ]               || return 1
+  [ -f "$BACKEND_DIR/.env" ]          || return 1
+  grep -Eq "^SUPABASE_URL=.+"         "$BACKEND_DIR/.env" 2>/dev/null || return 1
+  grep -Eq "^SUPABASE_SERVICE_KEY=.+" "$BACKEND_DIR/.env" 2>/dev/null || return 1
+  grep -Eq "^DATABASE_URL=.+"         "$BACKEND_DIR/.env" 2>/dev/null || return 1
+  return 0
 }
 
+# ─── Compose helpers ──────────────────────────────────────────────────────────
+
+configure_compose_args() {
+  COMPOSE_ARGS=("-f" "$COMPOSE_FILE" "--profile" "supabase")
+  if backend_can_start; then
+    COMPOSE_ARGS+=("--profile" "api")
+    _BACKEND_ENABLED=true
+  else
+    _BACKEND_ENABLED=false
+  fi
+}
+
+run_compose() {
+  [ "$VERBOSE" = true ] && say "${YELLOW}→ docker compose ${COMPOSE_ARGS[*]} $*${NC}"
+  docker compose "${COMPOSE_ARGS[@]}" "$@"
+}
+
+# ─── Error diagnostics ────────────────────────────────────────────────────────
+
+diagnose_failure() {
+  local label="$1" output_file="$2" text=""
+  [ -f "$output_file" ] && text="$(tail -n 200 "$output_file" 2>/dev/null)"
+
+  echo "$text" | grep -Eqi "no such host|temporary failure in name resolution|name or service not known|could not resolve host|network is unreachable|i/o timeout|connection timed out" \
+    && fail "$label failed — network or DNS error.\n  Check your internet connection.\n  Logs: $LOG_FILE"
+  echo "$text" | grep -Eqi "toomanyrequests|429 too many requests|pull rate limit" \
+    && fail "$label failed — Docker Hub rate limit.\n  Run: docker login\n  Logs: $LOG_FILE"
+  echo "$text" | grep -Eqi "permission denied.*docker|cannot connect to the docker daemon" \
+    && fail "$label failed — Docker not accessible. Start Docker Desktop.\n  Logs: $LOG_FILE"
+  echo "$text" | grep -Eqi "port is already allocated|address already in use|bind.*already in use" \
+    && fail "$label failed — port already in use.\n  Find conflicts: lsof -nP -iTCP -sTCP:LISTEN\n  Logs: $LOG_FILE"
+  fail "$label failed.\n  Logs: $LOG_FILE"
+}
+
+diagnose_readiness_timeout() {
+  local service="$1" label="$2" timeout_seconds="$3"
+  local state; state="$(docker inspect -f '{{.State.Status}}' "$service" 2>/dev/null || true)"
+  local code;  code="$(docker inspect -f '{{.State.ExitCode}}' "$service" 2>/dev/null || true)"
+  case "$state" in
+    exited)     fail "$label timed out — container exited (code: ${code:-?}).\n  Logs: ./dev.sh --logs=$service" ;;
+    restarting) fail "$label timed out — container is restart-looping.\n  Logs: ./dev.sh --logs=$service" ;;
+    running)    fail "$label timed out — container running but not answering.\n  Logs: ./dev.sh --logs=$service" ;;
+    *)          fail "$label did not become ready within ${timeout_seconds}s.\n  Logs: ./dev.sh --logs" ;;
+  esac
+}
+
+# ─── Live startup monitor ─────────────────────────────────────────────────────
+
+_spin_frame() {
+  local frames=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
+  printf '%s' "${frames[$(( $1 % 10 ))]}"
+}
+
+watch_build() {
+  local pid="$1" log_file="$2"
+  local tick=0 drawn=0
+  while kill -0 "$pid" 2>/dev/null; do
+    [ "$drawn" -gt 0 ] && printf '\033[1A\033[2K'
+    local sp; sp=$(_spin_frame "$tick")
+    local hint="" cols; cols=$(tput cols 2>/dev/null || echo 100)
+    [ -f "$log_file" ] && hint=$(grep -aE '\[[0-9]+/[0-9]+\]|Step [0-9]+|^#[0-9]+ \[' "$log_file" 2>/dev/null \
+      | sed 's/\x1b\[[0-9;]*m//g' | tail -1 | sed 's/^[[:space:]]*//' | cut -c1-$((cols - 8)))
+    printf "    \033[0;36m%s\033[0m  %s\n" "$sp" "${hint:-building...}"
+    drawn=1; sleep 0.25; tick=$((tick + 1))
+  done
+  [ "$drawn" -gt 0 ] && printf '\033[1A\033[2K'
+}
+
+watch_spinner() {
+  local pid="$1" label="$2" log_file="${3:-}"
+  local tick=0 drawn=0
+  while kill -0 "$pid" 2>/dev/null; do
+    [ "$drawn" -gt 0 ] && printf '\033[1A\033[2K'
+    local sp; sp=$(_spin_frame "$tick")
+    local hint="" cols; cols=$(tput cols 2>/dev/null || echo 100)
+    if [ -n "$log_file" ] && [ -f "$log_file" ]; then
+      hint=$(tail -1 "$log_file" 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g' | sed 's/^[[:space:]]*//' | cut -c1-$((cols - ${#label} - 12)))
+    fi
+    printf "    \033[0;36m%s\033[0m  %s  \033[2m%s\033[0m\n" "$sp" "$label" "${hint:-}"
+    drawn=1; sleep 0.25; tick=$((tick + 1))
+  done
+  [ "$drawn" -gt 0 ] && printf '\033[1A\033[2K'
+}
+
+watch_up() {
+  local pid="$1" log_file="${2:-}"
+  local tick=0 drawn=0
+  local row name state health icon color label sp
+
+  while true; do
+    [ "$drawn" -gt 0 ] && printf '\033[%dA\033[J' "$drawn"
+    sp=$(_spin_frame "$tick")
+    drawn=0
+
+    while IFS= read -r row; do
+      [ -z "$row" ] && continue
+      IFS='|' read -r name state health <<< "$row"
+      case "$state" in
+        running)
+          case "$health" in
+            healthy)   icon="✓"; color="0;32"; label="running · healthy" ;;
+            unhealthy) icon="✗"; color="0;31"; label="running · unhealthy" ;;
+            starting)  icon="$sp"; color="0;36"; label="starting health check" ;;
+            *)         icon="✓"; color="0;32"; label="running" ;;
+          esac ;;
+        exited)     icon="✗"; color="0;31"; label="exited" ;;
+        dead)       icon="✗"; color="0;31"; label="dead" ;;
+        restarting) icon="$sp"; color="1;33"; label="restarting" ;;
+        *)          icon="$sp"; color="1;33"; label="${state:-initializing}" ;;
+      esac
+      printf "    \033[%sm%s\033[0m  %-30s  \033[%sm%s\033[0m\n" "$color" "$icon" "$name" "$color" "$label"
+      drawn=$((drawn + 1))
+    done < <(docker compose "${COMPOSE_ARGS[@]}" ps --format '{{.Name}}|{{.State}}|{{.Health}}' 2>/dev/null)
+
+    if [ "$drawn" -eq 0 ]; then
+      local hint="initializing..."
+      if [ -n "$log_file" ] && [ -f "$log_file" ]; then
+        local raw; raw=$(tail -1 "$log_file" 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g' | sed 's/^[[:space:]]*//')
+        [ -n "$raw" ] && hint="$raw"
+      fi
+      printf "    \033[1;33m%s\033[0m  %s\n" "$sp" "$hint"
+      drawn=1
+    fi
+    kill -0 "$pid" 2>/dev/null || break
+    sleep 0.3; tick=$((tick + 1))
+  done
+
+  [ "$drawn" -gt 0 ] && printf '\033[%dA\033[J' "$drawn"
+  while IFS= read -r row; do
+    [ -z "$row" ] && continue
+    IFS='|' read -r name state health <<< "$row"
+    case "$state" in
+      running)
+        case "$health" in
+          healthy)   icon="✓"; color="0;32"; label="running · healthy" ;;
+          unhealthy) icon="✗"; color="0;31"; label="running · unhealthy" ;;
+          *)         icon="✓"; color="0;32"; label="running" ;;
+        esac ;;
+      exited) icon="✗"; color="0;31"; label="exited" ;;
+      dead)   icon="✗"; color="0;31"; label="dead" ;;
+      *)      icon="○"; color="1;33"; label="${state:-unknown}" ;;
+    esac
+    printf "    \033[%sm%s\033[0m  %-30s  \033[%sm%s\033[0m\n" "$color" "$icon" "$name" "$color" "$label"
+  done < <(docker compose "${COMPOSE_ARGS[@]}" ps --format '{{.Name}}|{{.State}}|{{.Health}}' 2>/dev/null)
+}
+
+# ─── Bootstrap ────────────────────────────────────────────────────────────────
+
+bootstrap_repos() {
+  if [ ! -d "$FRONTEND_DIR" ]; then
+    [ -z "$FRONTEND_REMOTE" ] && fail "Frontend repo not found.\n  Set LEAFLET_FRONTEND_REMOTE or clone manually."
+    info "Frontend repo not found — cloning..."
+    echo ""
+    local clone_log="$LOG_DIR/clone-frontend.log"; : > "$clone_log"
+    git clone --depth 1 --progress "$FRONTEND_REMOTE" "$FRONTEND_DIR" > "$clone_log" 2>&1 &
+    local clone_pid=$!
+    watch_spinner "$clone_pid" "cloning frontend..." "$clone_log"
+    wait "$clone_pid" || fail "Failed to clone frontend.\n  Check your internet connection."
+    ok "Frontend repo cloned"
+  fi
+
+  if [ ! -d "$BACKEND_DIR" ] && [ -n "$BACKEND_REMOTE" ]; then
+    info "Backend repo not found — cloning..."
+    echo ""
+    local clone_log="$LOG_DIR/clone-backend.log"; : > "$clone_log"
+    git clone --depth 1 --progress "$BACKEND_REMOTE" "$BACKEND_DIR" > "$clone_log" 2>&1 &
+    local clone_pid=$!
+    watch_spinner "$clone_pid" "cloning backend..." "$clone_log"
+    if wait "$clone_pid"; then
+      ok "Backend repo cloned"
+    else
+      info "Failed to clone backend — continuing without it"
+    fi
+  fi
+}
+
+# ─── Preflight ────────────────────────────────────────────────────────────────
+
+check_docker() {
+  command -v docker > /dev/null 2>&1          || fail "Docker not found. Install Docker Desktop and retry."
+  docker info > /dev/null 2>&1                || fail "Docker is not running. Start Docker Desktop and retry."
+  docker compose version > /dev/null 2>&1     || fail "docker compose plugin not found. Update Docker Desktop and retry."
+}
+
+check_ports() {
+  local ports=(3000)
+  [ "$_BACKEND_ENABLED" = true ] && ports+=(8000)
+  for port in "${ports[@]}"; do
+    lsof -nP -iTCP:"$port" -sTCP:LISTEN > /dev/null 2>&1 \
+      && fail "Port $port is already in use.\n  lsof -nP -iTCP:$port -sTCP:LISTEN"
+  done
+}
+
+# ─── Readiness ────────────────────────────────────────────────────────────────
+
+wait_for_url() {
+  local label="$1" url="$2" timeout_seconds="$3"
+  local curl_args=("${@:4}")
+  local deadline=$((SECONDS + timeout_seconds)) next_progress=5 elapsed=0
+
+  say "      ↳ $label  $url"
+  while [ "$SECONDS" -lt "$deadline" ]; do
+    curl "${curl_args[@]}" "$url" > /dev/null 2>&1 && {
+      elapsed=$((timeout_seconds - (deadline - SECONDS)))
+      say "${GREEN}        ✓ $label ready (${elapsed}s)${NC}"
+      return 0
+    }
+    elapsed=$((timeout_seconds - (deadline - SECONDS)))
+    if [ "$elapsed" -ge "$next_progress" ]; then
+      say "${YELLOW}        still waiting... ${elapsed}s / ${timeout_seconds}s${NC}"
+      next_progress=$((next_progress + 5))
+    fi
+    sleep 1
+  done
+  return 1
+}
+
+capture_failure_logs() {
+  log "Startup failed — capturing container logs"
+  run_compose logs >> "$LOG_FILE" 2>&1 || true
+}
+
+cleanup_on_interrupt() {
+  [ "$STARTUP_FAILED" = true ] && say "${YELLOW}Interrupted during startup. Leaving containers for debugging.${NC}"
+  exit 130
+}
+
+print_summary() {
+  echo ""
+  say "${GREEN}Leaflet is running.${NC}"
+  echo ""
+  echo "  Frontend:  http://localhost:3000"
+  [ "$_BACKEND_ENABLED" = true ] && echo "  API:       http://localhost:8000" && echo "  API docs:  http://localhost:8000/docs"
+  echo "  Supabase:  http://localhost:54321"
+  echo "  Studio:    http://localhost:54323"
+  echo ""
+  say "${YELLOW}  Log:  $LOG_FILE${NC}"
+}
+
+# ─── DB script runner ─────────────────────────────────────────────────────────
+
+_psql() {
+  docker exec -i supabase-db \
+    psql -h /var/run/postgresql -U postgres -d postgres "$@"
+}
+
+apply_db_scripts() {
+  local rls_script="$ROOT_DIR/supabase/volumes/db/init/02_rls.sql"
+
+  echo ""
+  say "${CYAN}▸ Database scripts${NC}"
+
+  local rls_log="$LOG_DIR/rls-output.log"; : > "$rls_log"
+  _psql < "$rls_script" > "$rls_log" 2>&1 &
+  local rls_pid=$!
+  watch_spinner "$rls_pid" "applying RLS policies..." "$rls_log"
+  if wait "$rls_pid"; then
+    ok "RLS policies applied"
+  else
+    info "RLS skipped — app tables may not exist yet; run again after backend migrations"
+    log "RLS output: $(cat "$rls_log" 2>/dev/null)"
+  fi
+}
+
+# ─── Individual action implementations ───────────────────────────────────────
+
+exec_stop() {
+  say "${CYAN}▸ Stop containers${NC}"
+  mkdir -p "$LOG_DIR"
+  echo ""
+  local down_log="$LOG_DIR/down-output.log"; : > "$down_log"
+  docker compose -f "$COMPOSE_FILE" --profile api --profile supabase \
+    down --remove-orphans > "$down_log" 2>&1 &
+  local pid=$!
+  watch_spinner "$pid" "stopping containers..." "$down_log"
+  wait "$pid" || true
+  ok "Containers stopped"
+}
+
+exec_volumes() {
+  say "${CYAN}▸ Wipe volumes${NC}"
+  mkdir -p "$LOG_DIR"
+  echo ""
+  local down_log="$LOG_DIR/down-output.log"; : > "$down_log"
+  docker compose -f "$COMPOSE_FILE" --profile api --profile supabase \
+    down --remove-orphans -v > "$down_log" 2>&1 &
+  local pid=$!
+  watch_spinner "$pid" "stopping containers and wiping volumes..." "$down_log"
+  wait "$pid" || true
+  ok "Containers stopped, volumes wiped"
+}
+
+exec_images() {
+  say "${CYAN}▸ Remove local images${NC}"
+  mkdir -p "$LOG_DIR"
+  echo ""
+  local down_log="$LOG_DIR/down-output.log"; : > "$down_log"
+  docker compose -f "$COMPOSE_FILE" --profile api --profile supabase \
+    down --remove-orphans --rmi local > "$down_log" 2>&1 &
+  local pid=$!
+  watch_spinner "$pid" "stopping containers and removing images..." "$down_log"
+  wait "$pid" || true
+  ok "Containers stopped, local images removed"
+}
+
+exec_prune() {
+  say "${CYAN}▸ Prune build cache${NC}"
+  mkdir -p "$LOG_DIR"
+  echo ""
+  local prune_log="$LOG_DIR/prune-output.log"; : > "$prune_log"
+  docker builder prune -f > "$prune_log" 2>&1 &
+  local pid=$!
+  watch_spinner "$pid" "pruning build cache..." "$prune_log"
+  wait "$pid" || true
+  ok "Build cache pruned"
+}
+
+exec_clear_logs() {
+  say "${CYAN}▸ Clear container logs${NC}"
+  echo ""
+  local containers=(nexus-light nexus-source supabase-db supabase-auth supabase-kong supabase-meta supabase-studio)
+  local paths=() container log_path
+
+  for container in "${containers[@]}"; do
+    log_path=$(docker inspect --format='{{.LogPath}}' "$container" 2>/dev/null)
+    [ -n "$log_path" ] && [ "$log_path" != "<no value>" ] && paths+=("$log_path")
+  done
+
+  if [ "${#paths[@]}" -eq 0 ]; then
+    info "No running containers found — nothing to clear"
+    return
+  fi
+
+  # Truncate each log file via a short-lived alpine container that can reach
+  # Docker's log directory inside the Docker Desktop VM.
+  local truncate_cmd=""
+  for p in "${paths[@]}"; do
+    truncate_cmd+="truncate -s 0 '$p'; "
+  done
+
+  local clear_log="$LOG_DIR/clear-logs-output.log"; : > "$clear_log"
+  docker run --rm \
+    -v /var/lib/docker/containers:/var/lib/docker/containers \
+    alpine sh -c "$truncate_cmd" > "$clear_log" 2>&1 &
+  local pid=$!
+  watch_spinner "$pid" "clearing container logs..." "$clear_log"
+  wait "$pid" && ok "Container logs cleared (${#paths[@]} container(s))" \
+              || info "Clear may have partially failed — check: $clear_log"
+}
+
+exec_start() {
+  _STEP=0
+  mkdir -p "$LOG_DIR"
+  trap cleanup_on_interrupt INT TERM
+
+  say "${CYAN}▸ Start${NC}"
+  log "Starting Leaflet (log: $LOG_FILE)"
+
+  bootstrap_repos
+
+  echo ""
+  say "${CYAN}[ $((_STEP+1)) ] Preflight${NC}"; _STEP=$((_STEP+1))
+  configure_compose_args
+  check_docker; ok "Docker running"
+  check_ports;  ok "Ports clear"
+  if [ "$_BACKEND_ENABLED" = true ]; then
+    ok "Backend ready"
+  else
+    info "Backend skipped (configure $BACKEND_DIR/.env to enable)"
+  fi
+
+  echo ""
+  say "${CYAN}[ $((_STEP+1)) ] Building images${NC}"; _STEP=$((_STEP+1))
+  echo ""
+  [ "$VERBOSE" = true ] && say "${YELLOW}→ docker compose ${COMPOSE_ARGS[*]} build${NC}"
+  : > "$LOG_DIR/build-output.log"
+  log "Running: docker compose ${COMPOSE_ARGS[*]} build"
+  docker compose "${COMPOSE_ARGS[@]}" build >> "$LOG_DIR/build-output.log" 2>&1 &
+  local build_pid=$!
+  watch_build "$build_pid" "$LOG_DIR/build-output.log"
+  wait "$build_pid" || { capture_failure_logs; diagnose_failure "Image build" "$LOG_DIR/build-output.log"; }
+  echo ""; ok "Images built"
+
+  echo ""
+  say "${CYAN}[ $((_STEP+1)) ] Starting services${NC}"; _STEP=$((_STEP+1))
+  STARTUP_FAILED=true
+  echo ""
+  [ "$VERBOSE" = true ] && say "${YELLOW}→ docker compose ${COMPOSE_ARGS[*]} up -d${NC}"
+  : > "$LOG_DIR/up-output.log"
+  log "Running: docker compose ${COMPOSE_ARGS[*]} up -d"
+  docker compose "${COMPOSE_ARGS[@]}" up -d >> "$LOG_DIR/up-output.log" 2>&1 &
+  local up_pid=$!
+  watch_up "$up_pid" "$LOG_DIR/up-output.log"
+  echo ""
+  wait "$up_pid" || { capture_failure_logs; diagnose_failure "Service startup" "$LOG_DIR/up-output.log"; }
+  ok "Containers running"
+
+  echo ""
+  say "${CYAN}[ $((_STEP+1)) ] Waiting for readiness${NC}"; _STEP=$((_STEP+1))
+  if ! wait_for_url "Frontend" "http://127.0.0.1:3000" 90 --silent --show-error --fail; then
+    capture_failure_logs; diagnose_readiness_timeout "nexus-light" "Frontend" 90
+  fi
+  if [ "$_BACKEND_ENABLED" = true ]; then
+    if ! wait_for_url "API" "http://127.0.0.1:8000/health" 60 --silent --show-error --fail; then
+      capture_failure_logs; diagnose_readiness_timeout "nexus-source" "API" 60
+    fi
+  fi
+
+  STARTUP_FAILED=false
+  trap - INT TERM
+
+  [ "$_BACKEND_ENABLED" = true ] && apply_db_scripts
+
+  print_summary
+  say "${CYAN}--- following logs  (Ctrl+C to stop, stack keeps running) ---${NC}"
+  echo ""
+  local _start_since
+  _start_since=$(docker inspect -f '{{.State.StartedAt}}' nexus-light 2>/dev/null | head -1)
+  [ -z "$_start_since" ] || [ "$_start_since" = "0001-01-01T00:00:00Z" ] && _start_since="$SCRIPT_START_TIME"
+  run_compose logs -f --since "$_start_since"
+}
+
+# ─── Interactive menu ─────────────────────────────────────────────────────────
+
+do_menu() {
+  echo ""
+  say "${GREEN}Leaflet${NC}"
+  echo ""
+  echo "    1  Start the stack"
+  echo "    2  Stop containers"
+  echo "    3  Wipe volumes (DB data)"
+  echo "    4  Remove local images"
+  echo "    5  Prune build cache"
+  echo "    6  Clear container logs"
+  echo ""
+  printf "  Enter numbers in order (e.g. 3 4 1): "
+  local input; read -r input
+  echo ""
+
+  for num in $input; do
+    case "$num" in
+      1) ACTIONS+=("start") ;;
+      2) ACTIONS+=("stop") ;;
+      3) ACTIONS+=("volumes") ;;
+      4) ACTIONS+=("images") ;;
+      5) ACTIONS+=("prune") ;;
+      6) ACTIONS+=("clearlogs") ;;
+      *) say "${YELLOW}  Skipping unknown option: $num${NC}" ;;
+    esac
+  done
+
+  [ "${#ACTIONS[@]}" -eq 0 ] && { say "${YELLOW}  Nothing selected.${NC}"; exit 0; }
+}
+
+# ─── Action queue runner ──────────────────────────────────────────────────────
+
+run_queue() {
+  check_docker
+  for action in "${ACTIONS[@]}"; do
+    case "$action" in
+      start)      exec_start ;;
+      stop)       exec_stop ;;
+      volumes)    exec_volumes ;;
+      images)     exec_images ;;
+      prune)      exec_prune ;;
+      clearlogs)  exec_clear_logs ;;
+    esac
+    echo ""
+  done
+}
+
+# ─── Other commands ───────────────────────────────────────────────────────────
+
 do_status() {
-  docker compose -f "$COMPOSE_FILE" ps
+  configure_compose_args; check_docker; run_compose ps
 }
 
 do_logs() {
-  local svc="${LOGS_SERVICE:-}"
-  [[ -z "$svc" || "$svc" == "all" ]] \
-    && docker compose -f "$COMPOSE_FILE" logs -f --tail=100 \
-    || docker compose -f "$COMPOSE_FILE" logs -f --tail=100 "$svc"
+  configure_compose_args; check_docker
+
+  local since
+  if [ "$LOGS_NOW" = true ]; then
+    # --now: anchor to this exact moment (discard everything before Ctrl+C)
+    since="$SCRIPT_START_TIME"
+  else
+    # Default: anchor to when the containers were last started so re-attaching
+    # after Ctrl+C shows the same session without repeating old history.
+    since=$(docker inspect -f '{{.State.StartedAt}}' nexus-light 2>/dev/null | head -1)
+    # Fall back to script start if container isn't found or not running
+    [ -z "$since" ] || [ "$since" = "0001-01-01T00:00:00Z" ] && since="$SCRIPT_START_TIME"
+  fi
+
+  if [ -n "$LOGS_SERVICE" ]; then
+    run_compose logs -f --since "$since" "$LOGS_SERVICE"
+  else
+    run_compose logs -f --since "$since"
+  fi
 }
 
 do_doctor() {
-  echo -e "\n${BOLD}Diagnostics${NC}"
-  command -v docker >/dev/null 2>&1 \
-    && ok "docker: $(docker --version 2>&1 | head -1)" \
-    || fail "docker not found"
-  docker compose version >/dev/null 2>&1 \
-    && ok "docker compose: $(docker compose version 2>&1)" \
-    || fail "docker compose plugin not found"
-  [[ -f "$COMPOSE_FILE" ]]     && ok "docker-compose.yml found"        || fail "docker-compose.yml missing"
-  [[ -d "$FRONTEND_DIR" ]]     && ok "Frontend repo: $FRONTEND_DIR"    || warn "Frontend repo missing: $FRONTEND_DIR"
-  [[ -d "$BACKEND_DIR" ]]      && ok "Backend repo: $BACKEND_DIR"      || warn "Backend repo missing: $BACKEND_DIR"
-  [[ -f "$BACKEND_DIR/.env" ]] && ok "Backend .env found"              || warn "Backend .env missing"
-  for p in "${REQUIRED_PORTS[@]}"; do
-    port_free "$p" && ok "Port $p free" || warn "Port $p in use"
+  say "${GREEN}Leaflet — Doctor${NC}"; echo ""
+
+  command -v docker > /dev/null 2>&1 \
+    && ok "Docker: $(docker --version 2>&1 | head -1)" \
+    || say "${RED}      ✗ Docker not found${NC}"
+  docker compose version > /dev/null 2>&1 \
+    && ok "Compose: $(docker compose version 2>&1)" \
+    || say "${RED}      ✗ docker compose plugin not found${NC}"
+  docker info > /dev/null 2>&1 \
+    && ok "Docker daemon running" \
+    || say "${YELLOW}      ✗ Docker daemon not running${NC}"
+
+  echo ""
+  [ -f "$COMPOSE_FILE"     ] && ok "docker-compose.yml"    || say "${RED}      ✗ docker-compose.yml missing${NC}"
+  [ -d "$FRONTEND_DIR"     ] && ok "Frontend repo found"   || say "${YELLOW}      ✗ Frontend repo not found at $FRONTEND_DIR${NC}"
+  [ -d "$BACKEND_DIR"      ] && ok "Backend repo found"    || say "${YELLOW}      ✗ Backend repo not found at $BACKEND_DIR${NC}"
+  [ -f "$BACKEND_DIR/.env" ] && ok "Backend .env found"    || say "${YELLOW}      ✗ Backend .env not found${NC}"
+
+  echo ""
+  for port in 3000 8000 54321 54323; do
+    lsof -nP -iTCP:"$port" -sTCP:LISTEN > /dev/null 2>&1 \
+      && say "${YELLOW}      ✗ Port $port in use${NC}" \
+      || ok "Port $port free"
   done
+
+  echo ""
+  configure_compose_args
+  if [ "$_BACKEND_ENABLED" = true ]; then
+    ok "Backend: enabled"
+  else
+    say "${YELLOW}      Backend: skipped — configure $BACKEND_DIR/.env to enable${NC}"
+  fi
+  info "Supabase: always on (local mode)"
 }
 
 do_test() {
-  [[ -d "$BACKEND_DIR" ]] || { fail "Backend repo not found at $BACKEND_DIR"; exit 1; }
-  docker compose -f "$COMPOSE_FILE" --profile api run --rm nexus-source \
-    python -m pytest tests/ -v
+  configure_compose_args; check_docker
+  [ "$_BACKEND_ENABLED" != true ] && fail "Backend not configured.\n  Ensure $BACKEND_DIR exists and $BACKEND_DIR/.env is set up."
+  run_compose run --rm nexus-source python -m pytest tests/ -v
 }
 
 do_attach() {
-  docker compose -f "$COMPOSE_FILE" exec "${ATTACH_SERVICE:-nexus-light}" sh
+  configure_compose_args; check_docker
+  run_compose exec "$ATTACH_SERVICE" sh
 }
 
 do_push() {
   local branch="$PUSH_BRANCH"
+  say "${GREEN}Leaflet — Pushing repos to origin/$branch${NC}"; echo ""
+
   local repos=("$ROOT_DIR" "$FRONTEND_DIR" "$BACKEND_DIR")
-  echo ""
-  echo -e "${BOLD}Pushing all repos → $branch${NC}"
-  echo ""
+  local names=("project-nexus" "project-nexus-light" "project-nexus-source")
   local any_failed=false
-  for repo in "${repos[@]}"; do
-    local name
-    name="$(basename "$repo")"
-    if [[ ! -d "$repo/.git" ]]; then
-      warn "$name: not a git repo, skipping."
-      continue
-    fi
+
+  for i in "${!repos[@]}"; do
+    local repo="${repos[$i]}" name="${names[$i]}"
+    [ ! -d "$repo/.git" ] && { info "$name — not a git repo, skipping"; continue; }
     info "Pushing $name..."
-    if git -C "$repo" push -u origin "$branch" 2>&1 | tee -a "$LOG_FILE"; then
-      ok "$name pushed."
+    if git -C "$repo" push -u origin "$branch" >> "$LOG_FILE" 2>&1; then
+      ok "$name pushed"
     else
-      fail "$name push failed."
-      any_failed=true
+      say "${RED}      ✗ $name — push failed${NC}"; any_failed=true
     fi
   done
+
   echo ""
-  $any_failed && { fail "One or more repos failed to push."; exit 1; }
-  ok "All repos pushed."
+  [ "$any_failed" = true ] && fail "One or more repos failed to push.\n  Check: $LOG_FILE"
+  ok "All repos pushed to origin/$branch"
 }
 
-# ─── Bootstrap missing sibling repos ──────────────────────
-bootstrap_repos() {
-  if [[ ! -d "$FRONTEND_DIR" && -n "$FRONTEND_REMOTE" ]]; then
-    info "Cloning frontend from $FRONTEND_REMOTE..."
-    git clone "$FRONTEND_REMOTE" "$FRONTEND_DIR" 2>&1 | tee -a "$LOG_FILE" \
-      || warn "Failed to clone frontend — continuing without it."
-  fi
-  if [[ ! -d "$BACKEND_DIR" && -n "$BACKEND_REMOTE" ]]; then
-    info "Cloning backend from $BACKEND_REMOTE..."
-    git clone "$BACKEND_REMOTE" "$BACKEND_DIR" 2>&1 | tee -a "$LOG_FILE" \
-      || warn "Failed to clone backend — continuing without it."
-  fi
-}
+# ─── Main ─────────────────────────────────────────────────────────────────────
 
-# ─── Determine compose profiles ───────────────────────────
-# api profile enabled only when backend repo + .env + required keys are all present
-compose_profiles() {
-  local args=()
-  if [[ -d "$BACKEND_DIR" && -f "$BACKEND_DIR/.env" ]]; then
-    local all_set=true
-    for key in SUPABASE_URL SUPABASE_SERVICE_KEY DATABASE_URL; do
-      grep -q "^${key}=.\+" "$BACKEND_DIR/.env" 2>/dev/null || { all_set=false; break; }
-    done
-    if [[ "$all_set" == "true" ]]; then
-      args+=("--profile" "api")
-    else
-      warn "Backend .env missing required keys — starting frontend-only."
-    fi
-  else
-    warn "Backend repo/env not found — starting frontend-only."
-  fi
-  echo "${args[@]}"
-}
-
-# ─── Main ─────────────────────────────────────────────────
 main() {
-  mkdir -p "$LOG_DIR"
   parse_args "$@"
 
-  # Non-startup operations — run and exit
-  $DOWN                     && { do_down;   exit 0; }
-  $STATUS                   && { do_status; exit 0; }
-  [[ -n "$LOGS_SERVICE" ]]  && { do_logs;   exit 0; }
-  $DOCTOR                   && { do_doctor; exit 0; }
-  $TEST                     && { do_test;   exit 0; }
-  [[ -n "$ATTACH_SERVICE" ]] && { do_attach; exit 0; }
-  [[ -n "$PUSH_BRANCH" ]]   && { do_push;   exit 0; }
+  case "$MODE" in
+    help)    print_usage; exit 0 ;;
+    status)  do_status; exit 0 ;;
+    logs)    do_logs; exit 0 ;;
+    doctor)  do_doctor; exit 0 ;;
+    test)    do_test; exit 0 ;;
+    attach)  do_attach; exit 0 ;;
+    push)    do_push; exit 0 ;;
+    menu)    do_menu ;;
+  esac
 
-  echo "" | tee -a "$LOG_FILE"
-  echo -e "${BOLD}🌿 Leaflet — Local Dev${NC}" | tee -a "$LOG_FILE"
-  echo "Log: $LOG_FILE"
-
-  # ── Phase 1: Preflight ───────────────────────────────────
-  phase 1 "Preflight"
-
-  command -v docker >/dev/null 2>&1 || { fail "Docker not found. Install Docker Desktop."; exit 1; }
-  ok "Docker: $(docker --version 2>&1 | head -1)"
-
-  # If our own containers are already running, stop them first
-  local running_ours
-  running_ours=$(docker compose -f "$COMPOSE_FILE" --profile api ps --status running --format "{{.Name}}" 2>/dev/null || true)
-  if [[ -n "$running_ours" ]]; then
-    warn "Containers already running — stopping them first..."
-    docker compose -f "$COMPOSE_FILE" --profile api down --remove-orphans 2>&1 | tee -a "$LOG_FILE" || true
-    ok "Stopped previous containers."
-  fi
-
-  local conflicts=()
-  for p in "${REQUIRED_PORTS[@]}"; do port_free "$p" || conflicts+=("$p"); done
-  if [[ ${#conflicts[@]} -gt 0 ]]; then
-    warn "Ports in use: ${conflicts[*]} — freeing..."
-    for p in "${conflicts[@]}"; do
-      local pids
-      pids=$(lsof -i ":$p" -sTCP:LISTEN -t 2>/dev/null || true)
-      if [[ -n "$pids" ]]; then
-        local proc
-        proc=$(lsof -i ":$p" -sTCP:LISTEN -n -P 2>/dev/null | awk 'NR>1 {print $1, "PID:"$2}' | head -1 || echo "unknown")
-        info "Killing process on port $p: $proc"
-        # shellcheck disable=SC2086
-        kill -9 $pids 2>/dev/null || true
-      fi
-    done
-    sleep 1
-    local still=()
-    for p in "${conflicts[@]}"; do port_free "$p" || still+=("$p"); done
-    if [[ ${#still[@]} -gt 0 ]]; then
-      fail "Ports still in use after kill attempt: ${still[*]}"
-      echo ""
-      echo "  What's using these ports:"
-      for p in "${still[@]}"; do
-        echo "    Port $p: $(lsof -i ":$p" -sTCP:LISTEN -n -P 2>/dev/null | awk 'NR>1 {print $1, "PID:"$2}' | head -1 || echo "unknown")"
-      done
-      echo ""
-      echo "  Kill the process manually, or change its port, then retry."
-      exit 1
-    fi
-    ok "Ports freed (${conflicts[*]})"
-  fi
-  ok "Ports free (${REQUIRED_PORTS[*]})"
-
-  bootstrap_repos
-
-  # ── Phase 2: Clean (if requested) ───────────────────────
-  if $CLEAN; then
-    phase 2 "Clean"
-    local c_args=("down")
-    { $CLEAN_ORPHANS || $CLEAN_ALL; } && c_args+=("--remove-orphans")
-    { $CLEAN_VOLUMES || $CLEAN_ALL; } && c_args+=("-v")
-    docker compose -f "$COMPOSE_FILE" "${c_args[@]}" 2>&1 | tee -a "$LOG_FILE" || true
-    { $CLEAN_IMAGES || $CLEAN_ALL; } && {
-      info "Removing built images..."
-      docker compose -f "$COMPOSE_FILE" down --rmi local 2>/dev/null | tee -a "$LOG_FILE" || true
-    }
-    { $CLEAN_CACHE || $CLEAN_ALL; } && {
-      info "Clearing build cache..."
-      docker builder prune -f 2>&1 | tee -a "$LOG_FILE" || true
-    }
-    ok "Cleaned."
-  fi
-
-  # ── Phase 3: Build ───────────────────────────────────────
-  phase 3 "Build"
-
-  local profiles_str
-  profiles_str="$(compose_profiles)"
-  read -ra PROFILES <<< "$profiles_str"
-
-  local build_cmd=("docker" "compose" "-f" "$COMPOSE_FILE" "${PROFILES[@]}" "build" "--progress=plain")
-  $REBUILD && build_cmd+=("--no-cache")
-
-  info "Building images..."
-  local build_out
-  if ! build_out=$("${build_cmd[@]}" 2>&1); then
-    printf '%s\n' "$build_out" | tee -a "$LOG_FILE"
-    fail "Build failed. Check log: $LOG_FILE"
-    exit 1
-  fi
-  printf '%s\n' "$build_out" >> "$LOG_FILE"
-  ok "Build complete."
-
-  # ── Phase 4: Start ───────────────────────────────────────
-  phase 4 "Start"
-
-  local up_out
-  if ! up_out=$(docker compose -f "$COMPOSE_FILE" "${PROFILES[@]}" up -d 2>&1); then
-    printf '%s\n' "$up_out" | tee -a "$LOG_FILE"
-    fail "Failed to start services."
-    exit 1
-  fi
-  printf '%s\n' "$up_out" >> "$LOG_FILE"
-  ok "Containers started."
-
-  # ── Phase 5: Wait for readiness ──────────────────────────
-  phase 5 "Wait for readiness"
-
-  _dump_service_logs() {
-    local svcs=("nexus-light")
-    [[ " ${PROFILES[*]} " == *"api"* ]] && svcs+=("nexus-source")
-    for svc in "${svcs[@]}"; do
-      echo ""
-      echo -e "  ${BOLD}${svc} (last 30 lines):${NC}"
-      docker compose -f "$COMPOSE_FILE" logs --tail=30 --no-log-prefix "$svc" 2>/dev/null | sed 's/^/    /'
-    done
-    echo ""
-    info "Run ./dev.sh --logs to stream live logs."
-  }
-
-  local max_wait=300 elapsed=0 last_print=0
-  info "Waiting for services to start..."
-
-  while true; do
-    # ── Crash / restart-loop check ─────────────────────────
-    # Catches both hard exits (exited/dead) and restart loops
-    # (restart:unless-stopped keeps status "Running" so we check RestartCount).
-    local crashed looping container rc
-    crashed=$(docker compose -f "$COMPOSE_FILE" "${PROFILES[@]}" ps \
-      --format "{{.Name}} {{.Status}}" 2>/dev/null \
-      | grep -i "exit\|error\|dead" || true)
-    looping=""
-    while IFS= read -r container; do
-      [[ -z "$container" ]] && continue
-      rc=$(docker inspect --format '{{.RestartCount}}' "$container" 2>/dev/null || echo 0)
-      (( rc >= 2 )) && looping+="${container} (restarted ${rc}x) "
-    done < <(docker compose -f "$COMPOSE_FILE" "${PROFILES[@]}" ps --format "{{.Name}}" 2>/dev/null)
-
-    if [[ -n "$crashed" || -n "$looping" ]]; then
-      [[ -n "$crashed" ]] && fail "Container(s) crashed: $crashed"
-      [[ -n "$looping" ]] && fail "Crash loop detected: $looping"
-      _dump_service_logs
-      exit 1
-    fi
-
-    # ── Timeout check ──────────────────────────────────────
-    if [[ $elapsed -ge $max_wait ]]; then
-      fail "Timed out after ${max_wait}s."
-      _dump_service_logs
-      exit 1
-    fi
-
-    # ── Poll frontend ───────────────────────────────────────
-    local http_code
-    http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000 2>/dev/null || echo "000")
-    if [[ "$http_code" =~ ^[23] ]]; then
-      ok "nexus-light ready after ${elapsed}s."
-      if [[ " ${PROFILES[*]} " == *"api"* ]]; then
-        local api_code
-        api_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/docs 2>/dev/null || echo "000")
-        [[ "$api_code" =~ ^[23] ]] \
-          && ok "nexus-source ready." \
-          || warn "nexus-source still starting — run ./dev.sh --logs=nexus-source"
-      fi
-      break
-    fi
-
-    # ── Periodic status (every 5s) ──────────────────────────
-    if (( elapsed - last_print >= 5 )); then
-      last_print=$elapsed
-      local status_str
-      status_str=$(docker compose -f "$COMPOSE_FILE" "${PROFILES[@]}" ps \
-        --format "{{.Service}}: {{.Status}}" 2>/dev/null | tr '\n' '   ' | sed 's/   $//')
-      info "[${elapsed}s] ${status_str:-containers starting}"
-    fi
-
-    sleep 3; elapsed=$((elapsed + 3))
-  done
-
-  # ── Success ───────────────────────────────────────────────
-  echo ""
-  echo -e "${BOLD}${GREEN}✓ Leaflet is running${NC}"
-  echo ""
-  echo "  nexus-light  : http://localhost:3000"
-  [[ " ${PROFILES[*]} " == *"api"* ]] && \
-  echo "  nexus-source : http://localhost:8000"
-  echo ""
-  echo "  Logs   → ./dev.sh --logs"
-  echo "  Status → ./dev.sh --status"
-  echo "  Stop   → ./dev.sh --down"
+  run_queue
 }
 
 main "$@"
