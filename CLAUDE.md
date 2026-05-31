@@ -11,7 +11,7 @@ project-nexus/                ← this repo (git repo 1)
   project-nexus-light/        ← Next.js frontend (separate git repo, gitignored by root)
   project-nexus-source/       ← FastAPI backend  (separate git repo, gitignored by root)
   docker-compose.yml
-  start.sh
+  dev.sh
   ...
 ```
 
@@ -38,53 +38,76 @@ project-nexus/                ← this repo (git repo 1)
 ## Running Locally
 
 ```bash
-./dev.sh                         # start the stack
-./dev.sh --rebuild               # rebuild images (no-cache), then start
-./dev.sh --clean                 # down + remove containers, then restart
-./dev.sh --clean -v              #   also remove named volumes
-./dev.sh --clean -i              #   also remove built images
-./dev.sh --clean -o              #   also remove orphan containers
-./dev.sh --clean -c              #   also clear build cache
-./dev.sh --clean -a              #   all of the above
-./dev.sh --down                  # stop and remove all containers
+# Interactive — no args shows a numbered menu (pick actions in any order)
+./dev.sh
+
+# Actions (each does exactly one thing; combine freely in any order)
+./dev.sh --start                 # start the stack (build + up + follow logs)
+./dev.sh -s                      # stop and remove containers
+./dev.sh -v                      # stop containers and wipe DB volumes
+./dev.sh -i                      # stop containers and remove local images
+./dev.sh -p                      # prune Docker build cache
+
+# Combine: actions execute left-to-right
+./dev.sh -v -i -p --start        # wipe → remove images → prune → start
+./dev.sh -p --start              # prune cache → start
+
+# Other commands (run alone)
 ./dev.sh --status                # docker compose ps
-./dev.sh --logs                  # tail all service logs
-./dev.sh --logs=nexus-light      # tail frontend logs only
-./dev.sh --logs=nexus-source     # tail backend logs only
+./dev.sh --logs                  # tail logs since containers last started
+./dev.sh --logs=nexus-light      # tail frontend logs since containers last started
+./dev.sh --logs=nexus-source     # tail backend logs since containers last started
+./dev.sh --logs --now            # re-attach from this moment only (after Ctrl+C)
 ./dev.sh --doctor                # diagnostics: docker, ports, repos, .env
 ./dev.sh --test                  # run backend test suite
 ./dev.sh --attach                # shell into frontend container
 ./dev.sh --attach=nexus-source   # shell into backend container
-./dev.sh --push                  # push all repos to remote (main)
+./dev.sh --exec                  # alias for --attach
+./dev.sh --exec=nexus-source     # alias for --attach=
+./dev.sh --push                  # push all repos to origin/main
 ./dev.sh --push=branch-name      # push all repos to a specific branch
+./dev.sh --verbose               # print docker commands before running (combine with any flag)
 ```
 
 ---
 
 ## Startup Behavior
 
-`dev.sh` startup runs five numbered phases:
+`dev.sh` runs an **action queue** — each flag adds one action; actions execute in order:
 
-1. **Preflight** — docker check, port check (3000/8000 must be free), bootstrap missing sibling repos from `$LEAFLET_FRONTEND_REMOTE` / `$LEAFLET_BACKEND_REMOTE` env vars
-2. **Clean** *(only if `--clean`)* — down containers, optionally volumes/images/cache
-3. **Build** — `docker compose build` (add `--no-cache` if `--rebuild`)
-4. **Start** — `docker compose up -d`
-5. **Wait** — polls `http://localhost:3000` until ready (90s timeout), then prints URLs
+- `--start` — bootstrap repos → preflight → `docker compose build` → `docker compose up -d` → readiness poll → apply RLS → follow logs
+- `-s` — `docker compose down --remove-orphans`
+- `-v` — `docker compose down --remove-orphans -v`
+- `-i` — `docker compose down --remove-orphans --rmi local`
+- `-p` — `docker builder prune -f`
+
+No flags → interactive numbered menu; user picks actions in any order.
+Other commands (`--status`, `--logs`, etc.) bypass the queue entirely.
+
+On success, URLs printed:
+- Frontend: `http://localhost:3000`
+- API + API docs: `http://localhost:8000` / `http://localhost:8000/docs` *(if backend enabled)*
+- Supabase API: `http://localhost:54321`
+- Supabase Studio: `http://localhost:54323`
+
+**Supabase** is always included in the stack (not conditional).
 
 **`api` profile auto-enable logic** — the FastAPI backend starts automatically only when ALL of:
 - `project-nexus-source/` directory exists
 - `project-nexus-source/.env` exists
-- `.env` contains non-empty `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `DATABASE_URL`
+- `project-nexus-source/.env` contains non-empty `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `DATABASE_URL`
 
-If any condition fails: frontend-only mode (warning printed, api profile skipped).
+If any condition fails: supabase + frontend mode (info message printed, api profile skipped).
+
+**`--clean` action** — separate from startup; tears down everything (containers, local images, volumes, build cache) with a 3× YES confirmation, then exits. To wipe and restart in one command use `--rebuild -v`.
 
 **Common failures translated to actionable messages:**
 - DNS/network error → "Check internet connection"
 - Docker Hub rate limit → "docker login or wait 6h"
-- Port conflict → "run ./dev.sh --status"
+- Port conflict → "lsof -nP -iTCP:<port> -sTCP:LISTEN"
 - Docker not running → "Start Docker Desktop"
 
-Logs captured to `logs/start_YYYYMMDD_HHMMSS.log`.
+Logs captured to `logs/dev-YYYY-MM-DDTHH-MM-SS.log`.
 
 ---
 

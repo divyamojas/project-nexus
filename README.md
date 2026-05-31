@@ -1,6 +1,6 @@
 # Leaflet
 
-Leaflet is a community-first library for lending and borrowing books. Think of it as a neighbourhood shelf that lives online: anyone can request to join, admins keep the catalogue tidy, and super admins make sure the rules stay fair. The frontend is a Vite-powered React single-page app, and Supabase handles authentication, databases, and realtime updates.
+Leaflet is a community-first library for lending and borrowing books. Think of it as a neighbourhood shelf that lives online: anyone can request to join, admins keep the catalogue tidy, and super admins make sure the rules stay fair. The stack runs locally via Docker: a Next.js frontend, a FastAPI backend, and a self-contained local Supabase instance (Postgres, Auth, Kong, Studio).
 
 ---
 
@@ -60,64 +60,61 @@ If you would rather watch it run than read code, follow the setup instructions b
 
 ## Plain-Language Setup
 
-Setting up Leaflet takes about 20 minutes. You only need basic computer skills: copying text, pasting keys, and running simple commands.
+Setting up Leaflet takes about 10 minutes. You need Docker Desktop and Git — nothing else installed on your machine.
 
 ### Step 1: Gather your tools
 
-- **Node.js 18 or newer**: download from [nodejs.org](https://nodejs.org/). Installing Node also installs `npm`, the package manager we use.
-- **A Supabase account**: sign up at [supabase.com](https://supabase.com/) with any email address.
-- **Git (optional but helpful)**: lets you download updates and contribute back.
+- **Docker Desktop**: download from [docker.com](https://www.docker.com/products/docker-desktop/). Make sure it is running before you proceed.
+- **Git**: to clone the repos.
 
-### Step 2: Create a Supabase project
+### Step 2: Clone this repo
 
-1. Log in to Supabase and click **New project**.
-2. Give it a name (for example “leaflet-dev”).
-3. Choose the **Free** plan and any region close to you.
-4. Set a database password you will remember.
-5. Once the project finishes provisioning, open **Settings → API**. You will need:
-   - the **Project URL** (looks like `https://your-project.supabase.co`)
-   - the **anon public key**
-6. In **Authentication → URL Configuration** add `http://localhost:5173` to the redirect URLs so Supabase lets you sign in during local development.
-7. In **Authentication → Policies** create (or note) the email allowlist you want. By default Leaflet accepts `@sprinklr.com` or `@gmail.com` emails; you can change this later in code under `src/constants/constants.js`.
+```bash
+git clone https://github.com/divyamojas/project-nexus.git
+cd project-nexus
+```
+
+The frontend and backend sub-repos are cloned automatically on first `./dev.sh` run if the `LEAFLET_FRONTEND_REMOTE` and `LEAFLET_BACKEND_REMOTE` environment variables are set (or they use the defaults in `dev.sh`).
 
 ### Step 3: Configure environment variables
 
-1. In the project root, duplicate `.env.sample` if it exists or create a new `.env` file.
-2. Add the Supabase values you collected:
-
-   ```ini
-   VITE_SUPABASE_URL=https://<your-project>.supabase.co
-   VITE_SUPABASE_ANON_KEY=<your-public-anon-key>
-   SUPABASE_SUPER_ADMIN_EMAIL=<email-that-should-start-as-super-admin>
-   ```
-
-3. If you want to export schema snapshots or run SQL migrations from your machine, also add the database connection string (find it under **Settings → Database → Connection String**):
-
-   ```ini
-   SUPABASE_DB_URL=postgresql://postgres:<your-password>@<host>:5432/postgres
-   ```
-
-   This optional value lets scripts in `supabase_schema/` connect securely.
-
-> Tip: Environment variables stay on your computer. Do not share `.env` or commit it to Git.
-
-### Step 4: Install dependencies
-
-Open a terminal (or Command Prompt on Windows), change into the project folder, and run:
+The backend needs a `.env` file to enable the API:
 
 ```bash
-npm install
+# project-nexus-source/.env
+SUPABASE_URL=http://supabase-kong:8000          # local Supabase via Kong
+SUPABASE_SERVICE_KEY=<local-service-key>        # see docker-compose.yml SUPABASE_SERVICE_KEY
+SUPABASE_PUBLISHABLE_KEY=<local-anon-key>
+DATABASE_URL=postgresql://postgres:your-super-secret-and-long-postgres-password@supabase-db:5432/postgres
+CORS_ORIGINS=http://localhost:3000
 ```
 
-This downloads the React, Supabase, and tooling packages listed in `package.json`.
-
-### Step 5: Start the app
+The frontend `.env` is optional for local dev:
 
 ```bash
-npm run dev
+# project-nexus-light/.env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<local-anon-key>
 ```
 
-Visit `http://localhost:5173` in your browser. The Vite dev server live-reloads whenever you edit files. Use the **Signup** form to create a new account with an allowed email domain. Your first signup should use the `SUPABASE_SUPER_ADMIN_EMAIL` so you have full control.
+> The local Supabase anon and service keys are the well-known dev values in `docker-compose.yml`. Never use them in production.
+
+### Step 4: Start the app
+
+```bash
+./dev.sh
+```
+
+That's it. `dev.sh` builds images, starts all services, and tails logs. Visit:
+
+| Service | URL |
+|---------|-----|
+| Frontend | http://localhost:3000 |
+| API | http://localhost:8000 |
+| API docs | http://localhost:8000/docs |
+| Supabase API | http://localhost:54321 |
+| Supabase Studio | http://localhost:54323 |
 
 ---
 
@@ -216,27 +213,41 @@ Keep `structure.txt` aligned with any structural change so new contributors can 
 
 ## Tools, Commands & Scripts
 
-| Command              | What it does and why it matters                                                                |
-| -------------------- | ---------------------------------------------------------------------------------------------- |
-| `npm run dev`        | Starts the Vite dev server at `http://localhost:5173` with live reloads.                       |
-| `npm run build`      | Creates an optimised production bundle (useful before deploying to Vercel or similar).         |
-| `npm run preview`    | Serves the built bundle locally to mimic production.                                           |
-| `npm run lint`       | Runs ESLint with project rules; fixes style issues early.                                      |
-| `npm run test`       | Executes Vitest suites for hooks, utilities, and contexts.                                     |
-| `npm run test:watch` | Runs tests continuously while you develop.                                                     |
-| `npm run getSchema`  | Pulls Supabase metadata into JSON snapshots (needs `SUPABASE_DB_URL`).                         |
-| `npm run updateDB`   | Applies `supabase_schema/update.sql`, refreshes metadata, then clears the SQL file for safety. |
+All commands go through `dev.sh` in the repo root. Never run `npm` or `pip` on the host — everything runs inside Docker.
 
-When introducing new tooling or scripts, document them here and in `package.json` comments so the team stays aligned.
+Each command does exactly one thing. Combine actions left-to-right — they execute in that order.
+
+| Command | What it does |
+|---------|--------------|
+| `./dev.sh` | Interactive menu — pick and sequence actions by number |
+| `./dev.sh --start` | Start the stack (build + up + follow logs) |
+| `./dev.sh -s` | Stop and remove containers |
+| `./dev.sh -v` | Stop containers and wipe DB volumes |
+| `./dev.sh -i` | Stop containers and remove local images |
+| `./dev.sh -p` | Prune Docker build cache |
+| `./dev.sh -v -i -p --start` | Wipe → remove images → prune → start (example: full reset) |
+| `./dev.sh --status` | Show service status (`docker compose ps`) |
+| `./dev.sh --logs` | Tail logs from the current session only |
+| `./dev.sh --logs=nexus-light` | Tail frontend logs from current session |
+| `./dev.sh --logs=nexus-source` | Tail backend logs from current session |
+| `./dev.sh --doctor` | Diagnose Docker, ports, repos, and `.env` state |
+| `./dev.sh --test` | Run the backend test suite |
+| `./dev.sh --attach` | Shell into the frontend container |
+| `./dev.sh --attach=nexus-source` | Shell into the backend container |
+| `./dev.sh --push` | Push all repos to `origin/main` |
+| `./dev.sh --push=branch` | Push all repos to a named branch |
+| `./dev.sh --verbose` | Print docker commands as they run (combine with any flag) |
+
+When introducing new flags or scripts, update `dev.sh`, the `print_usage` block inside it, and this table.
 
 ---
 
 ## Quality Checks, Deployment & Next Steps
 
-- **Before pushing changes** run `npm run lint` and `npm test`. Both should pass without warnings.
-- **Database changes** belong in `supabase_schema/update.sql`. After editing, run `npm run getSchema` to refresh the JSON snapshots and commit them together.
-- **Deployments**: supply `.env` values to your hosting provider (for example Vercel) and run `npm run build` to verify the production bundle. Ensure Supabase policies in your hosted project match the checked-in SQL.
-- **Monitoring**: Super admins should periodically export the schema to confirm RLS still protects sensitive data. Admins should review the approval queue daily so newcomers are not blocked.
+- **Before pushing changes** use `./dev.sh --test` to run the backend test suite inside Docker.
+- **Database changes** — add a migration file under `project-nexus-source/` and apply it via the `/schema/migrate` API endpoint (super_admin only) or Supabase Studio at `http://localhost:54323`.
+- **Deployments** — supply production `.env` values to your hosting provider. Point `SUPABASE_URL` at your hosted Supabase project rather than the local Kong gateway.
+- **Monitoring**: Super admins should periodically use `/schema/snapshot` to audit RLS policies. Admins should review the approval queue daily so newcomers are not blocked.
 
 Suggested follow-up tasks once you are comfortable:
 
@@ -248,9 +259,10 @@ Suggested follow-up tasks once you are comfortable:
 
 ## Further Resources
 
-- [`AGENTS.md`](AGENTS.md) — automation notes used by Codex (humans can stick with this README).
-- [`structure.txt`](structure.txt) — current repository layout, updated with every structural change.
+- [`AGENTS.md`](AGENTS.md) — quick reference for AI agents and automation tooling.
+- [`CLAUDE.md`](CLAUDE.md) — full context for Claude Code: auth contract, API contract, data schema, environment variables, and dev rules.
 - [Supabase Docs](https://supabase.com/docs) — guides for auth, database policies, and storage.
-- [Material UI](https://mui.com/) and [Framer Motion](https://www.framer.com/motion/) — component and animation systems used in the UI.
+- [Next.js Docs](https://nextjs.org/docs) — frontend framework.
+- [FastAPI Docs](https://fastapi.tiangolo.com/) — backend framework.
 
 Built with care for communities that read. 📚🌿
