@@ -55,7 +55,8 @@ CREATE POLICY "requests_update" ON public.book_requests FOR UPDATE TO authentica
 CREATE POLICY "requests_delete" ON public.book_requests FOR DELETE TO authenticated USING (requested_by = auth.uid());
 
 -- ── book_loans ────────────────────────────────────────────────────────────────
--- RLS already enabled on this table; just add policies.
+ALTER TABLE public.book_loans ENABLE ROW LEVEL SECURITY;
+
 DROP POLICY IF EXISTS "loans_select" ON public.book_loans;
 DROP POLICY IF EXISTS "loans_update" ON public.book_loans;
 
