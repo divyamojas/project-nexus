@@ -195,43 +195,49 @@ _spin_frame() {
 
 watch_build() {
   local pid="$1" log_file="$2"
-  local tick=0 drawn=0
+  local tick=0 drawn=0 start_time=$SECONDS
+  printf '\033[?25l'
   while kill -0 "$pid" 2>/dev/null; do
     [ "$drawn" -gt 0 ] && printf '\033[1A\033[2K'
     local sp; sp=$(_spin_frame "$tick")
-    local hint="" cols; cols=$(tput cols 2>/dev/null || echo 100)
+    local hint="" cols elapsed; cols=$(tput cols 2>/dev/null || echo 100); elapsed=$((SECONDS - start_time))
     [ -f "$log_file" ] && hint=$(grep -aE '\[[0-9]+/[0-9]+\]|Step [0-9]+|^#[0-9]+ \[' "$log_file" 2>/dev/null \
-      | sed 's/\x1b\[[0-9;]*m//g' | tail -1 | sed 's/^[[:space:]]*//' | cut -c1-$((cols - 8)))
-    printf "    \033[0;36m%s\033[0m  %s\n" "$sp" "${hint:-building...}"
+      | sed 's/\x1b\[[0-9;]*m//g' | tail -1 | sed 's/^[[:space:]]*//' | cut -c1-$((cols - 14)))
+    printf "    \033[0;36m%s\033[0m  %s  \033[2m%ds\033[0m\n" "$sp" "${hint:-building...}" "$elapsed"
     drawn=1; sleep 0.25; tick=$((tick + 1))
   done
   [ "$drawn" -gt 0 ] && printf '\033[1A\033[2K'
+  printf '\033[?25h'
 }
 
 watch_spinner() {
   local pid="$1" label="$2" log_file="${3:-}"
-  local tick=0 drawn=0
+  local tick=0 drawn=0 start_time=$SECONDS
+  printf '\033[?25l'
   while kill -0 "$pid" 2>/dev/null; do
     [ "$drawn" -gt 0 ] && printf '\033[1A\033[2K'
     local sp; sp=$(_spin_frame "$tick")
-    local hint="" cols; cols=$(tput cols 2>/dev/null || echo 100)
+    local hint="" cols elapsed; cols=$(tput cols 2>/dev/null || echo 100); elapsed=$((SECONDS - start_time))
     if [ -n "$log_file" ] && [ -f "$log_file" ]; then
-      hint=$(tail -1 "$log_file" 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g' | sed 's/^[[:space:]]*//' | cut -c1-$((cols - ${#label} - 12)))
+      hint=$(tail -1 "$log_file" 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g' | sed 's/^[[:space:]]*//' | cut -c1-$((cols - ${#label} - 18)))
     fi
-    printf "    \033[0;36m%s\033[0m  %s  \033[2m%s\033[0m\n" "$sp" "$label" "${hint:-}"
+    printf "    \033[0;36m%s\033[0m  %s  \033[2m%s  %ds\033[0m\n" "$sp" "$label" "${hint:-}" "$elapsed"
     drawn=1; sleep 0.25; tick=$((tick + 1))
   done
   [ "$drawn" -gt 0 ] && printf '\033[1A\033[2K'
+  printf '\033[?25h'
 }
 
 watch_up() {
   local pid="$1" log_file="${2:-}"
-  local tick=0 drawn=0
-  local row name state health icon color label sp
+  local tick=0 drawn=0 start_time=$SECONDS
+  local row name state health icon color label sp elapsed
+  printf '\033[?25l'
 
   while true; do
     [ "$drawn" -gt 0 ] && printf '\033[%dA\033[J' "$drawn"
     sp=$(_spin_frame "$tick")
+    elapsed=$((SECONDS - start_time))
     drawn=0
 
     while IFS= read -r row; do
@@ -260,14 +266,18 @@ watch_up() {
         local raw; raw=$(tail -1 "$log_file" 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g' | sed 's/^[[:space:]]*//')
         [ -n "$raw" ] && hint="$raw"
       fi
-      printf "    \033[1;33m%s\033[0m  %s\n" "$sp" "$hint"
+      printf "    \033[1;33m%s\033[0m  %s  \033[2m%ds\033[0m\n" "$sp" "$hint" "$elapsed"
       drawn=1
+    else
+      printf "    \033[2m%ds\033[0m\n" "$elapsed"
+      drawn=$((drawn + 1))
     fi
     kill -0 "$pid" 2>/dev/null || break
     sleep 0.3; tick=$((tick + 1))
   done
 
   [ "$drawn" -gt 0 ] && printf '\033[%dA\033[J' "$drawn"
+  printf '\033[?25h'
   while IFS= read -r row; do
     [ -z "$row" ] && continue
     IFS='|' read -r name state health <<< "$row"
@@ -363,6 +373,7 @@ capture_failure_logs() {
 }
 
 cleanup_on_interrupt() {
+  printf '\033[?25h'
   [ "$STARTUP_FAILED" = true ] && say "${YELLOW}Interrupted during startup. Leaving containers for debugging.${NC}"
   exit 130
 }
