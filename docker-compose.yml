@@ -21,6 +21,7 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=development
+      - INTERNAL_API_URL=http://nexus-source:8000  # server-to-server; not exposed to browser
     env_file:
       - path: ./project-nexus-light/.env
         required: false          # start.sh warns if missing; app boots without it
